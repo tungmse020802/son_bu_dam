@@ -1,0 +1,30 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/auth/me",
+      "destination": "/api/auth-me"
+    },
+    {
+      "source": "/api/auth/register",
+      "destination": "/api/auth-register"
+    },
+    {
+      "source": "/api/auth/login",
+      "destination": "/api/auth-login"
+    },
+    {
+      "source": "/api/auth/logout",
+      "destination": "/api/auth-logout"
+    },
+    {
+      "source": "/api/account/orders",
+      "destination": "/api/account-orders"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}

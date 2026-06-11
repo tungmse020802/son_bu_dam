@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.vercel/
+test-results/
+*.tsbuildinfo
+.vercel
+data/*.json
+!data/.gitkeep
