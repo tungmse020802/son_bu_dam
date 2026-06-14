@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './api'
+import { API_BASE_URL, getApiMessage, readApiJson } from './api'
 import type { AuthUser } from '../types/app'
 
 const AUTH_USER_KEY = 'svam-auth-user'
@@ -29,12 +29,16 @@ export async function getCurrentUser() {
     return loadLocalUser()
   }
 
-  const data = await response.json()
+  const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
   if (!response.ok) {
-    throw new Error(data.message ?? 'Không tải được phiên đăng nhập.')
+    throw new Error(getApiMessage(data) ?? 'Không tải được phiên đăng nhập.')
   }
 
-  const user = { ...(data.user as AuthUser), role: (data.user as AuthUser).role ?? 'customer' }
+  if (!data?.user) {
+    return loadLocalUser()
+  }
+
+  const user = { ...data.user, role: data.user.role ?? 'customer' }
   saveLocalUser(user)
   return user
 }
@@ -47,12 +51,15 @@ export async function registerUser(input: { fullName: string; email: string; pas
     body: JSON.stringify(input),
   })
 
-  const data = await response.json()
+  const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
   if (!response.ok) {
-    throw new Error(data.message ?? 'Không thể tạo tài khoản.')
+    throw new Error(getApiMessage(data) ?? 'Không thể tạo tài khoản.')
+  }
+  if (!data?.user) {
+    throw new Error('Phản hồi từ máy chủ không hợp lệ.')
   }
 
-  const user = { ...(data.user as AuthUser), role: (data.user as AuthUser).role ?? 'customer' }
+  const user = { ...data.user, role: data.user.role ?? 'customer' }
   saveLocalUser(user)
   return user
 }
@@ -65,12 +72,15 @@ export async function loginUser(input: { email: string; password: string }) {
     body: JSON.stringify(input),
   })
 
-  const data = await response.json()
+  const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
   if (!response.ok) {
-    throw new Error(data.message ?? 'Đăng nhập thất bại.')
+    throw new Error(getApiMessage(data) ?? 'Đăng nhập thất bại.')
+  }
+  if (!data?.user) {
+    throw new Error('Phản hồi từ máy chủ không hợp lệ.')
   }
 
-  const user = { ...(data.user as AuthUser), role: (data.user as AuthUser).role ?? 'customer' }
+  const user = { ...data.user, role: data.user.role ?? 'customer' }
   saveLocalUser(user)
   return user
 }
@@ -82,9 +92,9 @@ export async function logoutUser() {
       credentials: 'include',
     })
 
-    const data = await response.json()
+    const data = await readApiJson<{ message?: string }>(response)
     if (!response.ok) {
-      throw new Error(data.message ?? 'Đăng xuất thất bại.')
+      throw new Error(getApiMessage(data) ?? 'Đăng xuất thất bại.')
     }
   } finally {
     clearLocalUser()

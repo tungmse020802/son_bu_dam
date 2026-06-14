@@ -1,4 +1,4 @@
-import { Award, BookOpen, Boxes, LogIn, LogOut, ScanSearch, ShoppingCart, Sparkles, UserCircle2 } from 'lucide-react'
+import { Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, UserCircle2 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 interface HeaderProps {
@@ -13,7 +13,6 @@ const navItems = [
   { to: '/products', label: 'Sản phẩm', icon: Boxes },
   { to: '/lessons', label: 'Bài học', icon: BookOpen },
   { to: '/quiz', label: 'Quiz', icon: Award },
-  { to: '/ar', label: 'AR', icon: ScanSearch },
 ]
 
 export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProps) {
@@ -81,7 +80,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="container footer-grid">
         <div>
-          <p className="eyebrow">Nền tảng học lịch sử kết hợp thương mại và AR</p>
+          <p className="eyebrow">Nền tảng học lịch sử kết hợp bài học, quiz và thương mại</p>
           <h3>Sử Việt Anh Minh</h3>
           <p>
             Bộ thẻ bài lịch sử giúp học sinh THCS học nhanh hơn – nhớ lâu hơn – yêu lịch sử hơn.

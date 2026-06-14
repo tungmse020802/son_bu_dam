@@ -1,4 +1,4 @@
-import type { ArExperience, Character, Lesson, Product } from '../types/app'
+import type { Character, Lesson, Product } from '../types/app'
 
 export const characters: Character[] = [
   {
@@ -114,11 +114,11 @@ export const characters: Character[] = [
 export const siteStats = [
   { label: 'Nhân vật', value: String(characters.length) },
   { label: 'Bài học', value: '24' },
-  { label: 'Lượt AR', value: '18.2K' },
+  { label: 'Lượt học', value: '18.2K' },
 ]
 
 const gradeCatalog = [
-  { grade: 'Lớp 6', image: '/assets/1.png', price: 299000, period: 'Âu Lạc - Tự Chủ' },
+  { grade: 'Lớp 6', image: '/assets/1.png', price: 105000, period: 'Âu Lạc - Tự Chủ' },
   { grade: 'Lớp 7', image: '/assets/bg1.jpg', price: 319000, period: 'Vạn Xuân - Tự Chủ' },
   { grade: 'Lớp 8', image: '/assets/hs.jpg', price: 339000, period: 'Khởi nghĩa chống Bắc thuộc' },
   { grade: 'Lớp 9', image: '/assets/ar.jpg', price: 359000, period: 'Ôn tập lịch sử Việt Nam' },
@@ -127,11 +127,14 @@ const gradeCatalog = [
 export const products: Product[] = [
   ...gradeCatalog.map((entry) => {
     const gradeCharacters = characters.filter((character) => character.grade === entry.grade)
+    const isGradeSix = entry.grade === 'Lớp 6'
     return {
       id: `combo-${entry.grade.toLowerCase().replace('ớ', 'o').replace(/\s+/g, '-')}`,
       slug: `combo-the-bai-${entry.grade.toLowerCase().replace('ớ', 'o').replace(/\s+/g, '-')}`,
-      name: `Trọn bộ thẻ bài lịch sử ${entry.grade}`,
-      subtitle: `${gradeCharacters.length} nhân vật - ${entry.period} - trải nghiệm AR & quiz`,
+      name: isGradeSix ? 'Bộ thẻ Nhân Vật Lịch sử lớp 6' : `Trọn bộ thẻ bài lịch sử ${entry.grade}`,
+      subtitle: isGradeSix
+        ? '12 Anh hùng — 5 Thời kỳ: Thẻ bài vật lý tái hiện lịch sử lớp 6.'
+        : `${gradeCharacters.length} nhân vật - ${entry.period} - bài học và quiz`,
       price: entry.price,
       originalPrice: entry.price + 50000,
       grade: entry.grade,
@@ -139,8 +142,16 @@ export const products: Product[] = [
       type: 'Anh hùng' as const,
       stock: 36,
       image: entry.image,
-      description: `Bộ thẻ bài dành cho học sinh ${entry.grade}, kết hợp minh hoạ đẹp, nội dung lịch sử chọn lọc và trải nghiệm quét AR.`,
-      features: [`${gradeCharacters.length} thẻ nhân vật`, 'Kích hoạt bài học tương tác', 'Mở quiz và tích điểm', 'Tặng kèm poster dòng thời gian'],
+      description: isGradeSix
+        ? 'Bộ thẻ được thiết kế cho học sinh lớp 6 với các nhân vật và mốc sử tiêu biểu từ giai đoạn Âu Lạc đến buổi đầu tự chủ. Hình minh hoạ rõ ràng, nội dung cô đọng và phần luyện tập đi kèm giúp các em dễ nhớ bài, ôn nhanh và hứng thú hơn khi học Lịch sử.'
+        : `Bộ thẻ bài dành cho học sinh ${entry.grade}, kết hợp minh hoạ đẹp, nội dung lịch sử chọn lọc và phần luyện tập tương tác.`,
+      features: isGradeSix
+        ? [
+            'Quét QR — Chơi Quiz: Đấu trí hỏi đáp, ghi nhớ kiến thức cốt lõi.',
+            'Đọ chỉ số chiến thuật: Nhập vai nhân vật với hệ thống sức mạnh riêng.',
+            'Mua sắm một chạm: Đặt hàng combo nhanh chóng, tiện lợi qua web.',
+          ]
+        : [`${gradeCharacters.length} thẻ nhân vật`, 'Kích hoạt bài học tương tác', 'Mở quiz và tích điểm', 'Tặng kèm poster dòng thời gian'],
       characterIds: gradeCharacters.map((character) => character.id),
       arEnabled: true,
     }
@@ -157,11 +168,15 @@ export const products: Product[] = [
     stock: Math.max(8, 24 - index),
     image: character.image,
     description: character.blurb,
-    features: ['Minh hoạ chất lượng cao', 'Mở nội dung AR theo nhân vật', 'Gợi ý bài học liên quan'],
+    features: ['Minh hoạ chất lượng cao', 'Ôn tập nhân vật theo chủ đề', 'Gợi ý bài học liên quan'],
     characterIds: [character.id],
     arEnabled: true,
   })),
 ]
+
+export function getShowcaseProducts(catalog: Product[]) {
+  return catalog.filter((product) => product.characterIds.length > 1).slice(0, 3)
+}
 
 export const lessons: Lesson[] = [
   {
@@ -364,50 +379,5 @@ export const lessons: Lesson[] = [
       'Thông điệp: Kiên trì gìn giữ điều tốt đẹp cũng quan trọng như việc tạo dựng chúng.',
     ],
     relatedCharacterIds: ['duong-dinh-nghe'],
-  },
-]
-
-export const arExperiences: ArExperience[] = [
-  {
-    markerId: 'marker-thuc-phan',
-    characterId: 'thuc-phan',
-    title: 'AR Thục Phán - Thành Cổ Loa',
-    description: 'Quét thẻ để kích hoạt mô hình kể chuyện về quá trình xây thành và bảo vệ nước Âu Lạc.',
-    rewardPoints: 120,
-    questions: [
-      {
-        id: 'q1',
-        level: 'Nhận biết',
-        prompt: 'Thành Cổ Loa gắn với nhân vật lịch sử nào?',
-        options: ['Ngô Quyền', 'Thục Phán', 'Hai Bà Trưng', 'Lý Bí'],
-        correctIndex: 1,
-        explanation: 'Thành Cổ Loa gắn với Thục Phán, người sáng lập nước Âu Lạc.',
-      },
-      {
-        id: 'q2',
-        level: 'Nhận biết',
-        prompt: 'Cao Lỗ nổi tiếng với công trình quân sự nào?',
-        options: ['Trống đồng', 'Nỏ thần', 'Cọc Bạch Đằng', 'Lầu Kính Thiên'],
-        correctIndex: 1,
-        explanation: 'Cao Lỗ nổi tiếng với việc chế tạo nỏ thần, biểu tượng sức mạnh quân sự Âu Lạc.',
-      },
-    ],
-  },
-  {
-    markerId: 'marker-ngo-quyen',
-    characterId: 'ngo-quyen',
-    title: 'AR Ngô Quyền - Bạch Đằng',
-    description: 'Trải nghiệm mô phỏng chiến trận Bạch Đằng và làm quiz nhận thưởng.',
-    rewardPoints: 150,
-    questions: [
-      {
-        id: 'q3',
-        level: 'Nhận biết',
-        prompt: 'Chiến thắng Bạch Đằng diễn ra năm nào?',
-        options: ['938', '968', '1010', '1288'],
-        correctIndex: 0,
-        explanation: 'Chiến thắng Bạch Đằng của Ngô Quyền diễn ra vào năm 938.',
-      },
-    ],
   },
 ]

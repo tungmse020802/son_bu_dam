@@ -65,15 +65,6 @@ export interface QuizSet {
   questions: QuizQuestion[]
 }
 
-export interface ArExperience {
-  markerId: string
-  characterId: string
-  title: string
-  description: string
-  rewardPoints: number
-  questions: QuizQuestion[]
-}
-
 export interface CartItem {
   productId: string
   quantity: number
@@ -104,6 +95,10 @@ export interface Order {
   checkoutUrl?: string | null
   paymentLinkId?: string | null
   qrCode?: string | null
+  bankName?: string | null
+  bankAccountNo?: string | null
+  transferNote?: string | null
+  cardModeUnlockedAt?: string | null
 }
 
 export interface OrderDetail extends Order {

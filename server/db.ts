@@ -29,6 +29,10 @@ export type StoredOrder = {
   paymentLinkId: string | null
   checkoutUrl: string | null
   qrCode: string | null
+  bankName: string | null
+  bankAccountNo: string | null
+  transferNote: string | null
+  cardModeUnlockedAt: string | null
   provider: string
   createdAt: string
   updatedAt: string
@@ -162,7 +166,7 @@ export async function insertUser(input: {
   })
 }
 
-export async function insertOrder(order: Omit<StoredOrder, 'createdAt' | 'updatedAt' | 'paidAt' | 'provider'>, items: OrderItem[]) {
+export async function insertOrder(order: Omit<StoredOrder, 'createdAt' | 'updatedAt' | 'paidAt' | 'provider' | 'cardModeUnlockedAt'>, items: OrderItem[]) {
   return updateStore((store) => {
     if (store.orders.some((entry) => entry.orderCode === order.orderCode)) {
       throw new Error('Mã đơn hàng đã tồn tại, vui lòng thử lại.')
@@ -171,10 +175,11 @@ export async function insertOrder(order: Omit<StoredOrder, 'createdAt' | 'update
     const now = new Date().toISOString()
     const storedOrder: StoredOrder = {
       ...order,
-      provider: 'payos',
+      provider: 'manual_bank_transfer',
       createdAt: now,
       updatedAt: now,
       paidAt: null,
+      cardModeUnlockedAt: null,
     }
     const storedItems = items.map((item) => ({ ...item, orderId: order.id }))
 
@@ -238,8 +243,9 @@ export async function updateStoredOrderStatus(
 
     order.status = status
     order.updatedAt = now
-    if (status === 'paid') {
+    if (status === 'paid' || status === 'completed') {
       order.paidAt = now
+      order.cardModeUnlockedAt = order.cardModeUnlockedAt ?? now
     }
 
     const items = store.orderItems

@@ -12,7 +12,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import type { AdminOverviewData, AdminUserSummary, AuthUser, Order, OrderDetail } from '../types/app'
-import { API_BASE_URL } from '../utils/api'
+import { API_BASE_URL, getApiMessage, readApiJson } from '../utils/api'
 import { formatCurrency, orderStatusLabel, paymentLabel } from '../utils/store'
 import { DashboardOverview } from './DashboardOverview'
 
@@ -22,11 +22,17 @@ interface AdminDashboardProps {
   onLogout: () => void | Promise<void>
 }
 
-async function fetchAdmin<T>(path: string): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, { credentials: 'include' })
-  const data = await response.json()
+async function fetchAdmin<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    credentials: 'include',
+    ...init,
+  })
+  const data = await readApiJson<T & { message?: string }>(response)
   if (!response.ok) {
-    throw new Error(data.message ?? 'Không tải được dữ liệu quản trị.')
+    throw new Error(getApiMessage(data) ?? 'Không tải được dữ liệu quản trị.')
+  }
+  if (!data) {
+    throw new Error('Phản hồi từ máy chủ không hợp lệ.')
   }
   return data as T
 }
@@ -226,10 +232,11 @@ function AdminOrdersPage({ orders }: { orders: Order[] }) {
   )
 }
 
-function AdminOrderDetailPage() {
+function AdminOrderDetailPage({ onOrderUpdated }: { onOrderUpdated: () => Promise<void> }) {
   const { orderCode } = useParams()
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [message, setMessage] = useState('')
+  const [confirming, setConfirming] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -248,6 +255,23 @@ function AdminOrderDetailPage() {
   if (message) return <p className="status-message error">{message}</p>
   if (!order) return <p className="status-message info">Đang tải chi tiết đơn hàng...</p>
 
+  async function handleConfirmPayment() {
+    if (!orderCode) return
+    setConfirming(true)
+    setMessage('')
+    try {
+      const data = await fetchAdmin<OrderDetail>(`/api/admin/orders/${orderCode}/confirm-payment`, {
+        method: 'POST',
+      })
+      setOrder(data)
+      await onOrderUpdated()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể xác nhận thanh toán.')
+    } finally {
+      setConfirming(false)
+    }
+  }
+
   return (
     <div className="admin-page-stack">
       <div className="admin-page-heading">
@@ -256,7 +280,14 @@ function AdminOrderDetailPage() {
           <h2>Đơn hàng DH-{order.orderCode}</h2>
           <p>Tạo lúc {order.createdAt}</p>
         </div>
-        <span className={`status-pill ${order.status}`}>{orderStatusLabel(order.status)}</span>
+        <div className="hero-actions hero-actions-compact">
+          <span className={`status-pill ${order.status}`}>{orderStatusLabel(order.status)}</span>
+          {order.paymentMethod === 'bank' && order.status !== 'paid' && order.status !== 'completed' ? (
+            <button className="primary-btn" onClick={handleConfirmPayment} disabled={confirming}>
+              {confirming ? 'Đang xác nhận...' : 'Xác nhận đã nhận tiền'}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="admin-detail-grid">
@@ -294,7 +325,10 @@ function AdminOrderDetailPage() {
             <dl>
               <div><dt>Phương thức</dt><dd>{paymentLabel(order.paymentMethod)}</dd></div>
               <div><dt>Trạng thái</dt><dd>{orderStatusLabel(order.status)}</dd></div>
-              {order.paymentLinkId ? <div><dt>Mã giao dịch</dt><dd>{order.paymentLinkId}</dd></div> : null}
+              {order.bankName ? <div><dt>Ngân hàng</dt><dd>{order.bankName}</dd></div> : null}
+              {order.bankAccountNo ? <div><dt>Số tài khoản</dt><dd>{order.bankAccountNo}</dd></div> : null}
+              {order.transferNote ? <div><dt>Nội dung CK</dt><dd>{order.transferNote}</dd></div> : null}
+              {order.cardModeUnlockedAt ? <div><dt>Mở khóa thẻ bài</dt><dd>{order.cardModeUnlockedAt}</dd></div> : null}
             </dl>
           </section>
         </aside>
@@ -309,21 +343,27 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
   const [users, setUsers] = useState<AdminUserSummary[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [message, setMessage] = useState('')
+  const [refreshToken, setRefreshToken] = useState(0)
+
+  async function refreshAdminData() {
+    const [overviewData, usersData, ordersData] = await Promise.all([
+      fetchAdmin<AdminOverviewData>('/api/admin/overview'),
+      fetchAdmin<{ users: AdminUserSummary[] }>('/api/admin/users'),
+      fetchAdmin<{ orders: Order[] }>('/api/admin/orders'),
+    ])
+    setOverview(overviewData)
+    setUsers(usersData.users)
+    setOrders(ordersData.orders)
+  }
 
   useEffect(() => {
     if (authLoading || currentUser?.role !== 'admin') return
     let cancelled = false
 
-    Promise.all([
-      fetchAdmin<AdminOverviewData>('/api/admin/overview'),
-      fetchAdmin<{ users: AdminUserSummary[] }>('/api/admin/users'),
-      fetchAdmin<{ orders: Order[] }>('/api/admin/orders'),
-    ])
-      .then(([overviewData, usersData, ordersData]) => {
+    refreshAdminData()
+      .then(() => {
         if (cancelled) return
-        setOverview(overviewData)
-        setUsers(usersData.users)
-        setOrders(ordersData.orders)
+        setMessage('')
       })
       .catch((error) => {
         if (!cancelled) setMessage(error instanceof Error ? error.message : 'Không tải được dữ liệu quản trị.')
@@ -332,7 +372,7 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
     return () => {
       cancelled = true
     }
-  }, [authLoading, currentUser])
+  }, [authLoading, currentUser, refreshToken])
 
   async function handleLogout() {
     await onLogout()
@@ -385,7 +425,7 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
             <Route index element={<AdminOverviewPage data={overview} />} />
             <Route path="accounts" element={<AdminAccountsPage users={users} />} />
             <Route path="orders" element={<AdminOrdersPage orders={orders} />} />
-            <Route path="orders/:orderCode" element={<AdminOrderDetailPage />} />
+            <Route path="orders/:orderCode" element={<AdminOrderDetailPage onOrderUpdated={async () => setRefreshToken((value) => value + 1)} />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>

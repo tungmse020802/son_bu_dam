@@ -1,16 +1,16 @@
-import { Award, CheckCircle2, Crown, Rocket, Sparkles, Swords } from 'lucide-react'
+import { Award, CheckCircle2, Sparkles } from 'lucide-react'
 import type { FormEvent } from 'react'
-import { useEffect, useMemo, useState } from 'react'
-import { Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { AdminDashboard } from './components/AdminDashboard'
 import { DashboardOverview } from './components/DashboardOverview'
 import { Footer, Header } from './components/Layout'
 import { LessonCard } from './components/LessonCard'
 import { ProductCard } from './components/ProductCard'
-import { arExperiences, characters, lessons, products as fallbackProducts } from './data/mockData'
-import { historyQuiz } from './data/quizData'
+import { getShowcaseProducts, lessons, products as fallbackProducts } from './data/mockData'
+import { historyQuiz, historyQuizSets } from './data/quizData'
 import type { AuthUser, CartItem, CheckoutResponse, DashboardData, OrderDetail, PaymentMethod } from './types/app'
-import { API_BASE_URL } from './utils/api'
+import { API_BASE_URL, getApiMessage, readApiJson } from './utils/api'
 import { getCurrentUser, loginUser, logoutUser, registerUser } from './utils/auth'
 import {
   addToCart,
@@ -39,13 +39,7 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
-function HomePage({
-  onAdd,
-  featuredProduct,
-}: {
-  onAdd: (productId: string) => void
-  featuredProduct: (typeof fallbackProducts)[number] | null
-}) {
+function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProducts)[number] | null }) {
   return (
     <>
       <section className="hero-section hero-section-premium">
@@ -53,9 +47,9 @@ function HomePage({
           <div className="hero-copy">
             <div className="hero-badge">
               <Sparkles size={16} />
-              Hệ sinh thái học sử kết hợp AR, commerce và quiz
+              Hệ sinh thái học sử kết hợp bài học, commerce và quiz
             </div>
-            <p className="eyebrow">Công nghệ AR cho giáo dục lịch sử Việt Nam</p>
+            <p className="eyebrow">Nền tảng học lịch sử Việt Nam cho THCS</p>
             <h2>Học Sử chủ động, trải nghiệm sống động cùng Sử Việt Anh Minh</h2>
             <p className="hero-description">
               Hệ sinh thái kết hợp giữa bài học trực quan, thẻ bài sưu tầm và hệ thống thử thách quiz tương tác thông minh.
@@ -70,7 +64,7 @@ function HomePage({
             {featuredProduct ? (
               <>
                 <div className="hero-stage-top">
-                  <span className="eyebrow dark">Combo + quiz + AR</span>
+                  <span className="eyebrow dark">Combo + học + quiz</span>
                   <strong>{featuredProduct.name}</strong>
                   <p>{featuredProduct.subtitle}</p>
                 </div>
@@ -78,7 +72,7 @@ function HomePage({
               </>
             ) : (
               <div className="hero-stage-top">
-                <span className="eyebrow dark">Combo + quiz + AR</span>
+                <span className="eyebrow dark">Combo + học + quiz</span>
                 <strong>Danh mục đang cập nhật</strong>
                 <p>Shop đang tải lại bộ sưu tập phù hợp cho hành trình học và sưu tầm.</p>
               </div>
@@ -88,84 +82,6 @@ function HomePage({
         </div>
       </section>
 
-      <section className="container section-block section-tight section-tight-topless">
-        <div className="section-heading section-heading-balanced">
-          <div>
-            <p className="eyebrow">Trải nghiệm chính</p>
-            <h3>3 hành trình nổi bật trong cùng một sản phẩm</h3>
-          </div>
-        </div>
-        <div className="feature-grid feature-grid-refined">
-          <article className="feature-card feature-card-refined">
-            <div className="feature-visual">
-              <img src="/assets/bg1.jpg" alt="Thẻ bài lịch sử" />
-            </div>
-            <div className="feature-card-body">
-              <Crown size={18} />
-              <h4>Mua combo lịch sử</h4>
-              <p>Chọn thẻ bài theo lớp, combo theo chủ đề và checkout bằng PayOS hoặc COD.</p>
-            </div>
-          </article>
-          <article className="feature-card feature-card-refined">
-            <div className="feature-visual">
-              <img src="/assets/ar.jpg" alt="Quét AR" />
-            </div>
-            <div className="feature-card-body">
-              <Rocket size={18} />
-              <h4>Quét AR tương tác</h4>
-              <p>Mở nhân vật, nhận phần thưởng và chuyển tiếp sang luồng luyện tập kiến thức.</p>
-            </div>
-          </article>
-          <article className="feature-card feature-card-refined">
-            <div className="feature-visual">
-              <img src="/assets/hs.jpg" alt="Quiz lịch sử" />
-            </div>
-            <div className="feature-card-body">
-              <Swords size={18} />
-              <h4>Đấu trường quiz</h4>
-              <p>Chơi 30 câu hỏi nhiều cấp độ với giải thích chi tiết và màn tổng kết kết quả rõ ràng.</p>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section className="container section-block combo-showcase-grid">
-        <div className="combo-copy-block">
-          <p className="eyebrow">Combo nổi bật</p>
-          <h3>{featuredProduct?.name ?? 'Danh mục đang cập nhật'}</h3>
-          <p>{featuredProduct?.description ?? 'Khi catalog tải xong, shop sẽ hiển thị combo tiêu biểu để người học thêm vào giỏ nhanh hơn.'}</p>
-          <ul className="feature-list feature-list-spacious">
-            {(featuredProduct?.features ?? ['Thẻ bài sưu tầm', 'Quiz theo chủ đề', 'AR mở khóa nhân vật']).map((feature) => (
-              <li key={feature}>{feature}</li>
-            ))}
-          </ul>
-          <div className="hero-actions hero-actions-compact">
-            <button className="primary-btn" onClick={() => featuredProduct && onAdd(featuredProduct.id)} disabled={!featuredProduct}>
-              Thêm combo vào giỏ
-            </button>
-            <Link to="/quiz" className="ghost-btn light">Luyện quiz trước khi mua</Link>
-          </div>
-        </div>
-
-        <div className="combo-info-stack">
-          <div className="summary-card summary-card-highlight">
-            <span className="eyebrow dark">Quiz nổi bật</span>
-            <strong>{historyQuiz.title}</strong>
-            <p>{historyQuiz.description}</p>
-            <div className="summary-inline-metrics">
-              <div><strong>{historyQuiz.questionCount}</strong><span>Câu hỏi</span></div>
-              <div><strong>3</strong><span>Cấp độ</span></div>
-            </div>
-            <Link to="/quiz" className="secondary-btn full">Bắt đầu thử thách</Link>
-          </div>
-
-          <div className="summary-card summary-card-soft summary-card-clean">
-            <span className="eyebrow dark">Lối chơi</span>
-            <strong>Học → Chơi → Mua</strong>
-            <p>Hoàn thành quiz để ghi nhớ kiến thức, sau đó chuyển sang AR hoặc chọn combo phù hợp với chủ đề bạn vừa học.</p>
-          </div>
-        </div>
-      </section>
     </>
   )
 }
@@ -173,77 +89,22 @@ function HomePage({
 function ProductsPage({
   products,
   loading,
-  error,
   onAdd,
 }: {
   products: (typeof fallbackProducts)
   loading: boolean
-  error: string
   onAdd: (productId: string) => void
 }) {
-  const [gradeFilter, setGradeFilter] = useState('all')
-  const [typeFilter, setTypeFilter] = useState('all')
-
-  const gradeOptions = useMemo(
-    () => Array.from(new Set(products.map((product) => product.grade))),
-    [products],
-  )
-  const typeOptions = useMemo(
-    () => Array.from(new Set(products.map((product) => product.type))),
-    [products],
-  )
-
-  const filteredProducts = useMemo(
-    () =>
-      products.filter((product) => {
-        const matchesGrade = gradeFilter === 'all' || product.grade === gradeFilter
-        const matchesType = typeFilter === 'all' || product.type === typeFilter
-        return matchesGrade && matchesType
-      }),
-    [products, gradeFilter, typeFilter],
-  )
+  const showcaseProducts = getShowcaseProducts(products)
 
   return (
     <section className="container section-block catalog-layout catalog-layout-stacked">
-      <aside className="filter-panel filter-panel-clean filter-panel-products filter-panel-horizontal">
-        <div>
-          <p className="eyebrow">Bộ lọc</p>
-          <h3>Tùy chỉnh danh mục</h3>
-        </div>
-        <label>
-          Lớp
-          <select value={gradeFilter} onChange={(event) => setGradeFilter(event.target.value)}>
-            <option value="all">Tất cả</option>
-            {gradeOptions.map((grade) => (
-              <option key={grade} value={grade}>{grade}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Loại nhân vật
-          <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)}>
-            <option value="all">Tất cả</option>
-            {typeOptions.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </label>
-      </aside>
-      <div>
-        <div className="section-heading section-heading-balanced product-toolbar-heading">
-          <div>
-            <p className="eyebrow">Catalog</p>
-            <h3>Sản phẩm & thẻ nhân vật</h3>
-          </div>
-        </div>
-        {error ? <p className="status-message warning">{error}</p> : null}
-        {loading ? <div className="catalog-state-card">Đang tải catalog từ backend...</div> : null}
-        {!loading && filteredProducts.length === 0 ? <div className="catalog-state-card">Không có sản phẩm phù hợp với bộ lọc hiện tại.</div> : null}
-        <div className="product-grid product-grid-refined product-grid-showcase">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={onAdd} />
-          ))}
-        </div>
+      {loading ? <div className="catalog-state-card">Đang tải catalog từ backend...</div> : null}
+      {!loading && showcaseProducts.length === 0 ? <div className="catalog-state-card">Hiện chưa có sản phẩm để hiển thị.</div> : null}
+      <div className="product-grid product-grid-refined product-grid-showcase">
+        {showcaseProducts.map((product, index) => (
+          <ProductCard key={product.id} product={product} onAdd={onAdd} dimmed={index > 0} />
+        ))}
       </div>
     </section>
   )
@@ -319,17 +180,81 @@ function LessonDetailPage() {
 }
 
 function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
+  const [selectedQuizSlug, setSelectedQuizSlug] = useState(historyQuizSets[0].slug)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [score, setScore] = useState(0)
   const [showResult, setShowResult] = useState(false)
   const [answers, setAnswers] = useState<Record<string, boolean>>({})
-  const [qrScanned, setQrScanned] = useState(false)
+  const [unlockedOrders, setUnlockedOrders] = useState<OrderDetail[]>([])
+  const [unlockLoading, setUnlockLoading] = useState(false)
 
-  const question = historyQuiz.questions[currentIndex]
-  const progress = ((currentIndex + (showResult ? 1 : 0)) / historyQuiz.questionCount) * 100
+  const selectedQuiz = historyQuizSets.find((quiz) => quiz.slug === selectedQuizSlug) ?? historyQuizSets[0]
+  const question = selectedQuiz.questions[currentIndex] ?? selectedQuiz.questions[0]
+  const progress = selectedQuiz.questionCount > 0
+    ? ((currentIndex + (showResult ? 1 : 0)) / selectedQuiz.questionCount) * 100
+    : 0
   const answeredCount = Object.keys(answers).length
+  const unlockedProducts = Array.from(
+    new Set(
+      unlockedOrders.flatMap((order) =>
+        (order.items ?? []).length
+          ? order.items.map((item) => item.productName)
+          : [`Đơn DH-${order.orderCode}`],
+      ),
+    ),
+  )
+  const hasCardModeAccess = unlockedOrders.length > 0
+
+  useEffect(() => {
+    if (!currentUser) {
+      setUnlockedOrders([])
+      return
+    }
+
+    let cancelled = false
+    const activeUser = currentUser
+
+    async function loadUnlockedOrders() {
+      setUnlockLoading(true)
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/account-orders`, {
+          credentials: 'include',
+        })
+        const data = await readApiJson<{ orders?: OrderDetail[]; message?: string }>(response)
+        if (!response.ok) {
+          throw new Error(getApiMessage(data) ?? 'Không tải được quyền mở khóa thẻ bài.')
+        }
+
+        const orders = (data?.orders ?? []).filter(
+          (order) => Boolean(order.cardModeUnlockedAt) || order.status === 'paid' || order.status === 'completed',
+        )
+        if (!cancelled) {
+          setUnlockedOrders(orders)
+        }
+      } catch {
+        if (!cancelled) {
+          const localOrders = loadStoredOrders().filter(
+            (order) =>
+              (order.userId === activeUser.id ||
+                order.email.trim().toLowerCase() === activeUser.email.trim().toLowerCase()) &&
+              (Boolean(order.cardModeUnlockedAt) || order.status === 'paid' || order.status === 'completed'),
+          )
+          setUnlockedOrders(localOrders)
+        }
+      } finally {
+        if (!cancelled) {
+          setUnlockLoading(false)
+        }
+      }
+    }
+
+    loadUnlockedOrders()
+    return () => {
+      cancelled = true
+    }
+  }, [currentUser])
 
   function resetCurrentQuestion() {
     setSelectedOption(null)
@@ -351,7 +276,7 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
   }
 
   function handleNext() {
-    if (currentIndex === historyQuiz.questions.length - 1) {
+    if (currentIndex === selectedQuiz.questions.length - 1) {
       setShowResult(true)
       return
     }
@@ -378,7 +303,16 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
     setScore(0)
     setShowResult(false)
     setAnswers({})
-    setQrScanned(false)
+  }
+
+  function handleSelectQuiz(slug: string) {
+    setSelectedQuizSlug(slug)
+    setCurrentIndex(0)
+    setSelectedOption(null)
+    setSubmitted(false)
+    setScore(0)
+    setShowResult(false)
+    setAnswers({})
   }
 
   return (
@@ -391,8 +325,9 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
         </div>
         <div className="quiz-badges quiz-badges-clean">
           <span>Cần đăng nhập</span>
-          <span>Quét QR</span>
-          <span>Chọn câu hỏi</span>
+          <span>Mua thẻ bài</span>
+          <span>3 bộ quiz</span>
+          <span>Có chấm điểm</span>
         </div>
       </div>
 
@@ -405,174 +340,160 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
           </div>
           <Link to="/account" className="primary-btn">Đăng nhập ngay</Link>
         </div>
-      ) : !qrScanned ? (
+      ) : unlockLoading ? (
+        <div className="admin-panel quiz-access-panel quiz-access-panel-clean">
+          <div>
+            <p className="eyebrow dark">Đang kiểm tra</p>
+            <h3>Đang tải quyền thẻ bài</h3>
+            <p>Hệ thống đang đối chiếu các đơn đã được xác nhận thanh toán để mở khóa chế độ thẻ bài.</p>
+          </div>
+        </div>
+      ) : !hasCardModeAccess ? (
         <div className="admin-panel quiz-access-panel quiz-access-panel-clean">
           <div>
             <p className="eyebrow dark">Bước 2</p>
-            <h3>Quét QR trên thẻ bài</h3>
-            <p>Quét mã QR đi kèm bộ thẻ Sử Việt Anh Minh để mở khóa phiên quiz tương tác.</p>
+            <h3>Chưa mở khóa thẻ bài</h3>
+            <p>Bạn cần mua bộ thẻ bài và hoàn tất chuyển khoản để hệ thống mở khóa chế độ thẻ bài cho tài khoản.</p>
           </div>
-          <div className="quiz-qr-card" aria-label="Mã QR mô phỏng để mở khóa quiz">
-            <span />
-            <strong>QR</strong>
-            <small>Sử Việt Anh Minh</small>
-          </div>
-          <button className="primary-btn" onClick={() => setQrScanned(true)}>Tôi đã quét QR</button>
-        </div>
-      ) : showResult ? (
-        <div className="quiz-result-panel admin-panel quiz-result-panel-clean">
-          <div className="result-ring result-ring-clean">
-            <strong>{score}/{historyQuiz.questionCount}</strong>
-            <span>Điểm tổng kết</span>
-          </div>
-          <div>
-            <h3>Hoàn thành đấu trường lịch sử</h3>
-            <p>
-              Bạn đã trả lời đúng {score} / {historyQuiz.questionCount} câu. Hãy luyện lại hoặc chuyển sang trải nghiệm AR và mua bộ thẻ liên quan.
-            </p>
-            <div className="hero-actions hero-actions-compact">
-              <button className="primary-btn" onClick={handleRestart}>Chơi lại từ đầu</button>
-              <Link to="/products" className="secondary-btn">Mua bộ thẻ nổi bật</Link>
-              <Link to="/ar" className="ghost-btn light">Tiếp tục trải nghiệm AR</Link>
-            </div>
+          <div className="hero-actions hero-actions-compact">
+            <Link to="/products" className="primary-btn">Mua bộ thẻ ngay</Link>
+            <Link to="/account" className="secondary-btn">Xem đơn hàng của tôi</Link>
           </div>
         </div>
       ) : (
-        <div className="quiz-layout quiz-layout-clean">
-          <div className="admin-panel quiz-main-panel quiz-main-panel-clean">
-            <div className="quiz-progress-row">
-              <div>
-                <span className="eyebrow dark">{question.level}</span>
-                <h3>Câu {currentIndex + 1}</h3>
-              </div>
-              <strong>{Math.round(progress)}%</strong>
-            </div>
-            <div className="quiz-progress-bar">
-              <span style={{ width: `${progress}%` }} />
-            </div>
-            <h4 className="quiz-prompt">{question.prompt}</h4>
-            <div className="quiz-options-grid quiz-options-grid-clean">
-              {question.options.map((option, index) => {
-                const isCorrect = submitted && index === question.correctIndex
-                const isWrong = submitted && selectedOption === index && index !== question.correctIndex
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    className={`quiz-option ${selectedOption === index ? 'selected' : ''} ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`}
-                    onClick={() => !submitted && setSelectedOption(index)}
-                  >
-                    <span>{String.fromCharCode(65 + index)}</span>
-                    <strong>{option}</strong>
-                  </button>
-                )
-              })}
-            </div>
-            {submitted ? (
-              <div className="quiz-feedback-box quiz-feedback-box-clean">
-                <div className="quiz-feedback-title">
-                  <CheckCircle2 size={18} />
-                  <strong>{selectedOption === question.correctIndex ? 'Chính xác!' : 'Chưa đúng, thử ghi nhớ lại nhé.'}</strong>
-                </div>
-                <p>{question.explanation}</p>
-              </div>
-            ) : null}
-            <div className="hero-actions hero-actions-compact quiz-actions-row">
-              <button className="secondary-btn" onClick={handlePrevious} disabled={currentIndex === 0}>
-                Câu trước
-              </button>
-              {!submitted ? (
-                <button className="primary-btn" onClick={handleSubmit} disabled={selectedOption === null}>
-                  Khóa đáp án
-                </button>
-              ) : (
-                <button className="primary-btn" onClick={handleNext}>
-                  {currentIndex === historyQuiz.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
-                </button>
-              )}
-              <button className="secondary-btn" onClick={handleNext}>
-                {currentIndex === historyQuiz.questions.length - 1 ? 'Xem kết quả' : 'Next'}
-              </button>
+        <>
+          <div className="admin-panel quiz-access-panel quiz-access-panel-clean">
+            <div>
+              <p className="eyebrow dark">Đã mở khóa</p>
+              <h3>Chế độ thẻ bài đã sẵn sàng</h3>
+              <p>{unlockedProducts.join(', ')}</p>
             </div>
           </div>
-
-          <aside className="admin-panel quiz-side-panel quiz-side-panel-clean">
-            <p className="eyebrow dark">Tiến trình</p>
-            <h3>Đấu trường của bạn</h3>
-            <div className="quiz-side-stats quiz-side-stats-clean">
-              <div><strong>{answeredCount}</strong><span>Đã làm</span></div>
-              <div><strong>{currentIndex + 1}</strong><span>Đang chơi</span></div>
-              <div><strong>{historyQuiz.questionCount - answeredCount}</strong><span>Còn lại</span></div>
-            </div>
-            <div className="quiz-check-grid quiz-check-grid-clean">
-              {historyQuiz.questions.map((item, index) => {
-                const isAnswered = Object.prototype.hasOwnProperty.call(answers, item.id)
-                const isCorrect = answers[item.id]
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`quiz-checkpoint ${index === currentIndex ? 'active' : ''} ${isAnswered ? 'answered' : ''} ${isCorrect ? 'done' : ''}`}
-                    onClick={() => handleSelectQuestion(index)}
-                    aria-label={`Chọn câu hỏi ${index + 1}`}
-                  >
-                    {index + 1}
-                  </button>
-                )
-              })}
-            </div>
-            <p className="quiz-side-note">Sau mỗi câu, bạn sẽ nhận được giải thích để củng cố kiến thức trước khi chuyển sang phần học hoặc mua combo liên quan.</p>
-          </aside>
-        </div>
-      )}
-    </section>
-  )
-}
-
-function ArPage() {
-  const [selectedMarker, setSelectedMarker] = useState(arExperiences[0].markerId)
-  const experience = arExperiences.find((entry) => entry.markerId === selectedMarker) ?? arExperiences[0]
-  const character = characters.find((entry) => entry.id === experience.characterId)
-
-  return (
-    <section className="container section-block split-section refined-layout-two-column">
-      <div className="admin-panel ar-panel-premium">
-        <p className="eyebrow">AR flow MVP</p>
-        <h3>{experience.title}</h3>
-        <p>{experience.description}</p>
-        <label>
-          Chọn marker mô phỏng
-          <select value={selectedMarker} onChange={(event) => setSelectedMarker(event.target.value)}>
-            {arExperiences.map((entry) => (
-              <option key={entry.markerId} value={entry.markerId}>
-                {entry.title}
-              </option>
+          <div className="quiz-set-grid" aria-label="Chọn bộ quiz theo cấp độ">
+            {historyQuizSets.map((quiz) => (
+              <button
+                key={quiz.slug}
+                type="button"
+                className={`quiz-set-card ${quiz.slug === selectedQuiz.slug ? 'active' : ''}`}
+                onClick={() => handleSelectQuiz(quiz.slug)}
+              >
+                <span>{quiz.questions[0]?.level}</span>
+                <strong>{quiz.title}</strong>
+                <small>{quiz.questionCount} câu hỏi</small>
+              </button>
             ))}
-          </select>
-        </label>
-        <div className="quiz-box">
-          <strong>Điểm thưởng sau khi quét: {experience.rewardPoints}</strong>
-          {experience.questions.map((question) => (
-            <div key={question.id} className="quiz-question">
-              <p>{question.prompt}</p>
-              <ul>
-                {question.options.map((option) => (
-                  <li key={option}>{option}</li>
-                ))}
-              </ul>
+          </div>
+
+          {showResult ? (
+            <div className="quiz-result-panel admin-panel quiz-result-panel-clean">
+              <div className="result-ring result-ring-clean">
+                <strong>{score}/{selectedQuiz.questionCount}</strong>
+                <span>Điểm tổng kết</span>
+              </div>
+              <div>
+                <p className="eyebrow dark">{selectedQuiz.title}</p>
+                <h3>Hoàn thành bộ quiz</h3>
+                <p>
+                  Bạn đã trả lời đúng {score} / {selectedQuiz.questionCount} câu trong bộ {selectedQuiz.questions[0]?.level}. Hãy luyện lại, xem bài học liên quan hoặc mua bộ thẻ phù hợp.
+                </p>
+                <div className="hero-actions hero-actions-compact">
+                  <button className="primary-btn" onClick={handleRestart}>Chơi lại từ đầu</button>
+                  <Link to="/products" className="secondary-btn">Mua bộ thẻ nổi bật</Link>
+                  <Link to="/lessons" className="ghost-btn light">Xem bài học</Link>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-        <Link to="/quiz" className="secondary-btn full">Chuyển sang đấu trường quiz đầy đủ</Link>
-      </div>
-      <div className="hero-card elevated character-panel">
-        {character ? <img src={character.image} alt={character.name} /> : null}
-        <div className="character-sheet">
-          <h4>{character?.name}</h4>
-          <p>{character?.blurb}</p>
-          <span>{character?.period}</span>
-        </div>
-      </div>
+          ) : (
+            <div className="quiz-layout quiz-layout-clean">
+              <div className="admin-panel quiz-main-panel quiz-main-panel-clean">
+                <div className="quiz-progress-row">
+                  <div>
+                    <span className="eyebrow dark">{question.level}</span>
+                    <h3>Câu {currentIndex + 1}</h3>
+                  </div>
+                  <strong>{Math.round(progress)}%</strong>
+                </div>
+                <div className="quiz-progress-bar">
+                  <span style={{ width: `${progress}%` }} />
+                </div>
+                <h4 className="quiz-prompt">{question.prompt}</h4>
+                <div className="quiz-options-grid quiz-options-grid-clean">
+                  {question.options.map((option, index) => {
+                    const isCorrect = submitted && index === question.correctIndex
+                    const isWrong = submitted && selectedOption === index && index !== question.correctIndex
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`quiz-option ${selectedOption === index ? 'selected' : ''} ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`}
+                        onClick={() => !submitted && setSelectedOption(index)}
+                      >
+                        <span>{String.fromCharCode(65 + index)}</span>
+                        <strong>{option}</strong>
+                      </button>
+                    )
+                  })}
+                </div>
+                {submitted ? (
+                  <div className="quiz-feedback-box quiz-feedback-box-clean">
+                    <div className="quiz-feedback-title">
+                      <CheckCircle2 size={18} />
+                      <strong>{selectedOption === question.correctIndex ? 'Chính xác!' : 'Chưa đúng, thử ghi nhớ lại nhé.'}</strong>
+                    </div>
+                    <p>{question.explanation}</p>
+                  </div>
+                ) : null}
+                <div className="hero-actions hero-actions-compact quiz-actions-row">
+                  <button className="secondary-btn" onClick={handlePrevious} disabled={currentIndex === 0}>
+                    Câu trước
+                  </button>
+                  {!submitted ? (
+                    <button className="primary-btn" onClick={handleSubmit} disabled={selectedOption === null}>
+                      Khóa đáp án
+                    </button>
+                  ) : (
+                    <button className="primary-btn" onClick={handleNext}>
+                      {currentIndex === selectedQuiz.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
+                    </button>
+                  )}
+                  <button className="secondary-btn" onClick={handleNext}>
+                    {currentIndex === selectedQuiz.questions.length - 1 ? 'Xem kết quả' : 'Next'}
+                  </button>
+                </div>
+              </div>
+
+              <aside className="admin-panel quiz-side-panel quiz-side-panel-clean">
+                <p className="eyebrow dark">Tiến trình</p>
+                <h3>{selectedQuiz.title}</h3>
+                <p>{selectedQuiz.description}</p>
+                <div className="quiz-side-stats quiz-side-stats-clean">
+                  <div><strong>{answeredCount}</strong><span>Đã làm</span></div>
+                  <div><strong>{score}</strong><span>Điểm</span></div>
+                  <div><strong>{selectedQuiz.questionCount - answeredCount}</strong><span>Còn lại</span></div>
+                </div>
+                <div className="quiz-check-grid quiz-check-grid-clean">
+                  {selectedQuiz.questions.map((item, index) => {
+                    const isAnswered = Object.prototype.hasOwnProperty.call(answers, item.id)
+                    const isCorrect = answers[item.id]
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`quiz-checkpoint ${index === currentIndex ? 'active' : ''} ${isAnswered ? 'answered' : ''} ${isCorrect ? 'done' : ''}`}
+                        onClick={() => handleSelectQuestion(index)}
+                        aria-label={`Chọn câu hỏi ${index + 1}`}
+                      >
+                        {index + 1}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="quiz-side-note">Sau mỗi câu, bạn sẽ nhận được giải thích để củng cố kiến thức trước khi chuyển sang phần học hoặc mua combo liên quan.</p>
+              </aside>
+            </div>
+          )}
+        </>
+      )}
     </section>
   )
 }
@@ -594,9 +515,9 @@ function CheckoutPage({
   const [customerName, setCustomerName] = useState(currentUser?.fullName ?? '')
   const [email, setEmail] = useState(currentUser?.email ?? '')
   const [address, setAddress] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('momo')
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [qrOrder, setQrOrder] = useState<OrderDetail | null>(null)
 
   useEffect(() => {
     if (!currentUser) return
@@ -607,14 +528,14 @@ function CheckoutPage({
   const subtotal = calculateSubtotal(cart, products)
   const shipping = subtotal > 0 ? 30000 : 0
   const total = subtotal + shipping
-  const paymentHint =
-    paymentMethod === 'momo'
-      ? 'Bạn sẽ được chuyển sang PayOS / QR để hoàn tất thanh toán.'
-      : paymentMethod === 'cod'
-        ? 'Đơn hàng sẽ được ghi nhận ngay và chờ shop xác nhận.'
-        : 'Đơn chuyển khoản sẽ được tạo trước, sau đó shop xác nhận thủ công.'
+  const paymentHint = 'Hệ thống sẽ tạo mã VietQR TPBank theo đúng số tiền đơn hàng. Sau khi tạo đơn, bạn chỉ cần quét QR để chuyển khoản.'
 
   async function handleCheckout() {
+    if (!currentUser) {
+      setMessage('Vui lòng đăng nhập trước khi mua hàng.')
+      navigate('/account')
+      return
+    }
     setSubmitting(true)
     setMessage('')
     try {
@@ -622,11 +543,15 @@ function CheckoutPage({
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerName, email, address, paymentMethod, cart }),
+        body: JSON.stringify({ customerName, email, address, paymentMethod: 'bank' satisfies PaymentMethod, cart }),
       })
-      const data = (await response.json()) as CheckoutResponse & { message?: string }
+      const data = await readApiJson<CheckoutResponse & { message?: string }>(response)
       if (!response.ok) {
-        setMessage(data.message ?? 'Checkout thất bại.')
+        setMessage(getApiMessage(data) ?? 'Checkout thất bại.')
+        return
+      }
+      if (!data) {
+        setMessage('Phản hồi từ máy chủ không hợp lệ.')
         return
       }
 
@@ -634,22 +559,32 @@ function CheckoutPage({
         saveStoredOrder(data.order)
       }
 
-      if (data.paymentMethod === 'cod' || data.paymentMethod === 'bank') {
+      if (data.paymentMethod === 'bank') {
         navigate(`/checkout/success?orderCode=${data.orderCode}`)
         return
       }
-
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl
-        return
-      }
-
-      setMessage('Không lấy được link thanh toán.')
+      setMessage('Phương thức thanh toán không còn được hỗ trợ.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Checkout thất bại.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  if (!currentUser) {
+    return (
+      <section className="container section-block checkout-layout single-column result-shell">
+        <div className="admin-panel result-card-premium result-card-clean">
+          <p className="eyebrow">Cần đăng nhập</p>
+          <h3>Đăng nhập trước khi mua hàng</h3>
+          <p>Luồng thanh toán VietQR và mở khóa thẻ bài chỉ áp dụng cho tài khoản đã đăng nhập để hệ thống gắn đơn hàng đúng người học.</p>
+          <div className="hero-actions hero-actions-compact">
+            <Link to="/account" className="primary-btn">Đăng nhập ngay</Link>
+            <Link to="/products" className="secondary-btn">Quay lại sản phẩm</Link>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -714,11 +649,7 @@ function CheckoutPage({
           </label>
           <label>
             Phương thức thanh toán
-            <select value={paymentMethod} onChange={(event) => setPaymentMethod(event.target.value as PaymentMethod)}>
-              <option value="momo">PayOS / QR</option>
-              <option value="cod">COD</option>
-              <option value="bank">Chuyển khoản</option>
-            </select>
+            <input value="VietQR / TPBank" readOnly />
           </label>
         </div>
         <p className="payment-hint">{paymentHint}</p>
@@ -728,7 +659,7 @@ function CheckoutPage({
           <div><span>Tổng cộng</span><strong>{formatCurrency(total)}</strong></div>
         </div>
         <button className="primary-btn full" onClick={handleCheckout} disabled={!cart.length || submitting}>
-          {submitting ? 'Đang tạo thanh toán...' : 'Hoàn tất thanh toán'}
+          {submitting ? 'Đang tạo đơn chuyển khoản...' : 'Tạo đơn và nhận mã QR'}
         </button>
         {message ? <p className="status-message error">{message}</p> : null}
       </div>
@@ -742,14 +673,11 @@ function CheckoutResultPage({
   onPaid: () => void
 }) {
   const [searchParams] = useSearchParams()
-  const location = useLocation()
   const navigate = useNavigate()
   const orderCode = searchParams.get('orderCode')
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState('')
-
-  const isCancelPage = location.pathname.includes('/cancel')
 
   useEffect(() => {
     if (!orderCode) {
@@ -764,14 +692,17 @@ function CheckoutResultPage({
     async function loadOrder() {
       try {
         const response = await fetch(`${API_BASE_URL}/api/order?orderCode=${encodeURIComponent(currentOrderCode)}`)
-        const data = await response.json()
+        const data = await readApiJson<OrderDetail & { message?: string }>(response)
         if (!response.ok) {
-          throw new Error(data.message ?? 'Không tải được đơn hàng.')
+          throw new Error(getApiMessage(data) ?? 'Không tải được đơn hàng.')
+        }
+        if (!data) {
+          throw new Error('Phản hồi từ máy chủ không hợp lệ.')
         }
         if (!cancelled) {
-          setOrder(data as OrderDetail)
-          saveStoredOrder(data as OrderDetail)
-          if ((data as OrderDetail).status === 'paid' || (data as OrderDetail).paymentMethod === 'cod') {
+          setOrder(data)
+          saveStoredOrder(data)
+          if (data.status === 'paid' || data.status === 'completed') {
             onPaid()
           }
         }
@@ -780,7 +711,7 @@ function CheckoutResultPage({
           const cachedOrder = getStoredOrder(currentOrderCode)
           if (cachedOrder) {
             setOrder(cachedOrder)
-            if (cachedOrder.status === 'paid' || cachedOrder.paymentMethod === 'cod') {
+            if (cachedOrder.status === 'paid' || cachedOrder.status === 'completed') {
               onPaid()
             }
           } else {
@@ -800,43 +731,10 @@ function CheckoutResultPage({
     }
   }, [orderCode, onPaid])
 
-  async function handleMockConfirm() {
-    if (!orderCode) return
-    setLoading(true)
-    setMessage('')
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/mock-order-pay?orderCode=${encodeURIComponent(String(orderCode))}`, { method: 'POST' })
-      const data = await response.json()
-      if (!response.ok) {
-        throw new Error(data.message ?? 'Không thể xác nhận thanh toán.')
-      }
-      setOrder(data as OrderDetail)
-      saveStoredOrder(data as OrderDetail)
-      onPaid()
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Không thể xác nhận thanh toán.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleRetry() {
-    if (!orderCode) return
-    const response = await fetch(`${API_BASE_URL}/api/order-retry-payment?orderCode=${encodeURIComponent(String(orderCode))}`, { method: 'POST' })
-    const data = await response.json()
-    if (!response.ok) {
-      setMessage(data.message ?? 'Không thể tạo lại link thanh toán.')
-      return
-    }
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl as string
-    }
-  }
-
   return (
     <section className="container section-block checkout-layout single-column result-shell">
       <div className="admin-panel result-card-premium result-card-clean">
-        <p className="eyebrow">{isCancelPage ? 'Thanh toán bị hủy' : 'Kết quả thanh toán'}</p>
+        <p className="eyebrow">Thanh toán VietQR</p>
         <h3>{loading ? 'Đang tải đơn hàng...' : order ? `Đơn hàng DH-${order.orderCode}` : 'Không có dữ liệu đơn hàng'}</h3>
         {message ? <p className="status-message error">{message}</p> : null}
         {order ? (
@@ -847,10 +745,24 @@ function CheckoutResultPage({
               <div><span>Thanh toán</span><strong>{paymentLabel(order.paymentMethod)}</strong></div>
             </div>
             {order.paymentMethod === 'bank' ? (
-              <p className="status-message info">Đơn chuyển khoản đã được tạo. Shop sẽ xác nhận sau khi nhận tiền vào tài khoản.</p>
-            ) : null}
-            {order.paymentMethod === 'cod' ? (
-              <p className="status-message info">Đơn COD đã được ghi nhận. Shop sẽ liên hệ để xác nhận và chuẩn bị giao hàng.</p>
+              <>
+                <p className="status-message info">
+                  Quét mã VietQR bên dưới để chuyển đúng số tiền của đơn hàng.
+                </p>
+                <div className="admin-panel checkout-qr-panel">
+                  {order.qrCode ? <img src={order.qrCode} alt={`Mã VietQR cho đơn hàng ${order.orderCode}`} className="checkout-qr-image" /> : null}
+                  <div className="checkout-qr-meta">
+                    <div><span>Ngân hàng</span><strong>{order.bankName ?? 'TPBank'}</strong></div>
+                    <div><span>Số tài khoản</span><strong>{order.bankAccountNo ?? '00000802077'}</strong></div>
+                    <div><span>Nội dung CK</span><strong>{order.transferNote ?? `DH${order.orderCode}`}</strong></div>
+                  </div>
+                </div>
+                {order.cardModeUnlockedAt ? (
+                  <p className="status-message info">Thẻ bài đã được mở khóa lúc {order.cardModeUnlockedAt}. Bạn có thể vào quiz để dùng chế độ thẻ bài.</p>
+                ) : (
+                  <p className="status-message info">Đơn hàng đã được tạo. Vui lòng quét QR và chuyển khoản đúng nội dung để shop xử lý đơn.</p>
+                )}
+              </>
             ) : null}
             <div className="cart-list">
               {order.items.map((item) => (
@@ -864,10 +776,8 @@ function CheckoutResultPage({
               ))}
             </div>
             <div className="hero-actions hero-actions-compact">
-              {isCancelPage && order.status !== 'paid' && order.paymentMethod === 'momo' ? (
-                <button className="secondary-btn" onClick={handleRetry}>Thanh toán lại</button>
-              ) : null}
-              <button className="ghost-btn light" onClick={() => navigate('/dashboard')}>Xem dashboard</button>
+              <button className="primary-btn" onClick={() => navigate('/quiz')}>Đến trang quiz</button>
+              <button className="secondary-btn" onClick={() => navigate('/account')}>Xem đơn hàng của tôi</button>
             </div>
           </>
         ) : null}
@@ -888,6 +798,9 @@ function AccountPage({
   onLogout: () => void
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
+  const redirectState = (location.state ?? null) as { from?: string; reason?: string; message?: string } | null
+  const redirectMessage = redirectState?.message ?? null
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
@@ -910,12 +823,12 @@ function AccountPage({
         const response = await fetch(`${API_BASE_URL}/api/account-orders`, {
           credentials: 'include',
         })
-        const data = await response.json()
+        const data = await readApiJson<{ orders?: OrderDetail[]; message?: string }>(response)
         if (!response.ok) {
-          throw new Error(data.message ?? 'Không tải được đơn hàng của tài khoản.')
+          throw new Error(getApiMessage(data) ?? 'Không tải được đơn hàng của tài khoản.')
         }
         if (!cancelled) {
-          setOrders((data.orders as OrderDetail[]) ?? [])
+          setOrders(data?.orders ?? [])
         }
       } catch (error) {
         if (!cancelled) {
@@ -961,6 +874,8 @@ function AccountPage({
       setMessage('')
       if (user.role === 'admin') {
         navigate('/dashboard', { replace: true })
+      } else if (redirectState?.from) {
+        navigate(redirectState.from, { replace: true })
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Không thể xử lý đăng nhập.')
@@ -989,6 +904,7 @@ function AccountPage({
           </div>
           <p className="eyebrow dark">{mode === 'login' ? 'Đăng nhập học viên' : 'Tạo tài khoản mới'}</p>
           <h3>{mode === 'login' ? 'Vào tài khoản' : 'Bắt đầu với tài khoản thật'}</h3>
+          {redirectMessage ? <p className="status-message info">{redirectMessage}</p> : null}
           {mode === 'register' ? (
             <label>
               Họ tên
@@ -1055,7 +971,7 @@ function AccountPage({
             <article className="metric-card learner-metric-card">
               <span>Điểm hiện tại</span>
               <strong>0</strong>
-              <small>Bắt đầu quiz hoặc AR để tích điểm đầu tiên</small>
+              <small>Bắt đầu quiz hoặc mua hàng để tích điểm đầu tiên</small>
             </article>
             <article className="metric-card learner-metric-card">
               <span>Bài học hoàn thành</span>
@@ -1115,7 +1031,7 @@ function AccountPage({
           <p className="empty-state-copy">
             {orders.length
               ? 'Trang tài khoản không còn dựng sẵn timeline hay reward giả; dữ liệu chỉ xuất hiện khi tài khoản có hoạt động thật.'
-              : 'Khi bạn hoàn thành quiz, quét AR hoặc tạo đơn hàng thật, lịch sử hoạt động sẽ xuất hiện tại đây thay vì dữ liệu demo.'}
+              : 'Khi bạn hoàn thành quiz hoặc tạo đơn hàng thật, lịch sử hoạt động sẽ xuất hiện tại đây thay vì dữ liệu demo.'}
           </p>
         </aside>
       </div>
@@ -1142,12 +1058,15 @@ function DashboardPage({
         const response = await fetch(`${API_BASE_URL}/api/dashboard`, {
           credentials: 'include',
         })
-        const data = await response.json()
+        const data = await readApiJson<DashboardData & { message?: string }>(response)
         if (!response.ok) {
-          throw new Error(data.message ?? 'Không tải được dashboard.')
+          throw new Error(getApiMessage(data) ?? 'Không tải được dashboard.')
+        }
+        if (!data) {
+          throw new Error('Phản hồi từ máy chủ không hợp lệ.')
         }
         if (!cancelled) {
-          setDashboard(data as DashboardData)
+          setDashboard(data)
         }
       } catch (error) {
         if (!cancelled) {
@@ -1211,7 +1130,7 @@ function DashboardPage({
         <div className="admin-panel">
           <h4>Quản lý nội dung</h4>
           <ul className="feature-list feature-list-spacious">
-            <li>Bài học, quiz và AR hiện vẫn đang dùng dữ liệu mẫu để demo luồng.</li>
+            <li>Bài học và quiz hiện vẫn đang dùng dữ liệu mẫu để demo luồng.</li>
             <li>Shop có thể mở rộng CRUD riêng sau khi chốt xong catalog và checkout thật.</li>
             <li>Ưu tiên hiện tại là giữ phần mua hàng và thanh toán đồng nhất hơn.</li>
           </ul>
@@ -1221,7 +1140,7 @@ function DashboardPage({
           <ul className="feature-list feature-list-spacious">
             <li>Doanh thu và đơn hàng lấy từ dữ liệu order hiện có trong hệ thống.</li>
             <li>Đối soát đang hỗ trợ PayOS / QR, COD và chuyển khoản thủ công.</li>
-            <li>Các chỉ số ngoài order như AR scan vẫn được gắn nhãn mock để tránh gây hiểu nhầm.</li>
+            <li>Các chỉ số phụ như lượt luyện tập vẫn được gắn nhãn mock để tránh gây hiểu nhầm.</li>
           </ul>
         </div>
       </div>
@@ -1231,12 +1150,12 @@ function DashboardPage({
 
 export default function App() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [cart, setCart] = useState<CartItem[]>(() => loadCart())
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [catalog, setCatalog] = useState(fallbackProducts)
+  const [catalog, setCatalog] = useState(() => getShowcaseProducts(fallbackProducts))
   const [catalogLoading, setCatalogLoading] = useState(true)
-  const [catalogMessage, setCatalogMessage] = useState('')
 
   useEffect(() => {
     let cancelled = false
@@ -1271,19 +1190,20 @@ export default function App() {
       try {
         setCatalogLoading(true)
         const response = await fetch(`${API_BASE_URL}/api/products`)
-        const data = await response.json()
+        const data = await readApiJson<typeof fallbackProducts | { message?: string }>(response)
         if (!response.ok) {
-          throw new Error(data.message ?? 'Không tải được catalog.')
+          throw new Error(getApiMessage(data) ?? 'Không tải được catalog.')
+        }
+        if (!Array.isArray(data)) {
+          throw new Error('Phản hồi từ máy chủ không hợp lệ.')
         }
 
         if (!cancelled) {
-          setCatalog(data)
-          setCatalogMessage('')
+          setCatalog(getShowcaseProducts(data))
         }
       } catch (error) {
         if (!cancelled) {
-          setCatalog(fallbackProducts)
-          setCatalogMessage('Không kết nối được catalog backend, đang dùng dữ liệu dự phòng.')
+          setCatalog(getShowcaseProducts(fallbackProducts))
         }
       } finally {
         if (!cancelled) {
@@ -1311,6 +1231,16 @@ export default function App() {
   }, [catalog, catalogLoading])
 
   function handleAdd(productId: string) {
+    if (!currentUser) {
+      navigate('/account', {
+        state: {
+          from: '/products',
+          reason: 'add-to-cart',
+          message: 'Bạn cần đăng nhập trước khi thêm thẻ bài vào giỏ hàng.',
+        },
+      })
+      return
+    }
     const product = catalog.find((entry) => entry.id === productId)
     setCart((prev) => {
       const next = addToCart(prev, productId, product?.stock)
@@ -1355,12 +1285,12 @@ export default function App() {
         <Header cartCount={cartCount} learnerName={currentUser?.fullName} isAdmin={currentUser?.role === 'admin'} onLogout={handleLogout} />
       ) : null}
       <Routes>
-        <Route path="/" element={<HomePage onAdd={handleAdd} featuredProduct={featuredProduct} />} />
-        <Route path="/products" element={<ProductsPage products={catalog} loading={catalogLoading} error={catalogMessage} onAdd={handleAdd} />} />
+        <Route path="/" element={<HomePage featuredProduct={featuredProduct} />} />
+        <Route path="/products" element={<ProductsPage products={catalog} loading={catalogLoading} onAdd={handleAdd} />} />
         <Route path="/lessons" element={<LessonsPage />} />
         <Route path="/lessons/:slug" element={<LessonDetailPage />} />
         <Route path="/quiz" element={<QuizPage currentUser={currentUser} />} />
-        <Route path="/ar" element={<ArPage />} />
+        <Route path="/ar" element={<Navigate to="/quiz" replace />} />
         <Route path="/checkout" element={<CheckoutPage cart={cart} products={catalog} catalogLoading={catalogLoading} currentUser={currentUser} setCart={handleSetCart} />} />
         <Route path="/checkout/success" element={<CheckoutResultPage onPaid={handleOrderPaid} />} />
         <Route path="/checkout/cancel" element={<CheckoutResultPage onPaid={handleOrderPaid} />} />

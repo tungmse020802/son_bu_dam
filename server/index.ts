@@ -1,12 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { arExperiences, lessons } from '../src/data/mockData.js'
+import { lessons } from '../src/data/mockData.js'
 import type { CheckoutRequest } from '../src/types/app.js'
 import { clearAuthSession, createUser, getAuthUserFromRequest, loginUser, setUserAuthSession } from './auth.js'
 import { initializeDatabase, listStoredUsers } from './db.js'
 import { createOrder, getCatalogProducts, getDashboardData, getOrderByCode, listAllOrders, listOrdersByUser, updateOrderStatus } from './orders.js'
-import { createMockWebhook, deriveStatusFromWebhook, verifyWebhookPayload } from './payos.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 8787)
@@ -131,10 +130,6 @@ app.get('/api/lessons', (_req, res) => {
   res.json(lessons)
 })
 
-app.get('/api/ar-experiences', (_req, res) => {
-  res.json(arExperiences)
-})
-
 app.get('/api/dashboard', async (req, res) => {
   try {
     const user = await getAuthUserFromRequest(req)
@@ -225,16 +220,38 @@ app.get('/api/admin/orders/:orderCode', async (req, res) => {
   }
 })
 
+app.post('/api/admin/orders/:orderCode/confirm-payment', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res)
+    if (!admin) return
+
+    const orderCode = getOrderCodeFromRequest(req)
+    const currentOrder = await getOrderByCode(orderCode)
+    if (currentOrder.status === 'paid' || currentOrder.status === 'completed') {
+      res.status(400).json({ message: 'Đơn hàng này đã được xác nhận thanh toán.' })
+      return
+    }
+
+    const order = await updateOrderStatus(orderCode, 'paid', 'admin.payment_confirmed', {
+      confirmedBy: admin.email,
+      confirmedAt: new Date().toISOString(),
+      source: 'dashboard',
+    })
+
+    res.json(order)
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể xác nhận thanh toán.' })
+  }
+})
+
 app.post('/api/checkout', async (req, res) => {
   try {
     const user = await getAuthUserFromRequest(req)
-    const order = await createOrder(req.body as CheckoutRequest, user?.id)
-    const message =
-      order.paymentMethod === 'cod'
-        ? 'Đơn COD đã được ghi nhận và đang chờ xử lý.'
-        : order.paymentMethod === 'bank'
-          ? 'Đơn chuyển khoản đã được tạo, vui lòng hoàn tất chuyển khoản theo hướng dẫn của shop.'
-          : 'Đã tạo link thanh toán PayOS / QR thành công.'
+    if (!user) {
+      res.status(401).json({ message: 'Vui lòng đăng nhập trước khi mua hàng.' })
+      return
+    }
+    const order = await createOrder(req.body as CheckoutRequest, user.id)
 
     res.json({
       orderCode: order.orderCode,
@@ -242,7 +259,7 @@ app.post('/api/checkout', async (req, res) => {
       checkoutUrl: order.checkoutUrl ?? null,
       paymentMethod: order.paymentMethod,
       order,
-      message,
+      message: 'Đơn chuyển khoản đã được tạo. Vui lòng quét QR VietQR để thanh toán.',
     })
   } catch (error) {
     res.status(400).json({ message: error instanceof Error ? error.message : 'Checkout thất bại.' })
@@ -264,67 +281,8 @@ async function handleOrderDetail(req: express.Request, res: express.Response) {
   }
 }
 
-async function handleRetryPayment(req: express.Request, res: express.Response) {
-  try {
-    const order = await getOrderByCode(getOrderCodeFromRequest(req))
-    if (order.paymentMethod !== 'momo') {
-      res.status(400).json({ message: 'Chỉ đơn PayOS / QR mới có thể thanh toán lại.' })
-      return
-    }
-    if (order.status === 'paid') {
-      res.status(400).json({ message: 'Đơn hàng đã được thanh toán.' })
-      return
-    }
-    if (!order.checkoutUrl) {
-      res.status(400).json({ message: 'Đơn hàng này không có link thanh toán khả dụng.' })
-      return
-    }
-    res.json({ checkoutUrl: order.checkoutUrl, orderCode: order.orderCode, status: order.status })
-  } catch (error) {
-    res.status(404).json({ message: error instanceof Error ? error.message : 'Không thể tạo lại link thanh toán.' })
-  }
-}
-
 app.get('/api/orders/:orderCode', handleOrderDetail)
 app.get('/api/order', handleOrderDetail)
-app.post('/api/orders/:orderCode/retry-payment', handleRetryPayment)
-app.post('/api/order-retry-payment', handleRetryPayment)
-
-async function handlePayosWebhook(req: express.Request, res: express.Response) {
-  try {
-    const payload = await verifyWebhookPayload(req.body)
-    const currentOrder = await getOrderByCode(payload.orderCode)
-    const nextStatus = deriveStatusFromWebhook(payload.code, currentOrder.status)
-    const order = await updateOrderStatus(payload.orderCode, nextStatus, payload.eventType, payload.raw)
-    res.json({ ok: true, orderCode: order.orderCode, status: order.status })
-  } catch (error) {
-    res.status(400).json({ message: error instanceof Error ? error.message : 'Webhook không hợp lệ.' })
-  }
-}
-
-app.post('/api/payments/payos/webhook', handlePayosWebhook)
-app.post('/api/payos-webhook', handlePayosWebhook)
-
-async function handleMockOrderPay(req: express.Request, res: express.Response) {
-  try {
-    if (process.env.NODE_ENV === 'production') {
-      res.status(404).json({ message: 'Không hỗ trợ giả lập thanh toán ở môi trường production.' })
-      return
-    }
-    const orderCode = getOrderCodeFromRequest(req)
-    const webhook = createMockWebhook(orderCode)
-    const payload = await verifyWebhookPayload(webhook)
-    const currentOrder = await getOrderByCode(orderCode)
-    const nextStatus = deriveStatusFromWebhook(payload.code, currentOrder.status)
-    const order = await updateOrderStatus(orderCode, nextStatus, payload.eventType, payload.raw)
-    res.json(order)
-  } catch (error) {
-    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể giả lập thanh toán.' })
-  }
-}
-
-app.post('/api/mock/orders/:orderCode/pay', handleMockOrderPay)
-app.post('/api/mock-order-pay', handleMockOrderPay)
 
 export async function startServer() {
   await initializeDatabase()

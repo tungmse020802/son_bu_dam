@@ -94,19 +94,19 @@ export function calculateSubtotal(cart: CartItem[], products: Product[]) {
 
 export function paymentLabel(method: PaymentMethod) {
   if (method === 'cod') return 'COD'
-  if (method === 'bank') return 'Chuyển khoản'
-  return 'PayOS / QR'
+  if (method === 'bank') return 'VietQR / TPBank'
+  return 'PayOS (ngưng dùng)'
 }
 
 export function orderStatusLabel(status: OrderStatus) {
   if (status === 'paid') return 'Đã thanh toán'
   if (status === 'processing') return 'Đang xử lý'
-  if (status === 'payment_link_created') return 'Chờ thanh toán'
+  if (status === 'payment_link_created') return 'Đang chờ link'
   if (status === 'cancelled') return 'Đã hủy'
   if (status === 'failed') return 'Thất bại'
   if (status === 'expired') return 'Hết hạn'
   if (status === 'completed') return 'Hoàn tất'
-  return 'Chờ tạo link'
+  return 'Chờ chuyển khoản'
 }
 
 export function formatCurrency(amount: number) {

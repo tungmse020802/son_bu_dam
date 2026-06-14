@@ -879,6 +879,48 @@ textarea {
   gap: 9px;
 }
 
+.product-content {
+  position: relative;
+}
+
+.product-detail-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-height: 100%;
+}
+
+.product-card-dimmed .product-detail-stack.dimmed {
+  filter: blur(4px);
+  opacity: 0.38;
+  pointer-events: none;
+  user-select: none;
+}
+
+.product-dimmed-badge {
+  position: absolute;
+  inset: 20px;
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  text-align: center;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 253, 248, 0.3), rgba(255, 253, 248, 0.82));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.product-dimmed-badge strong {
+  color: var(--maroon);
+  font-size: 1.05rem;
+}
+
+.product-dimmed-badge span {
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .product-content-refined h3,
 .lesson-body-refined h3 {
   min-height: 2.2em;
@@ -1618,6 +1660,52 @@ textarea {
   color: var(--text-soft);
 }
 
+.quiz-set-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.quiz-set-card {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 18px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fffdf8;
+  color: var(--ink);
+  box-shadow: 0 14px 28px rgba(62, 10, 15, 0.06);
+  transition: 0.2s ease;
+}
+
+.quiz-set-card span {
+  color: var(--maroon);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.quiz-set-card strong {
+  font-size: 1.05rem;
+}
+
+.quiz-set-card small {
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.quiz-set-card.active,
+.quiz-set-card:hover {
+  border-color: rgba(138, 31, 45, 0.45);
+  background: var(--gold-soft);
+  transform: translateY(-2px);
+}
+
 .quiz-qr-card {
   width: 132px;
   height: 132px;
@@ -2162,6 +2250,7 @@ textarea {
   .hero-grid,
   .combo-showcase-grid,
   .quiz-layout,
+  .quiz-set-grid,
   .checkout-layout,
   .catalog-layout,
   .dashboard-grid.lower,
@@ -2338,6 +2427,7 @@ textarea {
   .auth-preview-grid,
   .quiz-check-grid,
   .quiz-options-grid,
+  .quiz-set-grid,
   .summary-inline-metrics,
   .quiz-side-stats,
   .filter-panel-horizontal {

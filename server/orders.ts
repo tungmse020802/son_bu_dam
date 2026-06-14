@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { products } from '../src/data/mockData.js'
+import { getShowcaseProducts, products } from '../src/data/mockData.js'
 import type {
   CartItem,
   CheckoutRequest,
@@ -19,12 +19,32 @@ import {
   type StoredOrder,
   type StoredOrderItem,
 } from './db.js'
-import { createPaymentLink, generateOrderCode } from './payos.js'
 
 const SHIPPING_FEE = 30000
+const TPBANK_BIN = '970423'
+const TPBANK_NAME = 'TPBank'
+const TPBANK_ACCOUNT_NO = '00000802077'
 
 function createId() {
   return crypto.randomUUID()
+}
+
+function generateOrderCode() {
+  const seed = `${Date.now()}${Math.floor(Math.random() * 1000)}`
+  return Number(seed.slice(-12))
+}
+
+function buildTransferNote(orderCode: number) {
+  return `DH${orderCode}`
+}
+
+function buildVietQrImageUrl(orderCode: number, amount: number) {
+  const params = new URLSearchParams({
+    amount: String(amount),
+    addInfo: buildTransferNote(orderCode),
+  })
+
+  return `https://img.vietqr.io/image/${TPBANK_BIN}-${TPBANK_ACCOUNT_NO}-compact2.png?${params.toString()}`
 }
 
 function formatTimestamp(date: string | Date) {
@@ -51,6 +71,10 @@ function mapStoredOrder(row: StoredOrder): Order {
     checkoutUrl: row.checkoutUrl,
     paymentLinkId: row.paymentLinkId,
     qrCode: row.qrCode,
+    bankName: row.bankName ?? null,
+    bankAccountNo: row.bankAccountNo ?? null,
+    transferNote: row.transferNote ?? null,
+    cardModeUnlockedAt: row.cardModeUnlockedAt ? formatTimestamp(row.cardModeUnlockedAt) : null,
   }
 }
 
@@ -66,7 +90,7 @@ function mapStoredOrderDetail(record: { order: StoredOrder; items: StoredOrderIt
 }
 
 export function getCatalogProducts() {
-  return products
+  return getShowcaseProducts(products)
 }
 
 export function resolveCartItems(cart: CartItem[], catalog: Product[]) {
@@ -110,6 +134,10 @@ export async function createOrder(input: CheckoutRequest, userId?: string | null
     throw new Error('Giỏ hàng đang trống.')
   }
 
+  if (input.paymentMethod !== 'bank') {
+    throw new Error('Shop hiện chỉ hỗ trợ chuyển khoản VietQR TPBank.')
+  }
+
   const { items, subtotal, shipping, total } = resolveCartItems(input.cart, products)
   if (!items.length) {
     throw new Error('Không tìm thấy sản phẩm hợp lệ trong giỏ hàng.')
@@ -117,36 +145,9 @@ export async function createOrder(input: CheckoutRequest, userId?: string | null
 
   const id = createId()
   const orderCode = generateOrderCode()
-
-  let paymentLinkId: string | null = null
-  let checkoutUrl: string | null = null
-  let qrCode: string | null = null
-  let status: OrderStatus = 'pending'
-
-  if (input.paymentMethod === 'cod') {
-    status = 'processing'
-  } else if (input.paymentMethod === 'bank') {
-    status = 'pending'
-  } else {
-    const payment = await createPaymentLink({
-      orderCode,
-      customerName: input.customerName,
-      email: input.email,
-      address: input.address,
-      paymentMethod: input.paymentMethod,
-      total,
-      items: items.map((item) => ({
-        name: item.productName,
-        quantity: item.quantity,
-        price: item.unitPrice,
-      })),
-    })
-
-    paymentLinkId = payment.paymentLinkId
-    checkoutUrl = payment.checkoutUrl
-    qrCode = payment.qrCode
-    status = payment.status
-  }
+  const transferNote = buildTransferNote(orderCode)
+  const qrCode = buildVietQrImageUrl(orderCode, total)
+  const status: OrderStatus = 'pending'
 
   const order = await insertOrder(
     {
@@ -161,9 +162,12 @@ export async function createOrder(input: CheckoutRequest, userId?: string | null
       subtotal,
       shipping,
       total,
-      paymentLinkId,
-      checkoutUrl,
+      paymentLinkId: null,
+      checkoutUrl: null,
       qrCode,
+      bankName: TPBANK_NAME,
+      bankAccountNo: TPBANK_ACCOUNT_NO,
+      transferNote,
     },
     items,
   )
@@ -210,8 +214,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     metrics: [
       { label: 'Doanh thu đơn đã thanh toán', value: `${(paidRevenue / 1000000).toFixed(1)}M`, change: `${allOrders.filter((order) => order.status === 'paid').length} đơn` },
       { label: 'Tổng đơn hàng', value: String(allOrders.length), change: 'Toàn bộ hệ thống' },
-      { label: 'Đơn chờ xác nhận', value: String(pendingOrders), change: 'PayOS / COD / chuyển khoản' },
-      { label: 'Lượt quét AR', value: '2,481', change: 'Dữ liệu mock' },
+      { label: 'Đơn chờ xác nhận', value: String(pendingOrders), change: 'Chuyển khoản thủ công qua dashboard' },
+      { label: 'Lượt làm quiz', value: '2,481', change: 'Dữ liệu mock' },
     ],
     orders,
   }
