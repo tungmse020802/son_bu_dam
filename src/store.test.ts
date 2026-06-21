@@ -20,8 +20,9 @@ describe('store helpers', () => {
   })
 
   it('maps payment and order status labels', () => {
-    expect(paymentLabel('momo')).toBe('PayOS / QR')
-    expect(orderStatusLabel('pending')).toBe('Chờ tạo link')
-    expect(orderStatusLabel('payment_link_created')).toBe('Chờ thanh toán')
+    expect(paymentLabel('momo')).toBe('PayOS (ngưng dùng)')
+    expect(paymentLabel('bank')).toBe('VietQR / TPBank')
+    expect(orderStatusLabel('pending')).toBe('Chờ chuyển khoản')
+    expect(orderStatusLabel('payment_link_created')).toBe('Đang chờ link')
   })
 })

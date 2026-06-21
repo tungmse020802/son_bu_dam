@@ -2,6 +2,7 @@ import crypto from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import type { Request, Response } from 'express'
 import type { UserRole } from '../src/types/app.js'
+import { resolveUserRole } from './admin.js'
 import { findUserByEmail, findUserById, insertUser, type StoredUser } from './db.js'
 
 const SESSION_COOKIE_NAME = 'svam_session'
@@ -19,26 +20,12 @@ function createId() {
   return crypto.randomUUID()
 }
 
-function getAdminEmails() {
-  return new Set(
-    (process.env.ADMIN_EMAILS ?? 'admin@example.com')
-      .split(/[\s,;]+/)
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  )
-}
-
-function getUserRole(email: string, storedRole?: UserRole): UserRole {
-  if (getAdminEmails().has(email.trim().toLowerCase())) return 'admin'
-  return storedRole ?? 'customer'
-}
-
 function mapUser(row: Pick<StoredUser, 'id' | 'fullName' | 'email'> & Partial<Pick<StoredUser, 'role'>>): AuthUser {
   return {
     id: row.id,
     fullName: row.fullName,
     email: row.email,
-    role: getUserRole(row.email, row.role),
+    role: resolveUserRole(row.email, row.role),
   }
 }
 
@@ -52,7 +39,7 @@ function signSession(user: AuthUser, expiresAt: number) {
       userId: user.id,
       fullName: user.fullName,
       email: user.email,
-      role: getUserRole(user.email, user.role),
+      role: resolveUserRole(user.email, user.role),
       expiresAt,
     }),
   ).toString('base64url')
@@ -93,7 +80,7 @@ function parseSessionValue(value: string) {
           id: parsed.userId,
           fullName: parsed.fullName,
           email: parsed.email,
-          role: getUserRole(parsed.email, parsed.role),
+          role: resolveUserRole(parsed.email, parsed.role),
         } satisfies AuthUser,
       }
     } catch {
@@ -168,7 +155,7 @@ export async function createUser(input: { fullName: string; email: string; passw
   }
 
   const passwordHash = await bcrypt.hash(password, 10)
-  const user = await insertUser({ id: createId(), fullName, email, passwordHash, role: getUserRole(email) })
+  const user = await insertUser({ id: createId(), fullName, email, passwordHash, role: resolveUserRole(email) })
 
   return mapUser(user)
 }

@@ -1,4 +1,4 @@
-import { Award, CheckCircle2, Sparkles } from 'lucide-react'
+import { ArrowRight, Award, CheckCircle2, ScanLine, Sparkles, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -41,48 +41,57 @@ function getInitials(name: string) {
 
 function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProducts)[number] | null }) {
   return (
-    <>
-      <section className="hero-section hero-section-premium">
-        <div className="container hero-grid hero-grid-premium">
-          <div className="hero-copy">
-            <div className="hero-badge">
-              <Sparkles size={16} />
-              Hệ sinh thái học sử kết hợp bài học, commerce và quiz
-            </div>
-            <p className="eyebrow">Nền tảng học lịch sử Việt Nam cho THCS</p>
-            <h2>Học Sử chủ động, trải nghiệm sống động cùng Sử Việt Anh Minh</h2>
-            <p className="hero-description">
-              Hệ sinh thái kết hợp giữa bài học trực quan, thẻ bài sưu tầm và hệ thống thử thách quiz tương tác thông minh.
-            </p>
-            <div className="hero-actions hero-actions-compact">
-              <Link to="/quiz" className="primary-btn">Bắt đầu quiz ngay</Link>
-              <Link to="/products" className="secondary-btn">Xem bộ sưu tập</Link>
-            </div>
+    <section className="home-hero">
+      <div className="home-hero-orb home-hero-orb-one" />
+      <div className="home-hero-orb home-hero-orb-two" />
+      <div className="container home-hero-shell">
+        <div className="home-hero-copy">
+          <div className="home-hero-kicker">
+            <span><Sparkles size={14} /></span>
+            Nền tảng học lịch sử Việt Nam cho THCS
           </div>
-
-          <div className="hero-stage-card hero-stage-card-clean hero-stage-card-minimal">
-            {featuredProduct ? (
-              <>
-                <div className="hero-stage-top">
-                  <span className="eyebrow dark">Combo + học + quiz</span>
-                  <strong>{featuredProduct.name}</strong>
-                  <p>{featuredProduct.subtitle}</p>
-                </div>
-                <img src={featuredProduct.image} alt={featuredProduct.name} className="hero-stage-image" />
-              </>
-            ) : (
-              <div className="hero-stage-top">
-                <span className="eyebrow dark">Combo + học + quiz</span>
-                <strong>Danh mục đang cập nhật</strong>
-                <p>Shop đang tải lại bộ sưu tập phù hợp cho hành trình học và sưu tầm.</p>
-              </div>
-            )}
-            <Link to="/products" className="secondary-btn full hero-stage-link">Khám phá bộ sưu tập</Link>
+          <h2>Học Sử chủ động.<br /><em>Trải nghiệm sống động.</em></h2>
+          <p className="home-hero-description">
+            Cùng Sử Việt Anh Minh biến mỗi bài học thành hành trình khám phá qua thẻ bài sưu tầm, AR trực quan và thử thách quiz tương tác.
+          </p>
+          <div className="home-hero-actions">
+            <Link to="/quiz" className="home-hero-primary">
+              Bắt đầu quiz <ArrowRight size={18} />
+            </Link>
+            <Link to="/products" className="home-hero-secondary">Xem bộ sưu tập</Link>
           </div>
         </div>
-      </section>
 
-    </>
+        <aside className="home-featured-card" aria-label="Bộ thẻ nổi bật">
+          {featuredProduct ? (
+            <>
+              <div className="home-featured-visual">
+                <img src={featuredProduct.image} alt={featuredProduct.name} />
+                <span className="home-featured-label">Bộ sưu tập nổi bật</span>
+                <span className="home-featured-grade">Lớp 6</span>
+              </div>
+              <div className="home-featured-content">
+                <p>Combo · Quiz · AR</p>
+                <h3>{featuredProduct.name}</h3>
+                <span>{featuredProduct.subtitle}</span>
+                <div className="home-featured-meta">
+                  <b>6 nhân vật</b><b>2 thời kỳ</b><b>AR + Quiz</b>
+                </div>
+                <Link to="/products" className="home-featured-link">
+                  Khám phá bộ sưu tập <ArrowRight size={17} />
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="home-featured-empty">
+              <Sparkles size={26} />
+              <h3>Bộ sưu tập đang cập nhật</h3>
+              <p>Những hành trình lịch sử mới đang được chuẩn bị.</p>
+            </div>
+          )}
+        </aside>
+      </div>
+    </section>
   )
 }
 
@@ -102,8 +111,8 @@ function ProductsPage({
       {loading ? <div className="catalog-state-card">Đang tải catalog từ backend...</div> : null}
       {!loading && showcaseProducts.length === 0 ? <div className="catalog-state-card">Hiện chưa có sản phẩm để hiển thị.</div> : null}
       <div className="product-grid product-grid-refined product-grid-showcase">
-        {showcaseProducts.map((product, index) => (
-          <ProductCard key={product.id} product={product} onAdd={onAdd} dimmed={index > 0} />
+        {showcaseProducts.map((product) => (
+          <ProductCard key={product.id} product={product} onAdd={onAdd} />
         ))}
       </div>
     </section>

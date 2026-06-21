@@ -1,8 +1,10 @@
 import 'dotenv/config'
 import fs from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
 import type { OrderItem, OrderStatus, PaymentMethod, UserRole } from '../src/types/app.js'
+import { getAdminEmails } from './admin.js'
 
 export type StoredUser = {
   id: string
@@ -65,6 +67,9 @@ const emptyStore: JsonStore = {
   webhookEvents: [],
 }
 
+const DEFAULT_ADMIN_FULL_NAME = 'Admin'
+const DEFAULT_ADMIN_PASSWORD_HASH = '$2b$10$eqfnMuotx0jHzExNTsziLOySghQlLtriG818Ehy.Jvaf238WQH0M6'
+
 const databaseFile =
   process.env.JSON_DB_PATH ??
   (process.env.VERCEL === '1'
@@ -122,6 +127,42 @@ export async function initializeDatabase() {
     store.orders ??= []
     store.orderItems ??= []
     store.webhookEvents ??= []
+
+    if (store.users.some((user) => user.role === 'admin')) {
+      return
+    }
+
+    const adminEmails = getAdminEmails()
+    if (adminEmails.size === 0) {
+      return
+    }
+
+    const now = new Date().toISOString()
+    let foundAdmin = false
+
+    for (const user of store.users) {
+      const normalizedEmail = user.email.trim().toLowerCase()
+      if (adminEmails.has(normalizedEmail)) {
+        foundAdmin = true
+        if (user.role !== 'admin') {
+          user.role = 'admin'
+          user.updatedAt = now
+        }
+      }
+    }
+
+    if (!foundAdmin) {
+      const primaryAdminEmail = [...adminEmails][0]
+      store.users.push({
+        id: randomUUID(),
+        fullName: DEFAULT_ADMIN_FULL_NAME,
+        email: primaryAdminEmail,
+        passwordHash: DEFAULT_ADMIN_PASSWORD_HASH,
+        role: 'admin',
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
   })
 }
 

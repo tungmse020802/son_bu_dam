@@ -114,25 +114,23 @@ describe('orders service', () => {
     ).toThrow('Combo chỉ còn 2 sản phẩm.')
   })
 
-  it('does not create payment link for COD orders', async () => {
-    mockStoredOrder({ paymentMethod: 'cod', status: 'processing', items: [] })
-
+  it('rejects unsupported payment methods', async () => {
     const { createOrder } = await import('../orders')
-    const order = await createOrder({
-      customerName: 'A',
-      email: 'a@example.com',
-      address: 'HN',
-      paymentMethod: 'cod',
-      cart: [{ productId: 'combo-lop-6', quantity: 1 }],
-    })
+    await expect(
+      createOrder({
+        customerName: 'A',
+        email: 'a@example.com',
+        address: 'HN',
+        paymentMethod: 'cod',
+        cart: [{ productId: 'combo-lop-6', quantity: 1 }],
+      }),
+    ).rejects.toThrow('Shop hiện chỉ hỗ trợ chuyển khoản VietQR TPBank.')
 
     expect(mockCreatePaymentLink).not.toHaveBeenCalled()
-    expect(order.paymentMethod).toBe('cod')
-    expect(order.status).toBe('processing')
   })
 
   it('stores user id when checkout comes from an authenticated account', async () => {
-    mockStoredOrder({ userId: 'user-1', paymentMethod: 'cod', status: 'processing', items: [] })
+    mockStoredOrder({ userId: 'user-1', paymentMethod: 'bank', status: 'pending', items: [] })
 
     const { createOrder } = await import('../orders')
     const order = await createOrder(
@@ -140,7 +138,7 @@ describe('orders service', () => {
         customerName: 'A',
         email: 'a@example.com',
         address: 'HN',
-        paymentMethod: 'cod',
+        paymentMethod: 'bank',
         cart: [{ productId: 'combo-lop-6', quantity: 1 }],
       },
       'user-1',

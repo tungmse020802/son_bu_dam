@@ -1,6 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { lessons } from '../src/data/mockData.js'
 import type { CheckoutRequest } from '../src/types/app.js'
 import { clearAuthSession, createUser, getAuthUserFromRequest, loginUser, setUserAuthSession } from './auth.js'
@@ -9,6 +11,8 @@ import { createOrder, getCatalogProducts, getDashboardData, getOrderByCode, list
 
 const app = express()
 const port = Number(process.env.PORT ?? 8787)
+const frontendDistDir = path.resolve(process.cwd(), 'dist')
+const frontendIndexPath = path.join(frontendDistDir, 'index.html')
 
 const allowedOrigins = [
   process.env.APP_BASE_URL,
@@ -284,9 +288,54 @@ async function handleOrderDetail(req: express.Request, res: express.Response) {
 app.get('/api/orders/:orderCode', handleOrderDetail)
 app.get('/api/order', handleOrderDetail)
 
+function sendFrontendIndex(res: express.Response) {
+  if (existsSync(frontendIndexPath)) {
+    res.sendFile(frontendIndexPath)
+    return
+  }
+
+  res
+    .status(200)
+    .type('html')
+    .send(
+      `<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sử Việt Anh Minh</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; padding: 40px; background: #f8f4ea; color: #4a231d; }
+      .card { max-width: 720px; margin: 0 auto; background: white; border: 1px solid #e7dcc6; border-radius: 20px; padding: 28px; box-shadow: 0 12px 30px rgba(0,0,0,.08); }
+      h1 { margin-top: 0; }
+      a { color: #9c3b2e; }
+      code { background: #f3ede1; padding: 2px 6px; border-radius: 6px; }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Sử Việt Anh Minh</h1>
+      <p>API server đang chạy trên <code>http://127.0.0.1:${port}</code> nhưng chưa tìm thấy bản frontend đã build trong <code>dist/</code>.</p>
+      <p>Hãy chạy <code>npm run build</code> rồi tải lại trang, hoặc mở frontend dev server ở <code>http://127.0.0.1:80/</code>.</p>
+    </main>
+  </body>
+</html>`,
+    )
+}
+
+app.use(express.static(frontendDistDir))
+
+app.get('/', (_req, res) => {
+  sendFrontendIndex(res)
+})
+
+app.get(/^(?!\/api\/).*/, (_req, res) => {
+  sendFrontendIndex(res)
+})
+
 export async function startServer() {
   await initializeDatabase()
-  app.listen(port, () => {
+  app.listen(port, '127.0.0.1', () => {
     console.log(`API listening on http://localhost:${port}`)
   })
 }
