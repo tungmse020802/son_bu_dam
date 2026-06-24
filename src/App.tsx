@@ -1,4 +1,4 @@
-import { ArrowRight, Award, CheckCircle2, ScanLine, Sparkles, UsersRound } from 'lucide-react'
+import { ArrowRight, Award, CheckCircle2, Sparkles, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -50,9 +50,12 @@ function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProduc
             <span><Sparkles size={14} /></span>
             Nền tảng học lịch sử Việt Nam cho THCS
           </div>
-          <h2>Học Sử chủ động.<br /><em>Trải nghiệm sống động.</em></h2>
+          <h2 className="home-hero-title">
+            <span>Học Sử chủ động</span>
+            <em>Trải nghiệm sống động</em>
+          </h2>
           <p className="home-hero-description">
-            Cùng Sử Việt Anh Minh biến mỗi bài học thành hành trình khám phá qua thẻ bài sưu tầm, AR trực quan và thử thách quiz tương tác.
+            Cùng Sử Việt Anh Minh biến mỗi bài học thành hành trình khám phá qua thẻ bài sưu tầm và thử thách quiz tương tác
           </p>
           <div className="home-hero-actions">
             <Link to="/quiz" className="home-hero-primary">
@@ -71,12 +74,9 @@ function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProduc
                 <span className="home-featured-grade">Lớp 6</span>
               </div>
               <div className="home-featured-content">
-                <p>Combo · Quiz · AR</p>
+                <p>Combo · Quiz</p>
                 <h3>{featuredProduct.name}</h3>
-                <span>{featuredProduct.subtitle}</span>
-                <div className="home-featured-meta">
-                  <b>6 nhân vật</b><b>2 thời kỳ</b><b>AR + Quiz</b>
-                </div>
+                <span>12 nhân vật lịch sử - Âu Lạc - Tự Chủ - trải nghiệm AR &amp; quiz</span>
                 <Link to="/products" className="home-featured-link">
                   Khám phá bộ sưu tập <ArrowRight size={17} />
                 </Link>
@@ -121,10 +121,10 @@ function ProductsPage({
 
 function LessonsPage() {
   return (
-    <section className="container section-block">
+    <section className="container section-block lessons-page">
       <div className="section-heading section-heading-balanced">
         <div>
-          <p className="eyebrow">Learning module</p>
+          <p className="eyebrow dark">Learning module</p>
           <h3>Học lịch sử theo bài học gắn với nhân vật</h3>
         </div>
         <Link to="/quiz" className="secondary-btn">Mở đấu trường quiz</Link>
@@ -604,7 +604,6 @@ function CheckoutPage({
             <p className="eyebrow">Checkout</p>
             <h3>Giỏ hàng & thanh toán</h3>
           </div>
-          <Link to="/quiz" className="ghost-btn light">Luyện quiz trước khi mua</Link>
         </div>
         {catalogLoading ? <p className="status-message info">Đang đồng bộ tồn kho mới nhất từ backend...</p> : null}
         <div className="cart-list">

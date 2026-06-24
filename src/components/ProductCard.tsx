@@ -12,7 +12,6 @@ export function ProductCard({ product, onAdd, dimmed = false }: ProductCardProps
   const isSoldOut = product.stock <= 0
   const isLowStock = product.stock > 0 && product.stock <= 3
   const isDisabled = dimmed || isSoldOut
-  const stockLabel = isSoldOut ? 'Tạm hết hàng' : isLowStock ? `Sắp hết · còn ${product.stock}` : `Còn ${product.stock}`
 
   return (
     <article className={`product-card product-card-premium ${isSoldOut ? 'product-card-soldout' : ''} ${dimmed ? 'product-card-dimmed' : ''}`}>
@@ -33,7 +32,6 @@ export function ProductCard({ product, onAdd, dimmed = false }: ProductCardProps
         <div className={`product-detail-stack ${dimmed ? 'dimmed' : ''}`}>
           <div className="product-topline">
             <p className="product-period">{product.period}</p>
-            <span className={`product-stock ${isSoldOut ? 'soldout' : isLowStock ? 'low' : 'ready'}`}>{stockLabel}</span>
           </div>
           <div className="product-meta-row">
             <span className="product-meta-pill">{product.type}</span>
@@ -43,7 +41,6 @@ export function ProductCard({ product, onAdd, dimmed = false }: ProductCardProps
           <p>{product.subtitle}</p>
           <div className="product-price-row">
             <strong>{formatCurrency(product.price)}</strong>
-            {product.originalPrice ? <span>{formatCurrency(product.originalPrice)}</span> : null}
           </div>
           <ul className="feature-list product-feature-list">
             {product.features.slice(0, 3).map((feature) => (

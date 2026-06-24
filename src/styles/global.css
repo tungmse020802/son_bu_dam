@@ -530,13 +530,25 @@ button {
   color: #271a1d;
   font-size: clamp(3.15rem, 5.2vw, 5.65rem);
   font-weight: 800;
-  line-height: 0.98;
+  line-height: 1.02;
   letter-spacing: -0.055em;
 }
 
+.home-hero-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12em;
+}
+
+.home-hero-title span {
+  display: block;
+}
+
 .home-hero h2 em {
+  display: block;
   color: var(--maroon);
   font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
   font-weight: 500;
   letter-spacing: -0.045em;
 }
@@ -630,7 +642,7 @@ button {
   border-radius: 30px;
   background: linear-gradient(145deg, #2b171c, #6d1722 62%, #30161b);
   box-shadow: 0 35px 90px rgba(55, 17, 23, 0.28);
-  transform: rotate(1.15deg);
+  transform: none;
 }
 
 .home-featured-card::after {
@@ -698,7 +710,7 @@ button {
 .home-featured-content {
   position: relative;
   z-index: 1;
-  padding: 24px 22px 18px;
+  padding: 24px 22px 22px;
   color: white;
 }
 
@@ -723,23 +735,7 @@ button {
   margin-top: 10px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.82rem;
-}
-
-.home-featured-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.home-featured-meta b {
-  padding: 7px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 0.66rem;
-  font-weight: 650;
+  line-height: 1.55;
 }
 
 .home-featured-link {
@@ -1092,6 +1088,28 @@ button {
   object-fit: cover;
 }
 
+.lesson-image-link {
+  display: block;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+.lessons-page .lesson-grid {
+  align-items: start;
+}
+
+.lessons-page .lesson-card-premium {
+  display: flex;
+  flex-direction: column;
+}
+
+.lessons-page .lesson-image {
+  aspect-ratio: 2 / 3;
+  height: auto;
+  min-height: 320px;
+  object-position: center top;
+}
+
 .feature-card,
 .metric-card,
 .admin-panel,
@@ -1313,6 +1331,12 @@ textarea {
 
 .lesson-link {
   min-width: 150px;
+}
+
+.lesson-detail-link-full {
+  width: 100%;
+  min-height: 48px;
+  justify-content: center;
 }
 
 .product-price-row,
@@ -2556,20 +2580,65 @@ textarea {
 
 .site-footer {
   margin-top: 32px;
-  padding: 40px 0 56px;
-  background: linear-gradient(135deg, #2b171c, #173d3a);
+  padding: 48px 0 54px;
+  background: linear-gradient(90deg, #34161d 0%, #223f3b 54%, #0f4b45 100%);
   color: white;
 }
 
-.footer-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 24px;
+.site-footer-premium {
+  overflow: hidden;
 }
 
-.site-footer p,
-.site-footer li {
-  color: rgba(255, 255, 255, 0.72);
+.footer-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.7fr) minmax(280px, 0.95fr);
+  gap: 36px;
+  align-items: start;
+}
+
+.footer-kicker {
+  margin: 0 0 14px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.footer-intro h3 {
+  margin: 0 0 16px;
+  color: white;
+  font-size: clamp(1.55rem, 2vw, 2.15rem);
+  line-height: 1.08;
+}
+
+.footer-intro p {
+  max-width: 42rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.footer-links h4,
+.footer-contact h4 {
+  margin: 0 0 14px;
+  color: white;
+  font-size: clamp(1.1rem, 1.4vw, 1.55rem);
+}
+
+.footer-links ul,
+.footer-contact ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-links li,
+.footer-contact li {
+  margin: 0 0 10px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 @media (max-width: 1440px) {
@@ -2655,6 +2724,11 @@ textarea {
   .lesson-image,
   .product-image {
     height: 205px;
+  }
+
+  .lessons-page .lesson-image {
+    min-height: 300px;
+    height: auto;
   }
 
   .product-feature-list,
@@ -2764,7 +2838,7 @@ textarea {
   }
 
   .nav-shell,
-  .footer-grid,
+  .footer-shell,
   .hero-stage-metrics,
   .feature-grid,
   .product-grid,
@@ -2819,6 +2893,11 @@ textarea {
     white-space: nowrap;
   }
 
+  .footer-shell {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
   .section-block {
     padding: 52px 0;
   }
@@ -2846,6 +2925,11 @@ textarea {
   .lesson-image,
   .product-image {
     height: 190px;
+  }
+
+  .lessons-page .lesson-image {
+    min-height: 270px;
+    height: auto;
   }
 
   .product-content-refined h3,
@@ -2901,6 +2985,10 @@ textarea {
     font-size: clamp(2.75rem, 13vw, 4.2rem);
   }
 
+  .home-hero-title {
+    gap: 0.08em;
+  }
+
   .home-hero-description {
     margin-top: 20px;
     line-height: 1.65;
@@ -2924,6 +3012,7 @@ textarea {
   .home-featured-card {
     padding: 8px;
     border-radius: 22px;
+    transform: none;
   }
 
   .home-featured-visual {
@@ -2936,10 +3025,6 @@ textarea {
 
   .home-featured-content h3 {
     font-size: 1.48rem;
-  }
-
-  .home-featured-meta {
-    gap: 6px;
   }
 
   .order-row-refined > div:last-child {

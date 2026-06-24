@@ -77,21 +77,33 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
 
 export function Footer() {
   return (
-    <footer className="site-footer">
-      <div className="container footer-grid">
-        <div>
-          <p className="eyebrow">Nền tảng học lịch sử kết hợp bài học, quiz và thương mại</p>
+    <footer className="site-footer site-footer-premium">
+      <div className="container footer-shell">
+        <div className="footer-intro">
+          <p className="footer-kicker">Nền tảng học lịch sử kết hợp bài học, quiz và thương mại</p>
           <h3>Sử Việt Anh Minh</h3>
-          <p>
-            Bộ thẻ bài lịch sử giúp học sinh THCS học nhanh hơn – nhớ lâu hơn – yêu lịch sử hơn.
+          <p className="footer-summary">
+            Bộ thẻ bài giáo dục giải trí tiên phong giúp học sinh THCS dễ dàng tiếp cận và ghi nhớ kiến thức.
+            Chúng tôi biến những trang sử khô khan thành những trải nghiệm tương tác thú vị, khơi dậy lòng tự
+            hào và tình yêu lịch sử dân tộc cho thế hệ trẻ.
           </p>
         </div>
-        <div>
+
+        <div className="footer-links">
           <h4>Khám phá</h4>
           <ul>
             <li>Danh mục sản phẩm</li>
             <li>Bài học theo thời kỳ</li>
             <li>Quiz game lịch sử</li>
+          </ul>
+        </div>
+
+        <div className="footer-contact">
+          <h4>Liên hệ</h4>
+          <ul>
+            <li>Hotline: (+84) 9xx xxx xxx</li>
+            <li>Email: suvietanhminh@gmail.com</li>
+            <li>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</li>
           </ul>
         </div>
       </div>

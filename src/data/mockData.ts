@@ -1,5 +1,7 @@
 import type { Character, Lesson, Product } from '../types/app'
 
+const productImage = '/assets/combo-the-bai-lop-6.png'
+
 export const characters: Character[] = [
   {
     id: 'thuc-phan',
@@ -118,30 +120,29 @@ export const siteStats = [
 ]
 
 const gradeCatalog = [
-  { grade: 'Lớp 6', image: '/assets/combo-the-bai-lop-6.png', price: 150000, period: 'Âu Lạc - Tự Chủ' },
-  { grade: 'Lớp 7', image: '/assets/bg1.jpg', price: 319000, period: 'Vạn Xuân - Tự Chủ' },
-  { grade: 'Lớp 8', image: '/assets/hs.jpg', price: 339000, period: 'Khởi nghĩa chống Bắc thuộc' },
-  { grade: 'Lớp 9', image: '/assets/ar.jpg', price: 359000, period: 'Ôn tập lịch sử Việt Nam' },
+  { grade: 'Lớp 6', image: productImage, price: 150000, period: 'Âu Lạc - Tự Chủ' },
+  { grade: 'Lớp 7', image: productImage, price: 319000, period: 'Vạn Xuân - Tự Chủ' },
+  { grade: 'Lớp 8', image: productImage, price: 339000, period: 'Khởi nghĩa chống Bắc thuộc' },
+  { grade: 'Lớp 9', image: productImage, price: 359000, period: 'Ôn tập lịch sử Việt Nam' },
 ]
 
-const gradeSixComboImage = '/assets/combo-the-bai-lop-6.png'
+const gradeSixComboImage = productImage
 
 const gradeSixComboProducts: Product[] = [
   {
-    id: 'combo-lop-6-2-bo',
-    slug: 'combo-2-bo-the-bai-lop-6',
-    name: 'Combo 2 bộ thẻ Nhân Vật Lịch sử lớp 6',
-    subtitle: 'Tiết kiệm hơn khi mua 2 bộ thẻ lớp 6 cho nhóm học hoặc tặng bạn.',
+    id: 'combo-lop-6-3-bo',
+    slug: 'combo-3-bo-the-bai-lop-6',
+    name: 'Combo 3 bộ thẻ bài lịch sử lớp 6',
+    subtitle: 'Tiết kiệm hơn khi mua 3 bộ thẻ lớp 6 cho nhóm học hoặc tặng bạn.',
     price: 429000,
-    originalPrice: 500000,
     grade: 'Lớp 6',
     period: 'Tổng hợp',
     type: 'Anh hùng',
     stock: 36,
     image: gradeSixComboImage,
-    description: 'Combo 2 bộ thẻ Nhân Vật Lịch sử lớp 6, phù hợp cho học nhóm, lớp học nhỏ hoặc mua chung cùng bạn bè.',
+    description: 'Combo 3 bộ thẻ bài lịch sử lớp 6, phù hợp cho học nhóm, lớp học nhỏ hoặc mua chung cùng bạn bè.',
     features: [
-      'Combo 2 bộ: Tiện chia nhóm học và cùng thi quiz.',
+      'Combo 3 bộ: Tiện chia nhóm học và cùng thi quiz.',
       'Quét QR — Chơi Quiz: Đấu trí hỏi đáp, ghi nhớ kiến thức cốt lõi.',
       'Ưu đãi mua chung: Tiết kiệm hơn so với mua lẻ từng bộ.',
     ],
@@ -154,7 +155,6 @@ const gradeSixComboProducts: Product[] = [
     name: 'Combo 5 bộ thẻ Nhân Vật Lịch sử lớp 6',
     subtitle: 'Combo 5 bộ dành cho lớp học, câu lạc bộ hoặc nhóm ôn tập lịch sử.',
     price: 719000,
-    originalPrice: 900000,
     grade: 'Lớp 6',
     period: 'Tổng hợp',
     type: 'Anh hùng',
@@ -188,7 +188,7 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
     period: 'Tổng hợp',
     type: 'Anh hùng',
     stock: 36,
-    image: entry.image,
+    image: productImage,
     description: isGradeSix
       ? 'Bộ thẻ được thiết kế cho học sinh lớp 6 với các nhân vật và mốc sử tiêu biểu từ giai đoạn Âu Lạc đến buổi đầu tự chủ. Hình minh hoạ rõ ràng, nội dung cô đọng và phần luyện tập đi kèm giúp các em dễ nhớ bài, ôn nhanh và hứng thú hơn khi học Lịch sử.'
       : `Bộ thẻ bài dành cho học sinh ${entry.grade}, kết hợp minh hoạ đẹp, nội dung lịch sử chọn lọc và phần luyện tập tương tác.`,
@@ -218,7 +218,7 @@ export const products: Product[] = [
     period: character.period,
     type: character.type,
     stock: Math.max(8, 24 - index),
-    image: character.image,
+    image: productImage,
     description: character.blurb,
     features: ['Minh hoạ chất lượng cao', 'Ôn tập nhân vật theo chủ đề', 'Gợi ý bài học liên quan'],
     characterIds: [character.id],
@@ -227,8 +227,10 @@ export const products: Product[] = [
 ]
 
 export function getShowcaseProducts(catalog: Product[]) {
-  const gradeSixProductIds = new Set(['combo-lop-6', 'combo-lop-6-2-bo', 'combo-lop-6-5-bo'])
-  const gradeSixShowcase = catalog.filter((product) => gradeSixProductIds.has(product.id))
+  const gradeSixProductIds = ['combo-lop-6', 'combo-lop-6-3-bo', 'combo-lop-6-5-bo']
+  const gradeSixShowcase = gradeSixProductIds
+    .map((productId) => catalog.find((product) => product.id === productId))
+    .filter((product): product is Product => Boolean(product))
 
   if (gradeSixShowcase.length > 0) {
     return gradeSixShowcase

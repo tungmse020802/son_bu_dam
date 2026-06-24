@@ -9,7 +9,9 @@ interface LessonCardProps {
 export function LessonCard({ lesson }: LessonCardProps) {
   return (
     <article className="lesson-card lesson-card-premium">
-      <img src={lesson.image} alt={lesson.title} className="lesson-image" />
+      <Link to={`/lessons/${lesson.slug}`} className="lesson-image-link" aria-label={`Mở bài học ${lesson.title}`}>
+        <img src={lesson.image} alt={lesson.title} className="lesson-image" />
+      </Link>
       <div className="lesson-body lesson-body-refined">
         <div className="lesson-meta">
           <span>{lesson.grade}</span>
@@ -24,7 +26,7 @@ export function LessonCard({ lesson }: LessonCardProps) {
           ))}
         </ul>
         <div className="lesson-card-actions lesson-card-actions-end">
-          <Link to={`/lessons/${lesson.slug}`} className="lesson-inline-cta lesson-detail-link">
+          <Link to={`/lessons/${lesson.slug}`} className="lesson-inline-cta lesson-detail-link lesson-detail-link-full">
             Xem bài học <ArrowRight size={15} />
           </Link>
         </div>
