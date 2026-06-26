@@ -16,9 +16,25 @@ export function LessonCard({ lesson }: LessonCardProps) {
         <div className="lesson-meta">
           <span>{lesson.grade}</span>
           <span>{lesson.period}</span>
-          <span>{lesson.duration}</span>
-        </div>
-        <h3>{lesson.title}</h3>
+                </div>
+        <h3>
+  {lesson.title.includes('–') ? (
+    <>
+      {/* Lấy phần trước dấu – (Ví dụ: Hai Bà Trưng) */}
+      <span className="lesson-main-title">
+        {lesson.title.split('–')[0].trim()}
+      </span>
+      
+      {/* Lấy phần sau dấu – (Ví dụ: Ngọn cờ đầu tiên của tinh thần độc lập) */}
+      <span className="lesson-subtitle">
+        {lesson.title.split('–')[1].trim()}
+      </span>
+    </>
+  ) : (
+    // Nếu tiêu đề không chứa dấu – thì giữ nguyên bình thường
+    lesson.title
+  )}
+</h3>
         <p>{lesson.summary}</p>
         <ul className="feature-list lesson-feature-list">
           {lesson.objectives.slice(0, 3).map((objective) => (
