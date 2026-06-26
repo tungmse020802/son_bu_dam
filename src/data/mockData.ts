@@ -1,6 +1,6 @@
 import type { Character, Lesson, Product } from '../types/app'
 
-const productImage = '/assets/combo-the-bai-lop-6.png'
+const productImage = '/assets/2.png'
 
 export const characters: Character[] = [
   {
@@ -99,7 +99,7 @@ export const characters: Character[] = [
     type: 'Anh hùng',
     grade: 'Lớp 8',
     period: 'Bắc Thuộc',
-    image: '/assets/maithucloan.png',
+    image: '/assets/MaiThúcLoan.jpg',
     blurb: 'Anh hùng khởi nghĩa Hoan Châu với tinh thần quật khởi chống áp bức.',
   },
   {
@@ -135,6 +135,7 @@ const gradeSixComboProducts: Product[] = [
     name: 'Combo 3 bộ thẻ bài lịch sử lớp 6',
     subtitle: 'Tiết kiệm hơn khi mua 3 bộ thẻ lớp 6 cho nhóm học hoặc tặng bạn.',
     price: 429000,
+    originalPrice: 450000,
     grade: 'Lớp 6',
     period: 'Tổng hợp',
     type: 'Anh hùng',
@@ -155,6 +156,7 @@ const gradeSixComboProducts: Product[] = [
     name: 'Combo 5 bộ thẻ Nhân Vật Lịch sử lớp 6',
     subtitle: 'Combo 5 bộ dành cho lớp học, câu lạc bộ hoặc nhóm ôn tập lịch sử.',
     price: 719000,
+    originalPrice: 750000,
     grade: 'Lớp 6',
     period: 'Tổng hợp',
     type: 'Anh hùng',
@@ -180,7 +182,7 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
     slug: `combo-the-bai-${entry.grade.toLowerCase().replace('ớ', 'o').replace(/\s+/g, '-')}`,
     name: isGradeSix ? 'Trọn bộ thẻ bài lịch sử Lớp 6' : `Trọn bộ thẻ bài lịch sử ${entry.grade}`,
     subtitle: isGradeSix
-      ? '6 nhân vật - Âu Lạc - Tự Chủ - trải nghiệm AR & quiz'
+      ? 'Trải nghiệm trọn bộ 12 thẻ nhân vật lịch sử lớp 6 với bài học và Quiz tương tác.'
       : `${gradeCharacters.length} nhân vật - ${entry.period} - bài học và quiz`,
     price: entry.price,
     originalPrice: isGradeSix ? undefined : entry.price + 50000,
@@ -206,7 +208,18 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
 
 export const products: Product[] = [
   buildCatalogProduct(gradeCatalog[0]),
-  ...gradeSixComboProducts,
+  
+  // Duyệt qua danh sách combo lớp 6 để ép đường dẫn ảnh mới cho Combo 3 và Combo 5
+  ...gradeSixComboProducts.map((product) => {
+    if (product.id === 'combo-lop-6-3-bo') {
+      return { ...product, image: '/assets/combo-the-bai-lop-6.png' }; // <-- Đường dẫn ảnh mới cho Combo 3
+    }
+    if (product.id === 'combo-lop-6-5-bo') {
+      return { ...product, image: '/assets/combo-the-bai-lop-6.png' }; // <-- Đường dẫn ảnh mới cho Combo 5
+    }
+    return product;
+  }),
+
   ...gradeCatalog.slice(1).map(buildCatalogProduct),
   ...characters.map((character, index) => ({
     id: character.id,
@@ -248,7 +261,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Trưng Vương',
     duration: '22 phút',
-    image: '/assets/haibatrung.png',
+    image: '/assets/HBT.jpg',
     objectives: ['Hiểu nguyên nhân khởi nghĩa chống Đông Hán', 'Ghi nhớ diễn biến và kết quả cuộc khởi nghĩa', 'Rút ra bài học về đoàn kết và lòng yêu nước'],
     content: [
       'Hai Bà Trưng (Trưng Trắc và Trưng Nhị) là hai chị em, nữ anh hùng dân tộc sinh ra tại Mê Linh (Hà Nội ngày nay), dòng dõi Lạc tướng Hùng Vương.',
@@ -269,7 +282,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Bắc Thuộc',
     duration: '20 phút',
-    image: '/assets/trieuthitrinh.png',
+    image: '/assets/trieuthitrinh.jpg',
     objectives: ['Nhận biết bối cảnh áp bức của nhà Đông Ngô', 'Hiểu vai trò lãnh đạo của Triệu Thị Trinh', 'Liên hệ bài học về dũng cảm trước bất công'],
     content: [
       'Bà Triệu, tên thật là Triệu Thị Trinh, còn được gọi là Triệu Trinh Nương hay Nhụy Kiều Tướng Quân. Bà sinh ngày 2 tháng 10 năm 226 tại vùng núi Quan Yên, quận Cửu Chân, nay thuộc tỉnh Thanh Hóa.',
@@ -290,7 +303,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Âu Lạc',
     duration: '20 phút',
-    image: '/assets/thucphan.png',
+    image: '/assets/An Dương Vương.jpg',
     objectives: ['Nắm được sự ra đời của nước Âu Lạc', 'Hiểu vai trò của thành Cổ Loa và nỏ Liên Châu', 'Rút ra bài học cảnh giác trước âm mưu xâm lược'],
     content: [
       'An Dương Vương, tên thật là Thục Phán, là vị vua duy nhất cai trị nhà nước Âu Lạc, được cho là sinh khoảng năm 257 trước Công nguyên tại vùng Ba Thục hoặc triều đình Thục cổ.',
@@ -311,7 +324,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Âu Lạc',
     duration: '18 phút',
-    image: '/assets/caolo.png',
+    image: '/assets/Cao Lỗ.jpg',
     objectives: ['Nhận biết công lao chế tạo nỏ Liên Châu', 'Hiểu vai trò xây dựng thành Cổ Loa', 'Rút ra bài học lắng nghe góp ý đúng đắn'],
     content: [
       'Cao Lỗ, còn được gọi là Đô Lỗ, Cao Thông hay Thạch Thần, là một tướng tài và nhà sáng chế quân sự kiệt xuất thời Âu Lạc, sinh khoảng năm 277 trước Công nguyên.',
@@ -332,7 +345,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Âu Lạc',
     duration: '16 phút',
-    image: '/assets/mychau.png',
+    image: '/assets/Mỵ Châu.jpg',
     objectives: ['Hiểu bi kịch Âu Lạc mất cảnh giác', 'Nhận biết vai trò bí mật nỏ thần', 'Rút ra bài học về lòng tin và trách nhiệm'],
     content: [
       'Mỵ Châu là công chúa triều đại Âu Lạc, con gái duy nhất của vua An Dương Vương. Bà lớn lên trong thời kỳ nước Âu Lạc đang phát triển hùng mạnh.',
@@ -352,7 +365,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 7',
     period: 'Vạn Xuân',
     duration: '21 phút',
-    image: '/assets/lynamde.png',
+    image: '/assets/Lý Bí.jpg',
     objectives: ['Nắm mốc khởi nghĩa năm 542', 'Hiểu ý nghĩa quốc hiệu Vạn Xuân', 'Rút ra bài học về ý chí và đoàn kết'],
     content: [
       'Lý Bí, tên gọi thường dùng là Lý Bôn hoặc Lý Nam Đế, sinh ngày 17 tháng 10 năm 503 tại thôn Cổ Pháp, hương Tế Xương, quận Giao Chỉ, nay thuộc tỉnh Thái Nguyên.',
@@ -373,7 +386,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 8',
     period: 'Vạn Xuân',
     duration: '19 phút',
-    image: '/assets/trieuquangphuc.png',
+    image: '/assets/Triệu quang phục.jpg',
     objectives: ['Hiểu chiến thuật Dạ Trạch', 'Nhận biết vai trò của trí tuệ và kiên trì', 'Liên hệ bài học sáng tạo trong khó khăn'],
     content: [
       'Triệu Quang Phục, tên gọi thường dùng là Triệu Việt Vương, sinh khoảng thế kỷ VI tại vùng Chu Diên, nay thuộc Hưng Yên.',
@@ -394,7 +407,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 8',
     period: 'Bắc Thuộc',
     duration: '18 phút',
-    image: '/assets/maithucloan.png',
+    image: '/assets/Mai Thúc Loan.jpg',
     objectives: ['Hiểu bối cảnh bóc lột thời Đường', 'Ghi nhớ khởi nghĩa Mai Thúc Loan', 'Rút ra sức mạnh đoàn kết của nhân dân'],
     content: [
       'Mai Thúc Loan, thường gọi là Mai Hắc Đế, sinh khoảng năm 670 tại làng Mai Phụ, Hà Tĩnh và lớn lên trong hoàn cảnh nghèo khó.',
@@ -415,7 +428,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 9',
     period: 'Bắc Thuộc',
     duration: '18 phút',
-    image: '/assets/phunghung.png',
+    image: '/assets/Phùng Hưng.jpg',
     objectives: ['Hiểu cuộc khởi nghĩa chống nhà Đường', 'Nhận biết ý nghĩa danh xưng Bố Cái Đại Vương', 'Rút ra bài học về lòng dân'],
     content: [
       'Phùng Hưng sinh ngày 25 tháng 11 năm 761 tại Đường Lâm, thuộc Phong Châu, nay thuộc xã Đường Lâm, thị xã Sơn Tây, Hà Nội.',
@@ -436,7 +449,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 7',
     period: 'Tự Chủ',
     duration: '17 phút',
-    image: '/assets/khucthuadu.png',
+    image: '/assets/Khúc Thừa Dụ.jpg',
     objectives: ['Ghi nhớ mốc năm 905', 'Hiểu ý nghĩa chính quyền tự quản', 'Rút ra bài học nắm bắt thời cơ'],
     content: [
       'Khúc Thừa Dụ, thường gọi là Khúc Tiên Chủ, sinh khoảng giữa thế kỷ IX tại xã Cúc Bồ, huyện Ninh Giang, tỉnh Hải Dương ngày nay.',
@@ -457,7 +470,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 7',
     period: 'Tự Chủ',
     duration: '18 phút',
-    image: '/assets/duongdinhnghe.png',
+    image: '/assets/Dương Đình Nghệ.jpg',
     objectives: ['Hiểu vai trò đánh bại Nam Hán năm 931', 'Nhận biết nguy cơ từ phản bội nội bộ', 'Rút ra bài học bảo vệ thành quả tự chủ'],
     content: [
       'Dương Đình Nghệ, tên gọi thường dùng là Dương Diên Nghệ, sinh khoảng năm 874 tại làng Giàng, huyện Đông Sơn, nay thuộc Thanh Hóa.',
@@ -478,7 +491,7 @@ export const lessons: Lesson[] = [
     grade: 'Lớp 6',
     period: 'Tự Chủ',
     duration: '18 phút',
-    image: '/assets/ngoquyen.png',
+    image: '/assets/Ngô Quyền.jpg',
     objectives: ['Hiểu diễn biến chính trận Bạch Đằng', 'Phân tích ý nghĩa lịch sử của chiến thắng', 'Rèn luyện tư duy so sánh chiến lược'],
     content: [
       'Ngô Quyền, tên gọi thường dùng là Tiền Ngô Vương, sinh ngày 12 tháng 3 năm 898 tại Đường Lâm, thuộc Phong Châu, nay thuộc Sơn Tây, Hà Nội.',

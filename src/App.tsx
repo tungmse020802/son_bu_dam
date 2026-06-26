@@ -1,7 +1,12 @@
+// Thêm "BrowserRouter as Router" vào nhóm react-router-dom có sẵn của bạn
+
+
+// Thêm dòng import component cuộn trang này vào dưới nhóm import
+import ScrollToTop from './components/ScrollToTop'
 import { ArrowRight, Award, CheckCircle2, Sparkles, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
-import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { AdminDashboard } from './components/AdminDashboard'
 import { DashboardOverview } from './components/DashboardOverview'
 import { Footer, Header } from './components/Layout'
@@ -27,8 +32,10 @@ import {
   updateQuantity,
 } from './utils/store'
 
+// --- COMPONENT CHÍNH ĐIỀU HƯỚNG TOÀN BỘ WEBSITE ---
 
 
+// --- CÁC HÀM TRỢ GIÚP (HELPER FUNCTIONS) ---
 function getInitials(name: string) {
   return name
     .trim()
@@ -39,6 +46,7 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
+// --- GIAO DIỆN TRANG CHỦ (HOMEPAGE COMPONENT) ---
 function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProducts)[number] | null }) {
   return (
     <section className="home-hero">
@@ -51,8 +59,8 @@ function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProduc
             Nền tảng học lịch sử Việt Nam cho THCS
           </div>
           <h2 className="home-hero-title">
-            <span>Học Sử chủ động</span>
-            <em>Trải nghiệm sống động</em>
+            <span>Học sử chủ động</span>
+            <span>Trải nghiệm sống động</span>
           </h2>
           <p className="home-hero-description">
             Cùng Sử Việt Anh Minh biến mỗi bài học thành hành trình khám phá qua thẻ bài sưu tầm và thử thách quiz tương tác
@@ -74,9 +82,9 @@ function HomePage({ featuredProduct }: { featuredProduct: (typeof fallbackProduc
                 <span className="home-featured-grade">Lớp 6</span>
               </div>
               <div className="home-featured-content">
-                <p>Combo · Quiz</p>
+                <p>Combo thẻ bài và Quiz</p>
                 <h3>{featuredProduct.name}</h3>
-                <span>12 nhân vật lịch sử - Âu Lạc - Tự Chủ - trải nghiệm AR &amp; quiz</span>
+                <span>12 nhân vật lịch sử - 12 bài học lịch sử</span>
                 <Link to="/products" className="home-featured-link">
                   Khám phá bộ sưu tập <ArrowRight size={17} />
                 </Link>
@@ -162,9 +170,34 @@ function LessonDetailPage() {
         <div className="lesson-meta lesson-detail-meta">
           <span>{lesson.grade}</span>
           <span>{lesson.period}</span>
-          <span>{lesson.duration}</span>
+     
         </div>
-        <h2>{lesson.title}</h2>
+        <div className="lesson-detail-title-group">
+  {lesson.title.includes('–') || lesson.title.includes('-') ? (
+    (() => {
+      // Xác định bài học đang dùng dấu gạch ngang dài '–' hay ngắn '-' để tách
+      const separator = lesson.title.includes('–') ? '–' : '-';
+      const parts = lesson.title.split(separator);
+      
+      return (
+        <>
+          {/* Tên nhân vật (Dòng trên) - GIỮ LẠI CLASS LESSON-MAIN-TITLE CŨ HOẶC DÙNG CLASS MỚI ĐỂ TO HƠN */}
+          <h2 className="lesson-main-title-large">
+            {parts[0].trim()}
+          </h2>
+          
+          {/* Danh hiệu / Subtitle đen (Dòng dưới) */}
+          <span className="lesson-subtitle-black-small">
+            {parts[1].trim()}
+          </span>
+        </>
+      );
+    })()
+  ) : (
+    // Nếu tiêu đề không chứa dấu gạch ngang, giữ nguyên h2 to
+    <h2 className="lesson-main-title-large">{lesson.title}</h2>
+  )}
+</div>
         <p className="lesson-detail-summary">{lesson.summary}</p>
         <div className="lesson-reading-body">
           {lesson.content.map((paragraph) => (
@@ -1289,6 +1322,9 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {/* CHÈN ĐÚNG 1 DÒNG NÀY VÀO ĐẦY ĐỂ TỰ ĐỘNG CUỘN LÊN ĐẦU TRANG */}
+      <ScrollToTop />
+
       {!isAdminRoute ? (
         <Header cartCount={cartCount} learnerName={currentUser?.fullName} isAdmin={currentUser?.role === 'admin'} onLogout={handleLogout} />
       ) : null}

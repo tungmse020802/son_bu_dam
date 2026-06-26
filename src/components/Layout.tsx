@@ -1,5 +1,5 @@
 import { Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, UserCircle2 } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 
 interface HeaderProps {
   cartCount: number
@@ -76,6 +76,11 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
 }
 
 export function Footer() {
+  // Hàm xử lý cuộn lên đầu trang một cách mượt mà khi người dùng click vào link
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <footer className="site-footer site-footer-premium">
       <div className="container footer-shell">
@@ -92,18 +97,67 @@ export function Footer() {
         <div className="footer-links">
           <h4>Khám phá</h4>
           <ul>
-            <li>Danh mục sản phẩm</li>
-            <li>Bài học theo thời kỳ</li>
-            <li>Quiz game lịch sử</li>
+            <li>
+              <Link to="/products" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
+                Danh mục sản phẩm
+              </Link>
+            </li>
+            <li>
+              <Link to="/lessons" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
+                Bài học theo thời kỳ
+              </Link>
+            </li>
+            <li>
+              <Link to="/quiz" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
+                Quiz game lịch sử
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div className="footer-contact">
           <h4>Liên hệ</h4>
           <ul>
-            <li>Hotline: (+84) 9xx xxx xxx</li>
-            <li>Email: suvietanhminh@gmail.com</li>
-            <li>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</li>
+            <li className="footer-contact-item">
+              {/* Icon Điện thoại / Hotline */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              <span>Hotline: (+84) 973 491 866</span>
+            </li>
+            
+            <li className="footer-contact-item">
+              <a 
+                href="https://www.facebook.com/profile.php?id=61590118002475" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="footer-fb-link"
+              >
+                {/* Icon Facebook */}
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.8z"/>
+                </svg>
+                <span>Fanpage: Sử Việt Anh Minh</span>
+              </a>
+            </li>
+            
+            <li className="footer-contact-item">
+              {/* Icon Thư / Email */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+              <span>Email: suvietanhminh@gmail.com</span>
+            </li>
+            
+            <li className="footer-contact-item alignment-top">
+              {/* Icon Định vị / Địa chỉ */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</span>
+            </li>
           </ul>
         </div>
       </div>

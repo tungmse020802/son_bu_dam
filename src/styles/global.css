@@ -491,9 +491,10 @@ button {
 
 .home-hero-shell {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(480px, 1.08fr);
+  grid-template-columns: minmax(0, 0.7fr) minmax(320px, 1fr);
   align-items: center;
-  gap: clamp(42px, 7vw, 96px);
+  gap: clamp(32px, 5vw, 72px);
+  justify-content: end;
 }
 
 .home-hero-copy {
@@ -537,11 +538,28 @@ button {
 .home-hero-title {
   display: flex;
   flex-direction: column;
-  gap: 0.12em;
+  align-items: flex-start;
+  
+  /* Tăng khoảng cách giữa 2 dòng (bạn có thể tăng từ 8px lên 16px hoặc hơn tùy ý) */
+  gap: 16px; 
 }
 
-.home-hero-title span {
+/* Thẻ span đầu tiên (Dòng chính: Học sử chủ động) */
+.home-hero-title span:first-child {
   display: block;
+  white-space: nowrap;
+}
+
+/* Thẻ span thứ hai (Dòng phụ: trải nghiệm sống động) */
+.home-hero-title span:last-child {
+  display: block;
+  white-space: nowrap;
+  font-size: 0.55em;       /* Giữ nguyên kích thước subtitle */
+  font-weight: 500;
+  text-transform: none;
+
+  /* CẬP NHẬT TẠI ĐÂY: */
+  color: #000000;          /* Mã màu đen tuyền (hoặc dùng chữ 'black') */
 }
 
 .home-hero h2 em {
@@ -638,6 +656,8 @@ button {
   position: relative;
   overflow: hidden;
   padding: 12px;
+  width: min(340px, 100%);
+  justify-self: end;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 30px;
   background: linear-gradient(145deg, #2b171c, #6d1722 62%, #30161b);
@@ -922,6 +942,10 @@ button {
 }
 
 .lesson-detail-image {
+  /* Thêm dòng này để ẩn hoàn toàn bức ảnh */
+  display: none !important;
+
+  /* Các thuộc tính cũ bên dưới bạn có thể giữ nguyên hoặc xóa đi đều được */
   width: 100%;
   max-height: 360px;
   object-fit: cover;
@@ -1184,10 +1208,6 @@ textarea {
 
 .product-card-premium {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 244, 236, 0.92));
-}
-
-.product-image-wrap {
-  position: relative;
 }
 
 .badge {
@@ -2598,11 +2618,13 @@ textarea {
 
 .footer-kicker {
   margin: 0 0 14px;
-  color: rgba(255, 255, 255, 0.62);
   font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
+  text-transform: uppercase; /* Giữ nguyên viết hoa, nếu muốn viết thường thì đổi thành 'none' */
+
+  /* --- CÁC DÒNG ĐƯỢC SỬA LẠI --- */
+  color: #000000;            /* Đổi từ màu trắng mờ sang màu đen tuyền */
+  letter-spacing: normal;    /* Đổi từ 0.28em thành normal để chữ khít lại như chữ Khám phá */
 }
 
 .footer-intro h3 {
@@ -3030,4 +3052,214 @@ textarea {
   .order-row-refined > div:last-child {
     text-align: left;
   }
+}
+
+.footer-links ul li a {
+  transition: color 0.2s ease;
+  opacity: 0.85;
+}
+
+.footer-links ul li a:hover {
+  opacity: 1;
+  color: #ffb703 !important; /* Đổi sang màu vàng sáng hoặc màu tùy chọn khi di chuột vào */
+  text-decoration: underline !important; /* Gạch chân nhẹ khi hover */
+}
+/* --- DÁN ĐOẠN NÀY VÀO CUỐI FILE GLOBAL.CSS --- */
+
+/* Style cho Tên nhân vật (Dòng trên) */
+.lesson-main-title {
+  display: block;          /* Ép tên nhân vật nằm riêng 1 dòng */
+  font-size: 1.15rem;      /* Kích thước chữ vừa vặn, nổi bật */
+  font-weight: 700;        /* Làm đậm chữ */
+  color: #111111;          /* Màu đen đậm */
+  margin-bottom: 6px;      /* Tạo khoảng cách với dòng subtitle phía dưới */
+}
+
+/* Style cho Danh hiệu/Mô tả (Dòng dưới - Subtitle) */
+.lesson-subtitle {
+  display: block;          /* Ép tự động xuống dòng mới */
+  font-size: 0.82rem;      /* Thu nhỏ kích thước chữ lại thành sub */
+  font-weight: 400;        /* Làm nét chữ mảnh đi */
+  color: #555555;          /* Đổi thành màu xám nhạt để làm phụ */
+  line-height: 1.4;        /* Giãn cách dòng vừa phải giúp dễ đọc */
+}
+/* --- CSS CHO TIÊU ĐỀ CHI TIẾT BÀI HỌC (CẬP NHẬT) --- */
+
+/* Nhóm chứa tiêu đề, tạo khoảng cách với phần summary bên dưới */
+.lesson-detail-title-group {
+  margin-bottom: 25px; /* Tùy chỉnh khoảng cách */
+}
+
+/* 1. Tên nhân vật (ví dụ: Dương Đình Nghệ) - Làm cho nó TO HƠN, ĐẬM */
+.lesson-main-title-large {
+  display: block;
+  font-size: 2.8rem !important;   /* Tăng kích thước chữ to lên nhiều (ví dụ từ 2.2rem mặc định) */
+  font-weight: 800 !important;   /* Làm nét chữ siêu đậm để nổi bật */
+  color: #111111 !important;     /* Giữ màu đen đậm */
+  line-height: 1.2 !important;   /* Giản khoảng cách dòng chặt chẽ cho chữ to */
+  margin: 0 0 12px 0 !important;  /* Bỏ margin mặc định và tạo khoảng cách dưới */
+}
+
+/* 2. Danh hiệu / Subtitle đen (ví dụ: Người giữ vững nền tự chủ) - Làm cho nó NHỎ HƠN, MẢNH */
+.lesson-subtitle-black-small {
+  display: block !important;          /* Ép bắt buộc phải xuống dòng mới */
+  font-size: 1.2rem !important;       /* Kích thước chữ nhỏ lại làm phụ (ví dụ từ 1.8rem trước đó) */
+  font-weight: 500 !important;        /* Làm nét chữ vừa phải, mảnh hơn so với tên nhân vật */
+  color: #111111 !important;          /* Giữ màu đen đậm theo yêu cầu */
+  line-height: 1.5 !important;        /* Giãn cách dòng thoáng hơn cho chữ nhỏ */
+  margin-top: 0 !important;           /* Không tạo thêm khoảng cách trên */
+}
+
+/* --- ĐỒNG BỘ CÁC ICON LIÊN HỆ DƯỚI FOOTER --- */
+
+/* Cấu trúc hiển thị chung cho mỗi dòng liên hệ */
+.footer-contact-item {
+  display: flex !important;
+  align-items: center !important; /* Căn giữa icon và chữ theo trục dọc */
+  gap: 10px !important;           /* Khoảng cách đều giữa icon và chữ */
+  margin-bottom: 12px !important; /* Khoảng cách thông thoáng giữa các dòng */
+}
+
+/* --- GIẢI PHÁP ĐỒNG BỘ CĂN THẲNG LỀ TUYỆT ĐỐI --- */
+
+/* Khung bọc danh sách chung */
+.footer-contact ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Định dạng cấu trúc cốt lõi cho TẤT CẢ các dòng liên hệ */
+.footer-contact-item {
+  display: block !important;       /* Sử dụng block chuẩn để text luôn xuất phát cùng 1 lề */
+  position: relative !important;
+  padding-left: 32px !important;   /* Tạo một khoảng trống cố định 32px bên trái để đặt icon */
+  margin-bottom: 14px !important;  /* Khoảng cách thông thoáng giữa các mục */
+  line-height: 1.5 !important;
+}
+
+/* --- TỐI ƯU DÒNG ĐỊA CHỈ KHÔNG BỊ XUỐNG DÒNG --- */
+.footer-contact-item {
+  display: block !important;
+  position: relative !important;
+  padding-left: 28px !important;   /* Giảm bớt padding từ 32px xuống 28px để lấy thêm không gian cho chữ */
+  margin-bottom: 14px !important;
+  line-height: 1.5 !important;
+  
+  /* Thu hẹp khoảng cách chữ một chút xíu để ép chữ "Việt Nam" lên cùng dòng */
+  letter-spacing: -0.3px !important; 
+}
+
+/* Giữ nguyên các định vị Icon */
+.footer-contact-item > svg,
+.footer-contact-item .footer-fb-link > svg {
+  position: absolute !important;
+  left: 0 !important;
+  display: block !important;
+  flex-shrink: 0 !important;
+}
+
+.footer-contact-item > svg {
+  width: 18px !important;
+  height: 18px !important;
+  top: 3px !important;
+}
+
+.footer-contact-item .footer-fb-link > svg {
+  width: 22px !important;
+  height: 22px !important;
+  top: 1px !important;
+}
+
+.footer-fb-link {
+  display: inline-block !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.footer-fb-link:hover {
+  color: #1877F2 !important;
+}
+
+/* ==========================================================================
+   THAY THẾ TOÀN BỘ CODE CSS CŨ CỦA PHẦN SALE BẰNG BLOCK HOÀN CHỈNH NÀY
+   ========================================================================== */
+
+/* 1. Điểm neo trên ảnh */
+.product-image-wrap {
+  position: relative !important;
+}
+
+/* 2. Badge % Giảm giá thiết kế kiểu Ribbon vát góc sắc nét (Giống hệt ảnh mẫu của bạn) */
+.product-sale-off-badge {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  background: linear-gradient(135deg, #ff2e55 0%, #dc2626 100%) !important; /* Màu gradient đỏ rực cháy */
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  padding: 5px 10px !important;
+  border-bottom-right-radius: 10px !important; /* Bo tròn góc dưới bên phải cực sang */
+  box-shadow: 2px 2px 8px rgba(220, 38, 38, 0.4) !important;
+  z-index: 10 !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* 3. Khung bọc khu vực giá: Tách dòng rõ ràng giữa Giá Ưu Đãi và Giá Cũ */
+.product-price-analysis-container {
+  display: flex !important;
+  flex-direction: column !important; /* Xếp dọc để không bị dính chữ */
+  gap: 4px !important;
+  margin: 14px 0 !important;
+  padding: 10px 12px !important;
+  background: #fdf2f2 !important; /* Nền hồng cam nhạt sang trọng */
+  border-left: 4px solid #dc2626 !important; /* Vạch đỏ điểm nhấn biên trái */
+  border-radius: 6px !important;
+}
+
+/* Khối hàng giá bán chính */
+.product-price-main-block {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.product-sale-price-label {
+  font-size: 12px !important;
+  color: #7f1d1d !important;
+  font-weight: 600 !important;
+}
+
+.product-sale-price {
+  color: #dc2626 !important; /* Màu đỏ rực bùng nổ kích thích mua hàng */
+  font-size: 1.4rem !important; /* Phóng to giá bán */
+  font-weight: 800 !important;
+}
+
+/* Khối hàng giá cũ + Tag tiết kiệm (Nằm riêng biệt dòng dưới) */
+.product-price-old-block {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important; /* Tạo khoảng cách thông thoáng giữa các phần tử */
+  margin-top: 2px !important;
+}
+
+.product-old-price-strike {
+  font-size: 13px !important;
+  color: #9ca3af !important; /* Màu xám mờ */
+  text-decoration: line-through !important; /* Gạch ngang giá cũ */
+  font-weight: 400 !important;
+}
+
+/* Tag thông báo số tiền tiết kiệm cụ thể - Điểm nhấn giữ chân khách hàng */
+.product-saved-amount-badge {
+  background-color: #ffffff !important;
+  color: #dc2626 !important;
+  border: 1px dashed #fca5a5 !important; /* Khung viền nét đứt chuyên nghiệp */
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
 }
