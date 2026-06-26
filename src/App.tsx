@@ -32,10 +32,7 @@ import {
   updateQuantity,
 } from './utils/store'
 
-// --- COMPONENT CHÍNH ĐIỀU HƯỚNG TOÀN BỘ WEBSITE ---
 
-
-// --- CÁC HÀM TRỢ GIÚP (HELPER FUNCTIONS) ---
 function getInitials(name: string) {
   return name
     .trim()
