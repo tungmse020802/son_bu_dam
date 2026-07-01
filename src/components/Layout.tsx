@@ -1,6 +1,11 @@
-import { useState } from 'react'
+import { BackgroundMusic } from './BackgroundMusic'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate, NavLink, Link } from 'react-router-dom'
-import { Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, UserCircle2, Search } from 'lucide-react'
+import { 
+  Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, 
+  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin, Compass, ShieldCheck,
+  Volume2, VolumeX 
+} from 'lucide-react'
 
 interface HeaderProps {
   cartCount: number
@@ -16,8 +21,6 @@ const navItems = [
   { to: '/quiz', label: 'Quiz', icon: Award },
 ]
 
-// 💡 BẢNG ĐỊNH TUYẾN TÊN ANH HÙNG VÀ ĐƯỜNG DẪN BÀI HỌC TƯƠNG ỨNG
-// Bạn có thể cập nhật hoặc thêm các từ khóa và URL bài học thực tế trên hệ thống của bạn vào đây
 const HERO_LESSONS_MAP = [
   { keywords: ['nguyen hue', 'quang trung', 'nguyễn huệ'], url: '/lessons/quang-trung-nguyen-hue' },
   { keywords: ['trieu thi trinh', 'Triệu Thị Trinh', 'triệu thị trinh'], url: '/lessons/trieu-thi-trinh-khat-vong-tu-do' },
@@ -36,33 +39,36 @@ const HERO_LESSONS_MAP = [
 
 export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
 
-  // ⚙️ Xử lý logic tìm kiếm thông minh và điều hướng link bài học
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const handleSearchSubmit = () => {
     if (!searchQuery.trim()) return
-
-    // Chuẩn hóa chữ thường, cắt bỏ khoảng trắng thừa để đối chiếu chính xác
     const cleanQuery = searchQuery.toLowerCase().trim()
 
-    // Tìm kiếm xem từ khóa nhập vào có khớp với anh hùng nào trong Map dữ liệu không
     const matchedLesson = HERO_LESSONS_MAP.find((hero) =>
       hero.keywords.some((keyword) => cleanQuery.includes(keyword) || keyword.includes(cleanQuery))
     )
 
     if (matchedLesson) {
-      // Nếu tìm thấy anh hùng tương ứng -> Link thẳng tới trang chi tiết bài học đó
       navigate(matchedLesson.url)
     } else {
-      // Nếu không khớp danh mục cụ thể -> Đẩy về trang danh sách bài học kèm tham số tìm kiếm chung
       navigate(`/lessons?search=${encodeURIComponent(searchQuery)}`)
     }
-    
-    // Xóa rỗng thanh search sau khi xử lý xong điều hướng
     setSearchQuery('')
   }
 
-  // Khởi chạy tìm kiếm trực tiếp khi người dùng nhấn nút Enter trên bàn phím
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearchSubmit()
@@ -96,13 +102,8 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
         </nav>
 
         <div className="header-actions">
-          {/* 🔍 Search Bar cấu trúc chuẩn: Icon kính lúp bắt tương tác đứng trước, Input đứng sau */}
           <div className="search-box">
-            <button 
-              type="button" 
-              onClick={handleSearchSubmit} 
-              aria-label="Tìm kiếm"
-            >
+            <button type="button" onClick={handleSearchSubmit} aria-label="Tìm kiếm">
               <Search size={15} />
             </button>
             <input 
@@ -115,31 +116,69 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
           </div>
 
           {learnerName ? (
-            <div className="account-action-group" aria-label="Tài khoản đang đăng nhập">
-              <NavLink to="/account" className="account-pill">
-                <UserCircle2 size={16} />
-                <span>{learnerName}</span>
+            <>
+              <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper">
+                <ShoppingCart size={22} strokeWidth={2} />
+                {cartCount > 0 && (
+                  <span className="shopee-cart-badge">{cartCount}</span>
+                )}
               </NavLink>
-              {isAdmin ? (
-                <NavLink to="/dashboard" className="account-pill">
-                  Admin
-                </NavLink>
-              ) : null}
-              <button type="button" className="icon-action" onClick={onLogout} aria-label="Đăng xuất">
-                <LogOut size={16} />
-              </button>
-            </div>
+
+              <div className="profile-dropdown-container" ref={dropdownRef}>
+                <button 
+                  type="button" 
+                  className={`account-pill dropdown-trigger ${isDropdownOpen ? 'open' : ''}`}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  <UserCircle2 size={16} />
+                  <span>{learnerName}</span>
+                  <ChevronDown size={14} className={`arrow-icon ${isDropdownOpen ? 'rotate' : ''}`} />
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="profile-dropdown-menu">
+                    <Link to="/account" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
+                      <User size={15} />
+                      <span>Thông tin tài khoản</span>
+                    </Link>
+
+                    {isAdmin && (
+                      <Link to="/dashboard" className="dropdown-item admin-item" onClick={() => setIsDropdownOpen(false)}>
+                        <Sparkles size={15} />
+                        <span>Trang Admin</span>
+                      </Link>
+                    )}
+
+                    <button 
+                      type="button" 
+                      className="dropdown-item logout-item" 
+                      onClick={() => {
+                        setIsDropdownOpen(false)
+                        onLogout()
+                      }}
+                    >
+                      <LogOut size={15} />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
-            <NavLink to="/account" className="ghost-btn login-cta">
-              <LogIn size={16} />
-              Đăng nhập
-            </NavLink>
+            <div className="account-action-group">
+              <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper" style={{ marginRight: '4px' }}>
+                <ShoppingCart size={22} strokeWidth={2} />
+                {cartCount > 0 && (
+                  <span className="shopee-cart-badge">{cartCount}</span>
+                )}
+              </NavLink>
+              
+              <NavLink to="/account" className="ghost-btn login-cta">
+                <LogIn size={16} />
+                Đăng nhập
+              </NavLink>
+            </div>
           )}
-          
-          <NavLink to="/checkout" className="cart-pill">
-            <ShoppingCart size={16} />
-            Giỏ hàng <span>{cartCount}</span>
-          </NavLink>
         </div>
       </div>
     </header>
@@ -147,86 +186,75 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
 }
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   return (
-    <footer className="site-footer site-footer-premium">
-      <div className="container footer-shell">
-        <div className="footer-intro">
+    <footer className="svam-footer">
+      <div className="footer-layout-wrapper">
+        <div className="footer-top-brand">
           <h3>SỬ VIỆT ANH MINH</h3>
-          <p className="footer-kicker">Nền tảng học lịch sử kết hợp bài học, quiz và thương mại</p>
-          <p className="footer-summary">
-            Bộ thẻ bài giáo dục giải trí tiên phong giúp học sinh THCS dễ dàng tiếp cận và ghi nhớ kiến thức.
-            Chúng tôi biến những trang sử khô khan thành những trải nghiệm tương tác thú vị, khơi dậy lòng tự
-            hào và tình yêu lịch sử dân tộc cho thế hệ trẻ.
-          </p>
         </div>
 
-        <div className="footer-links">
-          <h4>Khám phá</h4>
-          <ul>
-            <li>
-              <Link to="/products" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
-                Danh mục sản phẩm
-              </Link>
-            </li>
-            <li>
-              <Link to="/lessons" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
-                Bài học theo thời kỳ
-              </Link>
-            </li>
-            <li>
-              <Link to="/quiz" onClick={scrollToTop} style={{ color: 'inherit', textDecoration: 'none' }}>
-                Quiz game lịch sử
-              </Link>
-            </li>
-          </ul>
-        </div>
+        <div className="footer-shell-aligned">
+          <div className="footer-col intro-col">
+            <div className="subtitle-wrapper">
+              <p className="svam-brand-subtitle">
+                NỀN TẢNG HỌC LỊCH SỬ KẾT HỢP BÀI HỌC, QUIZ VÀ THƯƠNG MẠI
+              </p>
+            </div>
+            <p className="svam-brand-desc">
+              Bộ thẻ bài giáo dục giải trí tiên phong giúp học sinh THCS dễ dàng tiếp cận và ghi nhớ kiến thức. 
+              Chúng tôi biến những trang sử khô khan thành những trải nghiệm tương tác thú vị, khơi dậy lòng tự hào và tình yêu lịch sử dân tộc cho thế hệ trẻ.
+            </p>
+          </div>
 
-        <div className="footer-contact">
-          <h4>Liên hệ</h4>
-          <ul>
-            <li className="footer-contact-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-              <span>Hotline: (+84) 973 491 866</span>
-            </li>
-            
-            <li className="footer-contact-item">
-              <a 
-                href="https://www.facebook.com/profile.php?id=61590118002475" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="footer-fb-link"
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c4.56-.93 8-4.96 8-9.8z"/>
+          <div className="footer-col links-col">
+            <div className="title-wrapper">
+              <h4>Khám phá</h4>
+            </div>
+            <ul>
+              <li><Link to="/products">Danh mục sản phẩm</Link></li>
+              <li><Link to="/lessons">Bài học theo thời kỳ</Link></li>
+              <li><Link to="/quiz">Quiz game lịch sử</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-col contact-col">
+            <div className="title-wrapper">
+              <h4>Liên hệ</h4>
+            </div>
+            <ul>
+              <li className="single-line-item">
+                <Phone size={18} className="svam-icon" />
+                <span className="contact-text">
+                  <a href="tel:+84973491866">Hotline: (+84) 973 491 866</a>
+                </span>
+              </li>
+              <li className="single-line-item">
+                <svg className="svam-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                 </svg>
-                <span>Fanpage: Sử Việt Anh Minh</span>
-              </a>
-            </li>
-            
-            <li className="footer-contact-item">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              <span>Email: suvietanhminh@gmail.com</span>
-            </li>
-            
-            <li className="footer-contact-item alignment-top">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              <span>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</span>
-            </li>
-          </ul>
+                <span className="contact-text">
+                  <a href="[https://www.facebook.com/profile.php?id=61590118002475#](https://www.facebook.com/profile.php?id=61590118002475#)" target="_blank" rel="noreferrer">Fanpage: Sử Việt Anh Minh</a>
+                </span>
+              </li>
+              <li className="single-line-item">
+                <Mail size={18} className="svam-icon" />
+                <span className="contact-text">
+                  <a href="mailto:suvietanhminh@gmail.com">Email: suvietanhminh@gmail.com</a>
+                </span>
+              </li>
+              <li className="multi-line-item">
+                <MapPin size={18} className="svam-icon" />
+                <span className="contact-text">
+                  <span>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</span>
+                </span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
+
+      {/* Gọi trực tiếp bộ phát nhạc nội bộ */}
+      <BackgroundMusic />
     </footer>
   )
 }
