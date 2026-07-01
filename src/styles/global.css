@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 :root {
   color: #1f2421;
   background: #f6f5ef;
@@ -157,7 +158,7 @@ button {
   gap: 6px;
   padding: 4px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
   flex: 1 1 auto;
   justify-content: center;
   min-width: 0;
@@ -2304,7 +2305,7 @@ textarea {
     linear-gradient(180deg, rgba(12, 8, 10, 0.18), rgba(12, 8, 10, 0.5)),
     radial-gradient(circle at 50% 48%, rgba(255, 224, 164, 0.24), transparent 24rem),
     linear-gradient(90deg, rgba(31, 15, 18, 0.66), rgba(138, 31, 45, 0.22), rgba(31, 15, 18, 0.62)),
-    url('/assets/bg1.jpg') center center / cover no-repeat;
+    url('/assets/bg.png') center center / cover no-repeat;
   box-shadow: none;
 }
 
@@ -2616,12 +2617,12 @@ textarea {
   overflow: hidden;
 }
 
-/* 1. Phần bao ngoài Grid (Giữ nguyên cấu trúc của bạn) */
+/*/* 1. Phần bao ngoài Grid (Giữ nguyên cấu trúc của bạn) */
 .footer-shell {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.7fr) minmax(280px, 0.95fr);
   gap: 36px;
-  align-items: start;
+  align-items: start; /* Ép các cột canh đều từ đỉnh */
 }
 
 /* Khử hoàn toàn margin mặc định của các h3, h4 để tránh việc trình duyệt tự tính toán lệch */
@@ -2632,12 +2633,11 @@ textarea {
   margin-bottom: 16px;
 }
 
-/* 2. Dịch chuyển nội dung 2 cột phải xuống bằng thuộc tính padding dựa trên dòng văn bản */
+/* 2. CHỈNH SỬA TẠI ĐÂY: Thay vì để 3.3em (làm thụt sâu xuống dưới), 
+   chúng ta chỉnh về 5px để chân chữ của h4 khớp thẳng hàng tắp với h3 bên trái */
 .footer-links,
 .footer-contact {
-  /* Thuộc tính này sẽ đẩy cả cụm h4 xuống. 
-     Bạn tăng giảm số em (ví dụ: 3.8em, 4.2em) để nó tự động nhảy chuẩn theo dòng chữ của cột 1 */
-  padding-top: 3.3em; 
+  padding-top: 5px; 
 }
 
 /* Reset lại margin của danh sách bên dưới */
@@ -3423,4 +3423,1269 @@ textarea {
     0 0 0 2px rgba(229, 169, 59, 0.3); 
 }
 
+/* Hoạt ảnh bay thu nhỏ */
+@keyframes flyToCart {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.1;
+    transform: translate(var(--target-x), var(--target-y)) scale(0.1);
+  }
+}
 
+/* Hoạt ảnh tịnh tiến và thu nhỏ chuẩn xác */
+@keyframes flyToCart {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(calc(var(--target-x) * 0.5), calc(var(--target-y) * 0.5 - 30px)) scale(0.8) rotate(180deg); /* Bay vòng cung nhẹ */
+  }
+  100% {
+    opacity: 0.1;
+    transform: translate(var(--target-x), var(--target-y)) scale(0.1) rotate(360deg);
+  }
+}
+
+/* ==========================================================================
+   GIAO DIỆN THÔNG BÁO THÊM GIỎ HÀNG THỜI THƯỢNG (SHOPEE STYLE)
+   ========================================================================== */
+
+/* Lớp phủ mờ toàn màn hình để làm nổi bật hộp thông báo */
+.shopee-toast-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.1); /* Mờ cực nhẹ để không che mắt người dùng */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  pointer-events: none; /* Không ngăn cản người dùng click các nút khác */
+}
+
+/* Hộp thông báo màu đen bo góc nằm giữa màn hình */
+.shopee-toast-box {
+  background-color: rgba(0, 0, 0, 0.82);
+  color: #ffffff;
+  padding: 24px 32px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-width: 350px;
+  text-align: center;
+  
+  /* Hiệu ứng hiện hình mượt mà */
+  animation: shopeeToastIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Vòng tròn chứa dấu tích màu xanh lá đặc trưng */
+.shopee-toast-icon-circle {
+  width: 56px;
+  height: 56px;
+  background-color: #26c281; /* Xanh lá chuẩn Shopee */
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+}
+
+.shopee-toast-text {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+/* Hoạt ảnh hiện hình phóng to nhẹ */
+@keyframes shopeeToastIn {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   HOẠT ẢNH ĐỘNG CHO NÚT GIỎ HÀNG KHI NHẬN HÀNG
+   ========================================================================== */
+@keyframes cartScaleBounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.25) rotate(-5deg); } /* Phóng to và hơi nghiêng nhẹ */
+  60% { transform: scale(0.95) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Class này sẽ được gán tự động bằng JS trong 400ms rồi tự gỡ bỏ */
+.bounce-active {
+  animation: cartScaleBounce 0.4s ease-in-out !important;
+}
+
+/* Ép container chứa nội dung thẻ bài chiếm trọn chiều cao bằng Flexbox */
+.product-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Hoặc tùy chỉnh đảm bảo card có chiều cao bằng nhau */
+}
+
+.product-detail-stack {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Chiếm toàn bộ không gian trống */
+}
+
+/* Cho phép mô tả ngắn co giãn tự nhiên nhưng không đẩy lệch khối dưới */
+.product-detail-stack > p {
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  /* Nếu muốn giới hạn nghiêm ngặt text tối đa 2 dòng giống Shopee thì bật 4 dòng dưới: */
+  /* display: -webkit-box; */
+  /* -webkit-line-clamp: 2; */
+  /* -webkit-box-orient: vertical; */
+  /* overflow: hidden; */
+}
+
+/* KHỐI GIÁ CẢ */
+.product-price-analysis-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  min-height: 76px; /* Chiều cao cố định đảm bảo vùng giá đều nhau */
+}
+
+/* 🎯 ĐÂY LÀ CHÌA KHÓA: Ép khối nút bấm và các gạch đầu dòng tính năng luôn nằm sát đáy */
+.product-card-actions {
+  margin-top: auto; /* Tự động đẩy phần nút bấm và note xuống sát cạnh đáy */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Đảm bảo danh sách tính năng (gạch đầu dòng) có khoảng trống đồng nhất */
+.product-feature-list {
+  margin-bottom: 16px;
+  padding-left: 16px;
+  min-height: 110px; /* Định nghĩa chiều cao tối thiểu cho khối 3 gạch đầu dòng để thẳng hàng */
+}
+
+
+
+/* ==========================================================================
+   TINH CHỈNH KHU VỰC HEADER ACTIONS (PHÍA BÊN PHẢI)
+   ========================================================================== */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Tạo khoảng trống thoải mái giữa ô tìm kiếm, Profile và Giỏ hàng */
+}
+
+/* ==========================================================================
+   GIỎ HÀNG PHONG CÁCH SHOPEE (MINIMALIST CART BADGE)
+   ========================================================================== */
+.shopee-cart-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff; /* Hoặc đổi thành tông màu vàng gold hiện tại của bạn nếu thích */
+  text-decoration: none;
+  padding: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.shopee-cart-wrapper:hover {
+  color: #ffb800; /* Hiệu ứng đổi màu nhẹ khi hover chuột */
+  transform: scale(1.05);
+}
+
+/* Bong bóng số lượng hình oval viền đỏ nền trắng chuẩn shopee */
+.shopee-cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  background-color: #ffffff;
+  color: #ee4d2d; /* Màu cam/đỏ Shopee */
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 10px; /* Bo tròn dáng oval khi số lượng lên nhiều chữ số */
+  border: 1.5px solid #ee4d2d;
+  min-width: 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+}
+
+/* Đảm bảo hoạt ảnh scale giỏ hàng khi tương tác "Thêm vào giỏ" ở trang sản phẩm vẫn chạy mượt */
+.bounce-active {
+  animation: cartScaleBounce 0.4s ease-in-out;
+}
+
+@keyframes cartScaleBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+
+/* Khối bọc Profile tổng thể */
+.account-action-group {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  gap: 12px; /* Tạo khoảng cách đều giữa các thành phần bên trong */
+}
+
+/* Nút thông tin người dùng */
+.account-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.account-pill:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 🛒 Giỏ hàng tối giản phong cách Shopee */
+.shopee-cart-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 4px;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.shopee-cart-wrapper:hover {
+  color: #ffb800; /* Hiệu ứng đổi màu nhẹ sang vàng gold */
+  transform: scale(1.08);
+}
+
+/* Badge số lượng chuẩn dáng Shopee gắn góc trên bên phải icon */
+.shopee-cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -7px;
+  background-color: #ffffff;
+  color: #ee4d2d; /* Màu cam đỏ thương mại điện tử */
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 1.5px 5px;
+  border-radius: 10px;
+  border: 1.5px solid #ee4d2d;
+  min-width: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 🚪 Nút Đăng xuất được đẩy ra ngoài cùng bên phải */
+.icon-action.logout-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.icon-action.logout-btn:hover {
+  color: #ff4d4f; /* Chuyển màu đỏ khi muốn log out */
+  background-color: rgba(255, 77, 79, 0.1);
+}
+
+/* Giữ hoạt ảnh nảy giỏ hàng từ ProductCard */
+.bounce-active {
+  animation: cartScaleBounce 0.4s ease-in-out;
+}
+
+@keyframes cartScaleBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+
+
+/* Container của Dropdown */
+.profile-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Biến account-pill thành button bấm được */
+.account-pill.dropdown-trigger {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.account-pill.dropdown-trigger:hover,
+.account-pill.dropdown-trigger.open {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Icon mũi tên */
+.profile-dropdown-container .arrow-icon {
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.profile-dropdown-container .arrow-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Khung Menu xổ xuống */
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: #161618; /* Màu nền tối ăn nhập thanh header */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 180px;
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  transform-origin: top right;
+  animation: dropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Các item trong menu */
+.profile-dropdown-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+/* Hover vào các mục thường */
+.profile-dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Dòng trang admin (nếu có) */
+.profile-dropdown-menu .dropdown-item.admin-item {
+  color: #ffb800;
+}
+
+/* Mục Đăng xuất (Có vạch ngăn nhẹ phía trên và màu đỏ) */
+.profile-dropdown-menu .dropdown-item.logout-item {
+  color: #ff4d4f;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.profile-dropdown-menu .dropdown-item.logout-item:hover {
+  background-color: rgba(255, 77, 79, 0.1);
+  color: #ff7875;
+}
+
+/* Hiệu ứng trượt và mờ dần khi hiện menu */
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+
+/* 1. Đảm bảo thanh header và các nhóm action KHÔNG được ẩn nội dung tràn ra ngoài */
+.site-header,
+.site-header-compact,
+.header-actions,
+.account-action-group {
+  overflow: visible !important; /* Ép buộc cho phép hiển thị các phần tử tràn ra như Dropdown */
+}
+
+/* 2. Cấu trúc lại Container để định vị chính xác vị trí xổ xuống */
+.profile-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* 3. Nút bấm bọc tên người dùng */
+.account-pill.dropdown-trigger {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.account-pill.dropdown-trigger:hover,
+.account-pill.dropdown-trigger.open {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Icon mũi tên */
+.profile-dropdown-container .arrow-icon {
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.profile-dropdown-container .arrow-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* 4. Khung Menu xổ xuống - Đẩy z-index lên cao nhất để đè lên các thành phần khác */
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: #1a1a1c; /* Màu nền tối sang trọng khớp giao diện */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  min-width: 180px;
+  border-radius: 12px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); /* Tạo bóng đổ sâu để nổi hẳn lên trên */
+  z-index: 9999 !important; /* Đảm bảo menu không bị đè bởi bất kỳ khối nào phía dưới */
+  transform-origin: top right;
+  animation: dropdownSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Các item trong menu */
+.profile-dropdown-menu .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+/* Hover vào các mục */
+.profile-dropdown-menu .dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Mục Đăng xuất (Màu đỏ cảnh báo dịu) */
+.profile-dropdown-menu .dropdown-item.logout-item {
+  color: #ff4d4f;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.profile-dropdown-menu .dropdown-item.logout-item:hover {
+  background-color: rgba(255, 77, 79, 0.1);
+  color: #ff7875;
+}
+
+/* Hiệu ứng trượt nhẹ mềm mại */
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+
+
+/* ==========================================================================
+   CSS CUSTOM CHO FOOTER SỬ VIỆT ANH MINH (SỬA LỖI LAYOUT & RESPONSIVE)
+   ========================================================================== */
+
+/* Định dạng chung cho Footer */
+footer {
+  box-sizing: border-box;
+}
+
+footer * {
+  box-sizing: border-box;
+}
+
+/* Hiệu ứng hover cho các liên kết trong Footer */
+footer a, footer span {
+  transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
+}
+
+footer a:hover {
+  color: #e6b87d !important;
+}
+
+/* Đảm bảo danh sách không bị dính padding mặc định của trình duyệt */
+footer ul {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Tối ưu hóa hiển thị trên màn hình nhỏ (Mobile) */
+@media (max-width: 768px) {
+  footer > div:first-child {
+    grid-template-columns: 1fr !important; /* Chuyển thành 1 cột đứng trên điện thoại */
+    gap: 2rem !important;
+    text-align: left !important;
+  }
+
+  footer > div:last-child {
+    flex-direction: column !important; /* Đoạn copyright xếp chồng trên mobile */
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+  }
+}
+
+/* ==========================================================================
+   CSS CHI TIẾT CHO FOOTER CHUẨN ẢNH SỐ 2 (MÀU XANH RÊU GRADIENT)
+   ========================================================================== */
+
+.svam-footer {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Hiệu ứng dải màu từ tối đen góc trái sang xanh rêu đậm theo mẫu */
+  background: linear-gradient(115deg, #12080c 0%, #111d18 30%, #0d3226 100%);
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.svam-footer * {
+  box-sizing: border-box;
+}
+
+.svam-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1.5fr; /* Chia tỉ lệ các cột chuẩn */
+  gap: 4.5rem;
+  text-align: left;
+}
+
+/* Khối Thương Hiệu */
+.svam-brand-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0 0 0.75rem 0;
+  color: #ffffff;
+}
+
+.svam-brand-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #b3c2bc;
+  line-height: 1.4;
+  margin: 0 0 1rem 0;
+}
+
+.svam-brand-desc {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-weight: 300;
+  color: #cbd5e1;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* Tiêu đề các mục con */
+.svam-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin: 0 0 1.25rem 0;
+  color: #ffffff;
+}
+
+/* Danh sách link khám phá */
+.svam-link-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.svam-link-list a {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  font-weight: 400;
+  transition: opacity 0.2s;
+  opacity: 0.85;
+}
+
+.svam-link-list a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Danh sách thông tin liên hệ */
+.svam-contact-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.svam-contact-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.svam-contact-list a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.svam-contact-list a:hover {
+  text-decoration: underline;
+}
+
+/* Định dạng Icon nhỏ gọn và mảnh đúng như ảnh */
+.svam-icon {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  color: #ffffff;
+  opacity: 0.8;
+  stroke-width: 1.8px;
+}
+
+/* Responsive mượt mà khi co màn hình */
+@media (max-width: 968px) {
+  .svam-footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+  .svam-footer-brand {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .svam-footer-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0 1.5rem;
+  }
+  .svam-footer-brand {
+    grid-column: span 1;
+  }
+}
+
+.svam-footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1.5fr;
+  gap: 4.5rem;
+  text-align: left;
+  
+  /* 1. Ép các cột đỉnh bằng nhau */
+  align-items: start; 
+}
+
+/* 2. Triệt tiêu toàn bộ margin mặc định đẩy khối */
+.svam-brand-title,
+.svam-section-title {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* 3. Cân bằng line-height và bù trừ khoảng trống chênh lệch do cỡ chữ h2 lớn hơn h4 */
+.svam-brand-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  line-height: 1.1; /* Thu hẹp khoảng đệm dòng chữ to */
+}
+
+.svam-section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  
+  /* Đẩy nhẹ tiêu đề Khám phá và Liên hệ xuống một chút rất nhỏ (khoảng 5px) 
+     để đường chân baseline của chữ khớp hoàn hảo với chữ SỬ VIỆT ANH MINH */
+  margin-bottom: 1.5rem;
+  padding-top: 5px !important; 
+  line-height: 1.1;
+}
+
+
+/* Container chính bọc ngoài */
+.footer-layout-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Tiêu đề lớn giữ nguyên vị trí */
+.footer-top-brand h3 {
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+  color: #ffffff;
+}
+
+/* Khung Grid chứa 3 cột */
+.footer-shell-aligned {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.35fr) minmax(220px, 0.7fr) minmax(280px, 0.95fr) !important;
+  gap: 36px !important;
+  align-items: start !important;
+}
+
+/* Mẹo cốt lõi: Ép phần bọc tiêu đề của cả 3 cột có chung một chiều cao hiển thị.
+   Bằng cách này, bất kể dòng chữ phụ của bạn rớt làm 1 dòng hay 2 dòng, 
+   chân chữ của "Khám phá" và "Liên hệ" sẽ luôn tự động hạ xuống đều chằn chặn với nó */
+.subtitle-wrapper,
+.title-wrapper {
+  min-height: 44px; /* Chiều cao an toàn vừa khít cho văn bản phụ khi rớt 2 dòng */
+  display: flex;
+  align-items: flex-start; /* Canh đều từ đỉnh trong hộp bọc */
+  margin-bottom: 16px !important;
+}
+
+/* Format riêng các thẻ tiêu đề và chữ phụ bên trong khung bọc */
+.svam-brand-subtitle {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #b3c2bc;
+  line-height: 1.4;
+  margin: 0 !important;
+}
+
+.title-wrapper h4 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+/* Nội dung mô tả và danh sách phía dưới */
+.svam-brand-desc {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-weight: 300;
+  color: #cbd5e1;
+  margin: 0 !important;
+  opacity: 0.9;
+}
+
+.footer-col ul {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+
+/* Khung bọc danh sách liên hệ */
+.footer-col.contact-col ul {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+/* 1. ĐỐI VỚI DÒNG ĐƠN (Hotline, Fanpage, Email): Căn giữa tắp theo trục dọc */
+.footer-col.contact-col li.single-line-item {
+  display: flex !important;
+  align-items: center !important; /* Đưa tâm icon và tâm chữ về cùng một trục nằm ngang */
+  gap: 14px !important;
+}
+
+/* 2. ĐỐI VỚI DÒNG KÉP (Địa chỉ xuống hàng): Icon neo ở dòng đầu tiên */
+.footer-col.contact-col li.multi-line-item {
+  display: flex !important;
+  align-items: flex-start !important; /* Giữ cố định trên đầu không bị trượt khi nhảy dòng */
+  gap: 14px !important;
+}
+
+/* Định dạng thẻ text bọc ngoài link */
+.footer-col.contact-col .contact-text {
+  font-size: 0.92rem !important;
+  line-height: 1.4 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Tinh chỉnh riêng cho các Thẻ Icon */
+.footer-col.contact-col .svam-icon,
+.footer-col.contact-col svg {
+  flex-shrink: 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: #ffffff !important;
+  opacity: 0.95 !important;
+}
+
+/* Bù trừ khoảng lệch riêng của icon dòng nhiều chữ */
+.footer-col.contact-col li.multi-line-item .svam-icon {
+  margin-top: 3px !important; /* Đẩy nhẹ icon địa chỉ xuống khít đường line-height thứ nhất */
+}
+
+/* Link hiệu ứng */
+.footer-col.contact-col a {
+  color: inherit !important;
+  text-decoration: none !important;
+}
+.footer-col.contact-col a:hover {
+  text-decoration: underline !important;
+}
+
+
+
+/* Áp dụng font Inter và tối ưu hiển thị chữ */
+.svam-footer {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* 1. Tiêu đề thương hiệu lớn: SỬ VIỆT ANH MINH */
+.footer-top-brand h3 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;       /* Đậm, dày chữ */
+  font-size: 1.65rem !important;     /* Cân đối lại kích thước */
+  letter-spacing: -0.02em !important;/* Thu hẹp khoảng cách chữ theo chuẩn Inter */
+  color: #ffffff !important;
+  margin-bottom: 12px !important;
+}
+
+/* 2. Slogan dưới tên thương hiệu */
+.svam-brand-subtitle {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.03em !important; /* Giãn nhẹ tạo độ thoáng cho khối chữ viết hoa */
+  line-height: 1.4 !important;
+  color: #ffffff !important;
+}
+
+/* 3. Tiêu đề các cột (Khám phá, Liên hệ) */
+.footer-col h4 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  letter-spacing: -0.01em !important;
+  color: #ffffff !important;
+  margin-bottom: 18px !important;
+}
+
+/* 4. Toàn bộ phần danh sách (Khám phá & Liên hệ) */
+.footer-col ul {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;              /* Giảm khoảng cách dọc giữa các dòng cho khít lại */
+}
+
+/* Kiểu chữ nội dung (Khám phá + text liên hệ) */
+.footer-col ul li,
+.footer-col ul li a,
+.footer-col.contact-col .contact-text {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;       /* Chuyển về Regular 400 để nét chữ thanh mảnh, sắc nét */
+  font-size: 0.85rem !important;     /* Thu nhỏ kích thước đúng tỉ lệ ảnh mẫu */
+  color: #cccccc !important;         /* Màu chữ xám nhẹ, không bị chói */
+  letter-spacing: 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* 5. Căn chỉnh Icon liên hệ chuẩn tỉ lệ */
+.footer-col.contact-col li.single-line-item,
+.footer-col.contact-col li.multi-line-item {
+  display: flex !important;
+  gap: 10px !important;              /* Khoảng cách từ Icon đến Chữ thu hẹp lại */
+}
+
+.footer-col.contact-col li.single-line-item {
+  align-items: center !important;    /* Căn giữa tuyệt đối cho dòng đơn */
+}
+
+.footer-col.contact-col li.multi-line-item {
+  align-items: flex-start !important; /* Dòng kép neo icon ở hàng đầu */
+}
+
+/* Định dạng các thẻ Icon Lucide-react */
+.footer-col.contact-col .svam-icon {
+  flex-shrink: 0 !important;
+  width: 15px !important;            /* Thu nhỏ icon xuống 15px để cân xứng với text */
+  height: 15px !important;
+  color: #cccccc !important;         /* Đồng bộ màu icon tiệp với màu chữ */
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* Bù trừ khoảng lệch cho dòng nhiều chữ (Địa chỉ) */
+.footer-col.contact-col li.multi-line-item .svam-icon {
+  margin-top: 3px !important;        /* Đẩy nhẹ icon xuống khớp tâm dòng text đầu tiên */
+}
+
+/* Đoạn văn mô tả dài ở cột giới thiệu */
+.svam-brand-desc {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.6 !important;
+  color: #94a3b8 !important;
+}
+
+/* Khối Footer chuẩn hoá font Inter */
+.svam-footer {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Tiêu đề chính lớn */
+.footer-top-brand h3 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.7rem !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+}
+
+/* Slogan in hoa */
+.svam-brand-subtitle {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.02em !important;
+  color: #ffffff !important;
+}
+
+/* Chữ mô tả ngắn gọn */
+.svam-brand-desc {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.6 !important;
+  color: #cccccc !important;
+}
+
+/* Tiêu đề các cột mục nhỏ */
+.footer-col h4 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.05rem !important;
+  color: #ffffff !important;
+  margin-bottom: 16px !important;
+}
+
+/* Danh sách Text & Links */
+.footer-col ul li,
+.footer-col ul li a,
+.footer-col.contact-col .contact-text {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important; /* Dùng Regular thanh mảnh đúng tỷ lệ Figma */
+  font-size: 0.88rem !important;
+  color: #cccccc !important;
+  line-height: 1.5 !important;
+}
+
+/* Khối align icon liên hệ */
+.footer-col.contact-col ul {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.footer-col.contact-col li.single-line-item,
+.footer-col.contact-col li.multi-line-item {
+  display: flex !important;
+  gap: 10px !important;
+}
+
+.footer-col.contact-col li.single-line-item {
+  align-items: center !important;
+}
+
+.footer-col.contact-col li.multi-line-item {
+  align-items: flex-start !important;
+}
+
+/* Icon đồng bộ */
+.footer-col.contact-col .svam-icon {
+  flex-shrink: 0 !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: #cccccc !important;
+}
+
+.footer-col.contact-col li.multi-line-item .svam-icon {
+  margin-top: 3px !important;
+}
+
+/* ==========================================================================
+   CSS FOOTER - HIỆU ỨNG ĐỘNG (HOVER & ACTIVE EFFECT)
+   ========================================================================== */
+
+/* 1. HIỆU ỨNG CHO CÁC ĐƯỜNG LINK (Khám phá & Link Liên hệ) */
+.footer-col ul li a {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 0.88rem !important;
+  color: #cccccc !important;
+  text-decoration: none !important;
+  line-height: 1.5 !important;
+  
+  /* Tạo hiệu ứng mượt khi thay đổi trạng thái */
+  display: inline-block !important;
+  position: relative !important;
+  padding-bottom: 2px !important;
+  transition: color 0.25s ease, transform 0.2s ease !important;
+}
+
+/* Hiệu ứng đường gạch chân mượt mà trượt từ trái sang phải khi Hover */
+.footer-col ul li a::after {
+  content: '' !important;
+  position: absolute !important;
+  width: 100% !important;
+  transform: scaleX(0) !important;
+  height: 1.5px !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  background-color: #ffffff !important; /* Đường gạch màu trắng thanh mảnh */
+  transform-origin: bottom left !important;
+  transition: transform 0.25s ease-out !important;
+}
+
+/* Khi di chuột vào Link */
+.footer-col ul li a:hover {
+  color: #ffffff !important; /* Chữ sáng lên */
+  transform: translateX(4px) !important; /* Nhích nhẹ sang phải 4px tạo cảm giác tương tác */
+}
+
+.footer-col ul li a:hover::after {
+  transform: scaleX(1) !important; /* Hiện đường gạch chân */
+}
+
+/* Hiệu ứng Phản hồi khi NHẤN VÀO (Click / Active) */
+.footer-col ul li a:active {
+  transform: translateX(2px) scale(0.97) !important; /* Thu nhỏ nhẹ lại 3% tạo cảm giác phím vật lý */
+  color: #a7f3d0 !important; /* Chuyển nhẹ sang sắc xanh nhẹ ngọc bích */
+}
+
+
+/* 2. HIỆU ỨNG CHO CÁC MỤC DÒNG CHỮ LIÊN HỆ CÓ ICON (Hotline, Địa chỉ...) */
+.footer-col.contact-col li.single-line-item,
+.footer-col.contact-col li.multi-line-item {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+  transition: transform 0.2s ease !important;
+}
+
+.footer-col.contact-col li.multi-line-item {
+  align-items: flex-start !important;
+}
+
+/* Tạo hiệu ứng nhích nhẹ cả cụm dòng khi hover vùng liên hệ */
+.footer-col.contact-col li:hover {
+  transform: translateX(2px) !important;
+}
+
+/* Hiệu ứng riêng cho Icon Lucide khi di chuột vào */
+.footer-col.contact-col .svam-icon {
+  flex-shrink: 0 !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: #cccccc !important;
+  transition: color 0.25s ease, transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.footer-col.contact-col li:hover .svam-icon {
+  color: #ffffff !important; /* Icon sáng lên cùng chữ */
+  transform: scale(1.18) !important; /* Phóng to icon lên một chút hình khối */
+}
+
+/* Khi nhấn vào icon hoặc dòng liên hệ */
+.footer-col.contact-col li:active .svam-icon {
+  transform: scale(0.9) !important; /* Nhấn lún icon xuống */
+}
+
+
+/* 3. HIỆU ỨNG PHỤ CHO CÁC TIÊU ĐỀ LỚN (Tùy chọn tăng tính thẩm mỹ) */
+.footer-top-brand h3 {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1.7rem !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+  cursor: default !important;
+  transition: text-shadow 0.3s ease !important;
+}
+
+/* Khi hover vào Tên Thương Hiệu h3 sẽ có hiệu ứng phát sáng nhẹ (Glow) */
+.footer-top-brand h3:hover {
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4) !important;
+}
+
+
+
+/* CONTAINER CỐ ĐỊNH Ở GÓC MÀN HÌNH */
+.fixed-music-control {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+  z-index: 99999; /* Đảm bảo nổi lên trên tất cả mọi thứ */
+}
+
+/* THIẾT KẾ NÚT BẤM PHONG CÁCH SỬ VIỆT */
+.music-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 30px;
+  border: 1px solid rgba(212, 175, 55, 0.3); /* Viền vàng gold nhẹ */
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* TRẠNG THÁI ĐANG TẮT NHẠC (MUTED) */
+.music-toggle-btn.muted {
+  background: rgba(30, 30, 30, 0.85);
+  color: #a0a0a0;
+  backdrop-filter: blur(5px);
+}
+
+/* TRẠNG THÁI ĐANG BẬT NHẠC (PLAYING) - TÔNG XANH LỤC BẢO ĐỒNG BỘ FOOTER */
+.music-toggle-btn.playing {
+  background: linear-gradient(135deg, #133a22, #0d2617);
+  color: #d4af37; /* Chữ màu vàng hoàng gia */
+  border-color: #d4af37;
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+}
+
+/* HIỆU ỨNG HOVER CHUỘT */
+.music-toggle-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* HIỆU ỨNG XOAY ĐẸP MẮT CHO ICON KHI PHÁT NHẠC */
+.icon-spin-smooth {
+  animation: musicPulse 2s infinite ease-in-out;
+}
+
+@keyframes musicPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}

@@ -402,3 +402,83 @@ export const historyQuizSets: QuizSet[] = [
     questions: historyQuiz.questions.filter((question) => question.level === 'Vận dụng'),
   },
 ]
+
+// Định nghĩa tập hợp 3 câu hỏi trải nghiệm cho từng slug bài học (Đủ 12 nhân vật)
+export const LessonQuizDemo: Record<string, Array<{
+  id: string;
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}>> = {
+  'hai-ba-trung-ngon-co-doc-lap': [
+    {
+      id: 'demo-hbt-1',
+      prompt: 'Hai Bà Trưng đã phất cờ khởi nghĩa vào năm nào?',
+      options: ['Năm 40', 'Năm 42', 'Năm 43', 'Năm 542'],
+      correctIndex: 0,
+      explanation: 'Mùa xuân năm 40, Hai Bà Trưng phất cờ khởi nghĩa tại Hát Môn và nhanh chóng giành độc lập.'
+    },
+    {
+      id: 'demo-hbt-2',
+      prompt: 'Thái thú tàn bạo nào của nhà Đông Hán đã thúc đẩy cuộc khởi nghĩa bùng nổ?',
+      options: ['Tô Định', 'Mã Viện', 'Sĩ Nhiếp', 'Cao Biền'],
+      correctIndex: 0,
+      explanation: 'Thái thú Tô Định nổi tiếng tàn bạo, tham lam đã đẩy nhân dân vào cảnh khốn cùng và sát hại Thi Sách (chồng Trưng Trắc).'
+    },
+    {
+      id: 'demo-hbt-3',
+      prompt: 'Cuộc khởi nghĩa Hai Bà Trưng được phát động đầu tiên tại địa danh nào?',
+      options: ['Mê Linh', 'Hát Môn', 'Cổ Loa', 'Phú Điền'],
+      correctIndex: 1,
+      explanation: 'Cuộc khởi nghĩa chính thức được phất cờ tại cửa sông Hát (Hát Môn, Hà Nội ngày nay).'
+    }
+  ],
+  'quang-trung-nguyen-hue': [
+    {
+      id: 'demo-qt-1',
+      prompt: 'Nguyễn Huệ đại phá quân Thanh vào dịp tết năm nào?',
+      options: ['Tết Kỷ Dậu 1789', 'Tết Mậu Thân 1788', 'Tết Canh Tý 1790', 'Tết Quý Sửu 1793'],
+      correctIndex: 0,
+      explanation: 'Vào dịp Tết Kỷ Dậu (1789), vua Quang Trung - Nguyễn Huệ chỉ huy quân sĩ thần tốc tiến ra Bắc đại phá 29 vạn quân Thanh.'
+    },
+    {
+      id: 'demo-qt-2',
+      prompt: 'Trận đánh quyết định nào lật đổ hoàn toàn quân Thanh ở kinh thành?',
+      options: ['Trận Rạch Gầm - Xoài Mút', 'Trận Ngọc Hồi - Đống Đa', 'Trận Chi Lăng', 'Trận Bạch Đằng'],
+      correctIndex: 1,
+      explanation: 'Trận Ngọc Hồi - Đống Đa là chiến công vang dội nhất quét sạch quân Thanh khỏi bờ cõi.'
+    },
+    {
+      id: 'demo-qt-3',
+      prompt: 'Trước khi tiến quân ra Bắc, Nguyễn Huệ lên ngôi hoàng đế lấy niên hiệu là gì?',
+      options: ['Thái Đức', 'Quang Trung', 'Gia Long', 'Cảnh Thịnh'],
+      correctIndex: 1,
+      explanation: 'Tháng 12 năm 1788, Nguyễn Huệ tế cáo trời đất lên ngôi hoàng đế, lấy niên hiệu là Quang Trung.'
+    }
+  ],
+  'trieu-thi-trinh-khat-vong-tu-do': [
+    {
+      id: 'demo-ttt-1',
+      prompt: 'Bà Triệu lãnh đạo cuộc khởi nghĩa chống lại ách đô hộ của triều đại nào?',
+      options: ['Nhà Đông Hán', 'Nhà Ngô', 'Nhà Đường', 'Nhà Lương'],
+      correctIndex: 1,
+      explanation: 'Năm 248, Bà Triệu (Triệu Thị Trinh) khởi nghĩa chống lại ách đô hộ tàn bạo của nhà Đông Ngô.'
+    },
+    {
+      id: 'demo-ttt-2',
+      prompt: 'Căn cứ chính của cuộc khởi nghĩa Bà Triệu nằm ở vùng nào?',
+      options: ['Hát Môn', 'Mê Linh', 'Phú Điền', 'Dạ Trạch'],
+      correctIndex: 2,
+      explanation: 'Bà khởi nghĩa tại vùng núi Phú Điền, huyện Yên Định, tỉnh Thanh Hóa ngày nay.'
+    },
+    {
+      id: 'demo-ttt-3',
+      prompt: 'Câu nói nổi tiếng: "Tôi muốn cưỡi cơn gió mạnh, đạp luồng sóng dữ..." là của ai?',
+      options: ['Trưng Trắc', 'Bùi Thị Xuân', 'Triệu Thị Trinh', 'Nguyễn Thị Minh Khai'],
+      correctIndex: 2,
+      explanation: 'Đây là câu tuyên ngôn bất hủ thể hiện chí khí lẫm liệt, khát vọng tự do dân tộc của Bà Triệu.'
+    }
+  ]
+  // Bạn có thể viết tiếp các key tương ứng với 9 slug nhân vật còn lại theo cấu trúc này...
+};

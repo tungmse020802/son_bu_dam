@@ -1,6 +1,6 @@
 import type { Character, Lesson, Product } from '../types/app'
 
-const productImage = '/assets/2.png'
+const productImage = '/assets/combo-the-bai-lop-6.png'
 
 export const characters: Character[] = [
   {
@@ -212,10 +212,10 @@ export const products: Product[] = [
   // Duyệt qua danh sách combo lớp 6 để ép đường dẫn ảnh mới cho Combo 3 và Combo 5
   ...gradeSixComboProducts.map((product) => {
     if (product.id === 'combo-lop-6-3-bo') {
-      return { ...product, image: '/assets/combo-the-bai-lop-6.png' }; // <-- Đường dẫn ảnh mới cho Combo 3
+      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' }; // <-- Đường dẫn ảnh mới cho Combo 3
     }
     if (product.id === 'combo-lop-6-5-bo') {
-      return { ...product, image: '/assets/combo-the-bai-lop-6.png' }; // <-- Đường dẫn ảnh mới cho Combo 5
+      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' }; // <-- Đường dẫn ảnh mới cho Combo 5
     }
     return product;
   }),
