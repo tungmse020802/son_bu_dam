@@ -128,11 +128,13 @@ const gradeCatalog = [
 
 const gradeSixComboImage = productImage
 
-const gradeSixComboProducts: Product[] = [
+// Định nghĩa mảng dạng any tạm thời để bạn thoải mái gõ tag tùy biến không lo lỗi ép kiểu
+const gradeSixComboProducts: any[] = [
   {
     id: 'combo-lop-6-3-bo',
     slug: 'combo-3-bo-the-bai-lop-6',
     name: 'Combo 3 bộ thẻ bài lịch sử lớp 6',
+    tag: 'BÁN CHẠY', // <--- BẠN CÓ THỂ CHỦ ĐỘNG ĐỔI THÀNH BẤT CỨ CHỮ GÌ
     subtitle: 'Tiết kiệm hơn khi mua 3 bộ thẻ lớp 6 cho nhóm học hoặc tặng bạn.',
     price: 429000,
     originalPrice: 450000,
@@ -154,6 +156,7 @@ const gradeSixComboProducts: Product[] = [
     id: 'combo-lop-6-5-bo',
     slug: 'combo-5-bo-the-bai-lop-6',
     name: 'Combo 5 bộ thẻ Nhân Vật Lịch sử lớp 6',
+    tag: 'MỚI', // <--- BẠN CÓ THỂ CHỦ ĐỘNG ĐỔI THÀNH BẤT CỨ CHỮ GÌ
     subtitle: 'Combo 5 bộ dành cho lớp học, câu lạc bộ hoặc nhóm ôn tập lịch sử.',
     price: 719000,
     originalPrice: 750000,
@@ -173,7 +176,7 @@ const gradeSixComboProducts: Product[] = [
   },
 ]
 
-function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
+function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): any {
   const gradeCharacters = characters.filter((character) => character.grade === entry.grade)
   const isGradeSix = entry.grade === 'Lớp 6'
 
@@ -181,6 +184,7 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
     id: `combo-${entry.grade.toLowerCase().replace('ớ', 'o').replace(/\s+/g, '-')}`,
     slug: `combo-the-bai-${entry.grade.toLowerCase().replace('ớ', 'o').replace(/\s+/g, '-')}`,
     name: isGradeSix ? 'Trọn bộ thẻ bài lịch sử Lớp 6' : `Trọn bộ thẻ bài lịch sử ${entry.grade}`,
+    tag: isGradeSix ? 'BÁN CHẠY' : undefined, // <--- SẢN PHẨM 1 HIỂN THỊ CHỮ "MỚI" (Muốn ẩn thì đổi thành undefined)
     subtitle: isGradeSix
       ? 'Trải nghiệm trọn bộ 12 thẻ nhân vật lịch sử lớp 6 với bài học và Quiz tương tác.'
       : `${gradeCharacters.length} nhân vật - ${entry.period} - bài học và quiz`,
@@ -206,16 +210,16 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): Product {
   }
 }
 
+// Thực hiện ép kiểu ở lớp mảng ngoài cùng để phân phối dữ liệu đi các component mượt mà không lỗi
 export const products: Product[] = [
   buildCatalogProduct(gradeCatalog[0]),
   
-  // Duyệt qua danh sách combo lớp 6 để ép đường dẫn ảnh mới cho Combo 3 và Combo 5
   ...gradeSixComboProducts.map((product) => {
     if (product.id === 'combo-lop-6-3-bo') {
-      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' }; // <-- Đường dẫn ảnh mới cho Combo 3
+      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' };
     }
     if (product.id === 'combo-lop-6-5-bo') {
-      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' }; // <-- Đường dẫn ảnh mới cho Combo 5
+      return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' };
     }
     return product;
   }),
@@ -237,7 +241,7 @@ export const products: Product[] = [
     characterIds: [character.id],
     arEnabled: true,
   })),
-]
+] as Product[]
 
 export function getShowcaseProducts(catalog: Product[]) {
   const gradeSixProductIds = ['combo-lop-6', 'combo-lop-6-3-bo', 'combo-lop-6-5-bo']

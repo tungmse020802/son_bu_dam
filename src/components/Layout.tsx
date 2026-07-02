@@ -1,11 +1,10 @@
-import { BackgroundMusic } from './BackgroundMusic'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, NavLink, Link } from 'react-router-dom'
 import { 
   Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, 
-  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin, Compass, ShieldCheck,
-  Volume2, VolumeX 
+  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin 
 } from 'lucide-react'
+import { BackgroundMusic } from './BackgroundMusic'
 
 interface HeaderProps {
   cartCount: number
@@ -186,74 +185,63 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
 }
 
 export function Footer() {
+  const currentYear = new Date().getFullYear()
+
   return (
-    <footer className="svam-footer">
-      <div className="footer-layout-wrapper">
-        <div className="footer-top-brand">
-          <h3>SỬ VIỆT ANH MINH</h3>
+    <footer className="svam-footer-pro">
+      <div className="svam-footer-pro-inner">
+        <div className="svam-footer-pro-grid">
+          {/* Cột 1: Thương hiệu - title giữ nguyên vị trí, chỉ nằm ở hàng 1 */}
+          <h3 className="svam-footer-pro-title svam-footer-pro-cell-title">Sử Việt Anh Minh</h3>
+          <p className="svam-footer-pro-rowline svam-footer-pro-cell-tagline">
+            NỀN TẢNG HỌC LỊCH SỬ KẾT HỢP BÀI HỌC, QUIZ VÀ THƯƠNG MẠI
+          </p>
+          <p className="svam-footer-pro-desc svam-footer-pro-cell-desc">
+            Bộ thẻ bài giáo dục giải trí tiên phong giúp học sinh THCS dễ dàng tiếp cận và ghi nhớ kiến thức.
+            Chúng tôi biến những trang sử khô khan thành những trải nghiệm tương tác thú vị, khơi dậy lòng tự hào
+            và tình yêu lịch sử dân tộc cho thế hệ trẻ.
+          </p>
+
+          {/* Cột 2: Khám phá - không có gì ở hàng 1, heading bắt đầu ở hàng 2 */}
+          <h4 className="svam-footer-pro-rowline svam-footer-pro-cell-explore-heading">Khám phá</h4>
+          <ul className="svam-footer-pro-list svam-footer-pro-cell-explore-list">
+            <li><Link to="/products">Danh mục sản phẩm</Link></li>
+            <li><Link to="/lessons">Bài học theo thời kỳ</Link></li>
+            <li><Link to="/quiz">Quiz game lịch sử</Link></li>
+          </ul>
+
+          {/* Cột 3: Liên hệ - cũng bắt đầu ở hàng 2, thẳng hàng với Khám phá và tagline */}
+          <h4 className="svam-footer-pro-rowline svam-footer-pro-cell-contact-heading">Liên hệ</h4>
+          <ul className="svam-footer-pro-list svam-footer-pro-cell-contact-list">
+            <li className="svam-footer-pro-contact-item">
+              <Phone size={16} className="svam-footer-pro-icon" />
+              <a href="tel:+84973491866">Hotline: (+84) 973 491 866</a>
+            </li>
+            <li className="svam-footer-pro-contact-item">
+              <svg className="svam-footer-pro-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
+              <a href="https://www.facebook.com/profile.php?id=61590118002475#" target="_blank" rel="noreferrer">
+                Fanpage: Sử Việt Anh Minh
+              </a>
+            </li>
+            <li className="svam-footer-pro-contact-item">
+              <Mail size={16} className="svam-footer-pro-icon" />
+              <a href="mailto:suvietanhminh@gmail.com">suvietanhminh@gmail.com</a>
+            </li>
+            <li className="svam-footer-pro-contact-item svam-footer-pro-contact-item-multiline">
+              <MapPin size={16} className="svam-footer-pro-icon" />
+              <span>Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</span>
+            </li>
+          </ul>
         </div>
 
-        <div className="footer-shell-aligned">
-          <div className="footer-col intro-col">
-            <div className="subtitle-wrapper">
-              <p className="svam-brand-subtitle">
-                NỀN TẢNG HỌC LỊCH SỬ KẾT HỢP BÀI HỌC, QUIZ VÀ THƯƠNG MẠI
-              </p>
-            </div>
-            <p className="svam-brand-desc">
-              Bộ thẻ bài giáo dục giải trí tiên phong giúp học sinh THCS dễ dàng tiếp cận và ghi nhớ kiến thức. 
-              Chúng tôi biến những trang sử khô khan thành những trải nghiệm tương tác thú vị, khơi dậy lòng tự hào và tình yêu lịch sử dân tộc cho thế hệ trẻ.
-            </p>
-          </div>
-
-          <div className="footer-col links-col">
-            <div className="title-wrapper">
-              <h4>Khám phá</h4>
-            </div>
-            <ul>
-              <li><Link to="/products">Danh mục sản phẩm</Link></li>
-              <li><Link to="/lessons">Bài học theo thời kỳ</Link></li>
-              <li><Link to="/quiz">Quiz game lịch sử</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-col contact-col">
-            <div className="title-wrapper">
-              <h4>Liên hệ</h4>
-            </div>
-            <ul>
-              <li className="single-line-item">
-                <Phone size={18} className="svam-icon" />
-                <span className="contact-text">
-                  <a href="tel:+84973491866">Hotline: (+84) 973 491 866</a>
-                </span>
-              </li>
-              <li className="single-line-item">
-                <svg className="svam-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                </svg>
-                <span className="contact-text">
-                  <a href="https://www.facebook.com/profile.php?id=61590118002475#" target="_blank" rel="noreferrer">Fanpage: Sử Việt Anh Minh</a>
-                </span>
-              </li>
-              <li className="single-line-item">
-                <Mail size={18} className="svam-icon" />
-                <span className="contact-text">
-                  <a href="mailto:suvietanhminh@gmail.com">Email: suvietanhminh@gmail.com</a>
-                </span>
-              </li>
-              <li className="multi-line-item">
-                <MapPin size={18} className="svam-icon" />
-                <span className="contact-text">
-                  <span>Địa chỉ: Trường Đại học FPT Hà Nội, Khu Công nghệ cao Hòa Lạc, Hà Nội, Việt Nam</span>
-                </span>
-              </li>
-            </ul>
-          </div>
+        <div className="svam-footer-pro-bottom">
+          <span>© {currentYear} Sử Việt Anh Minh.</span>
+          <span className="svam-footer-pro-bottom-note">Made with pride for Vietnamese history</span>
         </div>
       </div>
 
-      {/* Gọi trực tiếp bộ phát nhạc nội bộ */}
       <BackgroundMusic />
     </footer>
   )

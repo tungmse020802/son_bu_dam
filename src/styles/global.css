@@ -4689,3 +4689,525 @@ footer ul {
   50% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 0.8; }
 }
+
+/* ==========================================================================
+   GIAO DIỆN SẢN PHẨM HIỆN ĐẠI - HOÀN THIỆN TOÀN DIỆN (GIÁ ĐỎ & TAG ĐỘNG)
+   ========================================================================== */
+
+.minimal-product-card {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.minimal-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.minimal-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 105%;
+  background: #fdfcf9;
+  overflow: hidden;
+}
+
+.minimal-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.minimal-product-card:hover .minimal-image {
+  transform: scale(1.03);
+}
+
+/* Định dạng nhãn dán góc trên hình dạng viên thuốc dẹt ngang */
+.minimal-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+/* PHÂN LOẠI MÀU CHO TAG ĐỘNG THEO LỰA CHỌN CỦA BẠN */
+/* 1. Phiên bản màu Đỏ: Dùng cho BÁN CHẠY, HOT, XU HƯỚNG... (Chuẩn sàn Shopee/Lazada) */
+.badge-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff1a1a 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 26, 26, 0.35);
+}
+
+/* 2. Phiên bản màu Xanh Dương: Dùng cho chữ MỚI hoặc NEW */
+.badge-blue {
+  background: linear-gradient(135deg, #2f80ed 0%, #1f60bd 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(47, 128, 237, 0.35);
+}
+
+/* 3. Phiên bản màu Cam: Dùng cho SALE / GIẢM GIÁ */
+.badge-orange {
+  background: linear-gradient(135deg, #ff9c6e 0%, #ff7875 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 120, 117, 0.35);
+}
+
+.badge-soldout {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Thanh nút thêm vào giỏ hàng trượt mượt mà lên trên */
+.minimal-hover-add-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 3;
+}
+
+.minimal-product-card:hover .minimal-hover-add-btn {
+  transform: translateY(0);
+}
+
+.minimal-hover-add-btn:hover {
+  background: #222222;
+}
+
+/* Khối thông tin chữ phía dưới */
+.minimal-info-container {
+  padding: 14px 10px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.minimal-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.dot-separator {
+  font-size: 8px;
+  color: #bfbfbf;
+}
+
+.minimal-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f1f1f;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Khu vực hiển thị giá tiền nằm ngang */
+.minimal-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* GIÁ CHÍNH THỨC: Đỏ rực rỡ nổi bật và chuyên nghiệp */
+.minimal-current-price {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ff4d4f;
+}
+
+/* Viên thuốc chứa % giảm giá màu xanh dương phong cách Coolmate */
+.minimal-inline-discount-tag {
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.minimal-old-price {
+  font-size: 12px;
+  color: #bfbfbf;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.minimal-product-card.dimmed {
+  opacity: 0.5;
+}
+
+/* Trong global.css */
+.badge-custom {
+  position: absolute;
+  top: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  text-transform: uppercase;
+  color: white;
+}
+
+/* Các phân loại màu */
+.badge-black {
+  background: black;
+}
+.badge-blue {
+  background: blue;
+}
+.badge-red {
+  background: red;
+}
+
+.lesson-trial-quiz {
+  margin-top: 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.lesson-trial-quiz-note {
+  margin: 8px 0 0;
+  color: var(--text-soft);
+  max-width: 60ch;
+}
+
+.lesson-trial-quiz-body {
+  display: grid;
+  gap: 6px;
+}
+
+.lesson-trial-quiz-result {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .lesson-trial-quiz-result {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quiz-progress-meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quiz-timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--jade);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.quiz-checkpoint.wrong {
+  background: #ffe0df;
+  color: #a6302e;
+}
+
+.quiz-result-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 14px;
+  padding: 0.5rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(201, 133, 43, 0.12);
+  color: #9a5a11;
+  font-weight: 600;
+  width: fit-content;
+}
+
+/* ==========================================================================
+   FOOTER CHUYÊN NGHIỆP - DÙNG GRID TƯỜNG MINH ĐỂ CANH HÀNG CHÍNH XÁC
+   ========================================================================== */
+
+.svam-footer-pro {
+  position: relative;
+  margin-top: auto;
+  padding: 64px 0 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: rgba(255, 255, 255, 0.86);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(212, 175, 55, 0.1), transparent 42%),
+    linear-gradient(120deg, #0c0709 0%, #14201b 45%, #0b2b23 100%);
+  border-top: 1px solid rgba(212, 175, 55, 0.18);
+  -webkit-font-smoothing: antialiased;
+}
+
+.svam-footer-pro-inner {
+  width: min(1160px, calc(100vw - 40px));
+  margin: 0 auto;
+}
+
+/* Grid 3 cột x 3 hàng tường minh:
+   Hàng 1 = chỉ có title (cột 1)
+   Hàng 2 = tagline / Khám phá / Liên hệ  -> LUÔN thẳng hàng với nhau
+   Hàng 3 = mô tả / danh sách link / danh sách liên hệ */
+.svam-footer-pro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.85fr) minmax(0, 1.05fr);
+  grid-template-rows: auto auto auto;
+  column-gap: 48px;
+  row-gap: 0;
+  padding-bottom: 40px;
+}
+
+/* Vị trí từng ô trong grid */
+.svam-footer-pro-cell-title {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.svam-footer-pro-cell-tagline {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.svam-footer-pro-cell-desc {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.svam-footer-pro-cell-explore-heading {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.svam-footer-pro-cell-explore-list {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.svam-footer-pro-cell-contact-heading {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.svam-footer-pro-cell-contact-list {
+  grid-column: 3;
+  grid-row: 3;
+}
+
+/* Tên thương hiệu - GIỮ NGUYÊN vị trí và kiểu chữ, không đổi */
+.svam-footer-pro-title {
+  margin: 0 0 20px;
+  font-size: clamp(1.7rem, 2.4vw, 2.15rem);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  color: #ffffff;
+  background: linear-gradient(120deg, #ffffff 0%, #f4d998 55%, #d4af37 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 8px 30px rgba(212, 175, 55, 0.18);
+}
+
+/* Style DÙNG CHUNG cho tagline + "Khám phá" + "Liên hệ"
+   -> cùng font, cùng màu, cùng cỡ chữ, và nhờ grid-row: 2 ở trên
+   nên tự động thẳng hàng ngang với nhau. */
+.svam-footer-pro-rowline {
+  margin: 0 0 16px;
+  font-family: inherit;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  color: #ffffff;
+  text-transform: none;
+}
+
+.svam-footer-pro-desc {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.86rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.svam-footer-pro-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.svam-footer-pro-list a {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 2px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.87rem;
+  font-weight: 400;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.svam-footer-pro-list a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: #d4af37;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.svam-footer-pro-list a:hover {
+  color: #ffffff;
+  transform: translateX(3px);
+}
+
+.svam-footer-pro-list a:hover::after {
+  transform: scaleX(1);
+}
+
+.svam-footer-pro-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.svam-footer-pro-contact-item-multiline {
+  align-items: flex-start;
+}
+
+.svam-footer-pro-contact-item a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.svam-footer-pro-contact-item a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.svam-footer-pro-icon {
+  flex-shrink: 0;
+  color: #d4af37;
+  opacity: 0.95;
+}
+
+.svam-footer-pro-contact-item-multiline .svam-footer-pro-icon {
+  margin-top: 3px;
+}
+
+/* Thanh dưới cùng: bản quyền */
+.svam-footer-pro-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 0 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.svam-footer-pro-bottom-note {
+  color: rgba(255, 255, 255, 0.34);
+}
+
+/* Responsive: từ đây trở xuống chuyển sang xếp dọc,
+   nên yêu cầu "thẳng hàng ngang" không còn cần thiết,
+   thứ tự DOM đã đúng: title -> tagline -> desc -> Khám phá -> list -> Liên hệ -> list */
+@media (max-width: 968px) {
+  .svam-footer-pro-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .svam-footer-pro-cell-title,
+  .svam-footer-pro-cell-explore-heading,
+  .svam-footer-pro-cell-contact-heading {
+    order: unset;
+  }
+
+  .svam-footer-pro-cell-explore-heading {
+    margin-top: 8px;
+  }
+
+  .svam-footer-pro-cell-contact-heading {
+    margin-top: 8px;
+  }
+
+  .svam-footer-pro-cell-explore-list,
+  .svam-footer-pro-cell-contact-list {
+    margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .svam-footer-pro {
+    padding-top: 48px;
+  }
+
+  .svam-footer-pro-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

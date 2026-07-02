@@ -1,23 +1,38 @@
 import { useEffect, useRef, useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
 
+// Tạo Audio DUY NHẤT ở phạm vi module (ngoài React lifecycle).
+// Dù component BackgroundMusic bị mount/unmount nhiều lần khi chuyển trang
+// (Footer chỉ hiển thị ở một số route), vẫn chỉ có 1 track được phát,
+// không bao giờ tạo ra 2 bản audio chạy song song và lệch nhịp.
+let sharedAudio: HTMLAudioElement | null = null
+
+function getSharedAudio() {
+  if (!sharedAudio) {
+    sharedAudio = new Audio('/assets/nhac-nen.mp3')
+    sharedAudio.loop = true
+    sharedAudio.volume = 0.35
+    sharedAudio.addEventListener('error', () => {
+      if (sharedAudio) {
+        sharedAudio.src = '/nhac-nen.mp3'
+      }
+    })
+  }
+  return sharedAudio
+}
+
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    // Thử đường dẫn trong assets, nếu lỗi tự động tìm ở thư mục gốc public
-    const audio = new Audio('/assets/nhac-nen.mp3')
-    audio.loop = true
-    audio.volume = 0.35
+    const audio = getSharedAudio()
     audioRef.current = audio
 
-    audio.addEventListener('error', () => {
-      if (audioRef.current) {
-        audioRef.current.src = '/nhac-nen.mp3'
-      }
-    })
+    // Đồng bộ lại trạng thái nút bấm với trạng thái thật của audio
+    // (vd: vừa chuyển trang xong nhưng nhạc vẫn đang phát từ trước).
+    setIsPlaying(!audio.paused)
 
     const handleFirstInteraction = () => {
       if (audioRef.current && audioRef.current.paused) {
@@ -36,11 +51,11 @@ export function BackgroundMusic() {
 
     document.addEventListener('click', handleFirstInteraction)
 
+    // KHÔNG pause audio khi unmount — vì đây là instance dùng chung,
+    // Footer unmount (ví dụ khi vào trang /account) không có nghĩa là
+    // người dùng muốn tắt nhạc. Chỉ gỡ event listener của lần mount này.
     return () => {
       removeListeners()
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
     }
   }, [])
 
@@ -70,7 +85,7 @@ export function BackgroundMusic() {
         bottom: '25px', 
         left: '25px', 
         zIndex: 999999,
-        padding: '10px' // Tạo vùng đệm để di chuột vào dễ hơn
+        padding: '10px'
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -92,17 +107,13 @@ export function BackgroundMusic() {
           fontWeight: 600,
           letterSpacing: '0.5px',
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)',
-          
-          /* Hiệu ứng ẩn/hiện mượt mà */
           transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-          opacity: isHovered ? 1 : 0.2, // Bình thường mờ 80%, di chuột vào hiện 100%
-          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)', // Thu nhỏ lùi nhẹ về góc khi ẩn
+          opacity: isHovered ? 1 : 0.2,
+          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)',
         }}
         title={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
       >
         {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
-        
-        {/* Chữ chỉ hiện ra đầy đủ khi di chuột vào, giúp nút cực kỳ gọn */}
         <span style={{
           maxWidth: isHovered ? '150px' : '0px',
           overflow: 'hidden',

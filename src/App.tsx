@@ -2,8 +2,10 @@
 
 
 // Thêm dòng import component cuộn trang này vào dưới nhóm import
+import { LessonTrialQuiz } from './components/LessonTrialQuiz'
+import { BackgroundMusic } from './components/BackgroundMusic'
 import ScrollToTop from './components/ScrollToTop'
-import { ArrowRight, Award, CheckCircle2, Sparkles, UsersRound } from 'lucide-react'
+import { ArrowRight, Award, CheckCircle2, Clock, Sparkles, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
 import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -41,6 +43,13 @@ function getInitials(name: string) {
     .map((part) => part[0])
     .join('')
     .toUpperCase()
+}
+
+
+function formatDuration(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
 // --- GIAO DIỆN TRANG CHỦ (HOMEPAGE COMPONENT) ---
@@ -214,23 +223,47 @@ function LessonDetailPage() {
           </div>
         ) : null}
       </article>
+      <LessonTrialQuiz lessonSlug={lesson.slug} />
     </section>
   )
 }
 
+type QuizProgressState = {
+  currentIndex: number
+  selectedOptions: Record<string, number>
+  score: number
+  answers: Record<string, boolean>
+  showResult: boolean
+  elapsedSeconds: number
+}
+
+function createEmptyQuizState(): QuizProgressState {
+  return {
+    currentIndex: 0,
+    selectedOptions: {},
+    score: 0,
+    answers: {},
+    showResult: false,
+    elapsedSeconds: 0,
+  }
+}
+
 function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
   const [selectedQuizSlug, setSelectedQuizSlug] = useState(historyQuizSets[0].slug)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [selectedOption, setSelectedOption] = useState<number | null>(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [score, setScore] = useState(0)
-  const [showResult, setShowResult] = useState(false)
-  const [answers, setAnswers] = useState<Record<string, boolean>>({})
+  const [quizStates, setQuizStates] = useState<Record<string, QuizProgressState>>({})
   const [unlockedOrders, setUnlockedOrders] = useState<OrderDetail[]>([])
   const [unlockLoading, setUnlockLoading] = useState(false)
 
   const selectedQuiz = historyQuizSets.find((quiz) => quiz.slug === selectedQuizSlug) ?? historyQuizSets[0]
+
+  // Lấy state riêng của bộ quiz đang chọn, tạo mặc định nếu chưa có.
+  const quizState = quizStates[selectedQuizSlug] ?? createEmptyQuizState()
+  const { currentIndex, selectedOptions, score, answers, showResult, elapsedSeconds } = quizState
+
   const question = selectedQuiz.questions[currentIndex] ?? selectedQuiz.questions[0]
+  const submitted = Object.prototype.hasOwnProperty.call(answers, question.id)
+  const selectedOption = selectedOptions[question.id] ?? null
+
   const progress = selectedQuiz.questionCount > 0
     ? ((currentIndex + (showResult ? 1 : 0)) / selectedQuiz.questionCount) * 100
     : 0
@@ -245,6 +278,13 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
     ),
   )
   const hasCardModeAccess = unlockedOrders.length > 0
+
+  function updateQuizState(slug: string, updater: (prev: QuizProgressState) => QuizProgressState) {
+    setQuizStates((prev) => {
+      const current = prev[slug] ?? createEmptyQuizState()
+      return { ...prev, [slug]: updater(current) }
+    })
+  }
 
   useEffect(() => {
     if (!currentUser) {
@@ -295,63 +335,60 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
     }
   }, [currentUser])
 
-  function resetCurrentQuestion() {
-    setSelectedOption(null)
-    setSubmitted(false)
+  // Đồng hồ bấm giờ chỉ chạy cho bộ quiz đang được chọn, và chỉ khi chưa xem kết quả của bộ đó.
+  useEffect(() => {
+    if (!currentUser || unlockLoading || !hasCardModeAccess || showResult) {
+      return
+    }
+    const interval = window.setInterval(() => {
+      updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, elapsedSeconds: prev.elapsedSeconds + 1 }))
+    }, 1000)
+    return () => window.clearInterval(interval)
+  }, [currentUser, unlockLoading, hasCardModeAccess, showResult, selectedQuizSlug])
+
+  function handleSelectOption(index: number) {
+    if (submitted) return
+    updateQuizState(selectedQuizSlug, (prev) => ({
+      ...prev,
+      selectedOptions: { ...prev.selectedOptions, [question.id]: index },
+    }))
   }
 
   function handleSubmit() {
     if (selectedOption === null || submitted) return
     const isCorrect = selectedOption === question.correctIndex
-    const wasAnsweredCorrectly = answers[question.id]
-    setAnswers((prev) => ({ ...prev, [question.id]: isCorrect }))
-    if (isCorrect && !wasAnsweredCorrectly) {
-      setScore((prev) => prev + 1)
-    }
-    if (!isCorrect && wasAnsweredCorrectly) {
-      setScore((prev) => Math.max(0, prev - 1))
-    }
-    setSubmitted(true)
+    updateQuizState(selectedQuizSlug, (prev) => ({
+      ...prev,
+      answers: { ...prev.answers, [question.id]: isCorrect },
+      score: isCorrect ? prev.score + 1 : prev.score,
+    }))
   }
 
   function handleNext() {
     if (currentIndex === selectedQuiz.questions.length - 1) {
-      setShowResult(true)
+      updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, showResult: true }))
       return
     }
-    setCurrentIndex((prev) => prev + 1)
-    resetCurrentQuestion()
+    updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }))
   }
 
   function handlePrevious() {
     if (currentIndex === 0) return
-    setCurrentIndex((prev) => prev - 1)
-    resetCurrentQuestion()
+    updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, currentIndex: prev.currentIndex - 1 }))
   }
 
   function handleSelectQuestion(index: number) {
-    setCurrentIndex(index)
-    setShowResult(false)
-    resetCurrentQuestion()
+    updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, currentIndex: index, showResult: false }))
   }
 
   function handleRestart() {
-    setCurrentIndex(0)
-    setSelectedOption(null)
-    setSubmitted(false)
-    setScore(0)
-    setShowResult(false)
-    setAnswers({})
+    // Chỉ reset đúng bộ quiz đang chọn, không ảnh hưởng 2 bộ còn lại.
+    setQuizStates((prev) => ({ ...prev, [selectedQuizSlug]: createEmptyQuizState() }))
   }
 
   function handleSelectQuiz(slug: string) {
+    // Chỉ đổi tab hiển thị, KHÔNG đụng vào state đã lưu của bất kỳ bộ quiz nào.
     setSelectedQuizSlug(slug)
-    setCurrentIndex(0)
-    setSelectedOption(null)
-    setSubmitted(false)
-    setScore(0)
-    setShowResult(false)
-    setAnswers({})
   }
 
   return (
@@ -409,18 +446,28 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
             </div>
           </div>
           <div className="quiz-set-grid" aria-label="Chọn bộ quiz theo cấp độ">
-            {historyQuizSets.map((quiz) => (
-              <button
-                key={quiz.slug}
-                type="button"
-                className={`quiz-set-card ${quiz.slug === selectedQuiz.slug ? 'active' : ''}`}
-                onClick={() => handleSelectQuiz(quiz.slug)}
-              >
-                <span>{quiz.questions[0]?.level}</span>
-                <strong>{quiz.title}</strong>
-                <small>{quiz.questionCount} câu hỏi</small>
-              </button>
-            ))}
+            {historyQuizSets.map((quiz) => {
+              const quizProgress = quizStates[quiz.slug]
+              const quizAnsweredCount = quizProgress ? Object.keys(quizProgress.answers).length : 0
+              return (
+                <button
+                  key={quiz.slug}
+                  type="button"
+                  className={`quiz-set-card ${quiz.slug === selectedQuiz.slug ? 'active' : ''}`}
+                  onClick={() => handleSelectQuiz(quiz.slug)}
+                >
+                  <span>{quiz.questions[0]?.level}</span>
+                  <strong>{quiz.title}</strong>
+                  <small>
+                    {quizProgress?.showResult
+                      ? `Đã hoàn thành - ${quizProgress.score}/${quiz.questionCount}`
+                      : quizAnsweredCount > 0
+                        ? `Đang làm dở - ${quizAnsweredCount}/${quiz.questionCount}`
+                        : `${quiz.questionCount} câu hỏi`}
+                  </small>
+                </button>
+              )
+            })}
           </div>
 
           {showResult ? (
@@ -432,6 +479,10 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
               <div>
                 <p className="eyebrow dark">{selectedQuiz.title}</p>
                 <h3>Hoàn thành bộ quiz</h3>
+                <div className="quiz-result-time">
+                  <Clock size={16} />
+                  <span>Thời gian làm bài: <strong>{formatDuration(elapsedSeconds)}</strong></span>
+                </div>
                 <p>
                   Bạn đã trả lời đúng {score} / {selectedQuiz.questionCount} câu trong bộ {selectedQuiz.questions[0]?.level}. Hãy luyện lại, xem bài học liên quan hoặc mua bộ thẻ phù hợp.
                 </p>
@@ -450,7 +501,13 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
                     <span className="eyebrow dark">{question.level}</span>
                     <h3>Câu {currentIndex + 1}</h3>
                   </div>
-                  <strong>{Math.round(progress)}%</strong>
+                  <div className="quiz-progress-meta">
+                    <span className="quiz-timer-badge">
+                      <Clock size={14} />
+                      {formatDuration(elapsedSeconds)}
+                    </span>
+                    <strong>{Math.round(progress)}%</strong>
+                  </div>
                 </div>
                 <div className="quiz-progress-bar">
                   <span style={{ width: `${progress}%` }} />
@@ -465,7 +522,7 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
                         key={option}
                         type="button"
                         className={`quiz-option ${selectedOption === index ? 'selected' : ''} ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''}`}
-                        onClick={() => !submitted && setSelectedOption(index)}
+                        onClick={() => handleSelectOption(index)}
                       >
                         <span>{String.fromCharCode(65 + index)}</span>
                         <strong>{option}</strong>
@@ -496,7 +553,7 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
                     </button>
                   )}
                   <button className="secondary-btn" onClick={handleNext}>
-                    {currentIndex === selectedQuiz.questions.length - 1 ? 'Xem kết quả' : 'Next'}
+                    {currentIndex === selectedQuiz.questions.length - 1 ? 'Xem kết quả' : 'Câu tiếp theo'}
                   </button>
                 </div>
               </div>
@@ -514,11 +571,12 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
                   {selectedQuiz.questions.map((item, index) => {
                     const isAnswered = Object.prototype.hasOwnProperty.call(answers, item.id)
                     const isCorrect = answers[item.id]
+                    const isWrong = isAnswered && !isCorrect
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        className={`quiz-checkpoint ${index === currentIndex ? 'active' : ''} ${isAnswered ? 'answered' : ''} ${isCorrect ? 'done' : ''}`}
+                        className={`quiz-checkpoint ${index === currentIndex ? 'active' : ''} ${isAnswered ? 'answered' : ''} ${isCorrect ? 'done' : ''} ${isWrong ? 'wrong' : ''}`}
                         onClick={() => handleSelectQuestion(index)}
                         aria-label={`Chọn câu hỏi ${index + 1}`}
                       >
@@ -1319,12 +1377,15 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* CHÈN ĐÚNG 1 DÒNG NÀY VÀO ĐẦY ĐỂ TỰ ĐỘNG CUỘN LÊN ĐẦU TRANG */}
       <ScrollToTop />
+
+      {/* 2. CHÈN BỘ PHÁT NHẠC NẰM ĐỘC LẬP TẠI ĐÂY */}
+      <BackgroundMusic />
 
       {!isAdminRoute ? (
         <Header cartCount={cartCount} learnerName={currentUser?.fullName} isAdmin={currentUser?.role === 'admin'} onLogout={handleLogout} />
       ) : null}
+      
       <Routes>
         <Route path="/" element={<HomePage featuredProduct={featuredProduct} />} />
         <Route path="/products" element={<ProductsPage products={catalog} loading={catalogLoading} onAdd={handleAdd} />} />
@@ -1338,6 +1399,7 @@ export default function App() {
         <Route path="/account" element={<AccountPage currentUser={currentUser} authLoading={authLoading} onAuthSuccess={handleAuthSuccess} onLogout={handleLogout} />} />
         <Route path="/dashboard/*" element={<AdminDashboard currentUser={currentUser} authLoading={authLoading} onLogout={handleLogout} />} />
       </Routes>
+      
       {!isAdminRoute && !isAccountRoute ? <Footer /> : null}
     </div>
   )
