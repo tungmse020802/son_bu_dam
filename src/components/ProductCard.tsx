@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { AlertTriangle, Boxes, Sparkles, Flame, Check } from 'lucide-react'
+import { Boxes, Check } from 'lucide-react'
 import type { Product } from '../types/app'
 import { formatCurrency } from '../utils/store'
 
@@ -11,30 +11,37 @@ interface ProductCardProps {
 
 export function ProductCard({ product, onAdd, dimmed = false }: ProductCardProps) {
   const isSoldOut = product.stock <= 0
-  const isLowStock = product.stock > 0 && product.stock <= 3
   const isDisabled = dimmed || isSoldOut
-
-  // State điều khiển hiển thị thông báo Shopee Toast
   const [showSuccessToast, setShowSuccessToast] = useState(false)
 
-  // TỰ ĐỘNG KHÔI PHỤC GIÁ GỐC NẾU DỮ LIỆU ĐẦU VÀO BỊ THIẾU TRƯỜNG (DỰ PHÒNG CHO API)
   let finalOriginalPrice = product.originalPrice;
   if (!finalOriginalPrice) {
     if (product.price === 429000) finalOriginalPrice = 450000;
     if (product.price === 719000) finalOriginalPrice = 750000;
   }
 
-  // TÍNH TOÁN % GIẢM GIÁ DỰA TRÊN GIÁ GỐC THỰC TẾ
   const hasDiscount = finalOriginalPrice !== undefined && finalOriginalPrice > product.price
   const discountPercent = hasDiscount 
     ? Math.round(((finalOriginalPrice! - product.price) / finalOriginalPrice!) * 100) 
     : 0
 
-  // KIỂM TRA ĐỂ CHÈN BADGE BEST SELLER (Áp dụng cho sản phẩm Thẻ lẻ / Không phải combo)
-  const isBestSeller = product.characterIds.length === 1 || product.id.includes('tron-bo');
+  const productNameLower = product.name.toLowerCase();
+  const isSingleSet = productNameLower.includes('trọn bộ') || productNameLower.includes('thẻ lẻ');
+  const isCombo = !isSingleSet && (product.characterIds.length > 1 || productNameLower.includes('combo'));
 
-  // Hàm xử lý tương tác thêm vào giỏ và kích hoạt Toast thông báo
-  const handleAddToCart = () => {
+  // Lấy giá trị trường tag động ra
+  const customBadgeText = (product as any).tag;
+
+  let badgeColorClass = 'badge-red'; 
+  if (customBadgeText === 'MỚI' || customBadgeText === 'NEW') {
+    badgeColorClass = 'badge-blue';
+  } else if (customBadgeText === 'GIẢM GIÁ' || customBadgeText === 'SALE') {
+    badgeColorClass = 'badge-orange';
+  }
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
     onAdd(product.id)
     setShowSuccessToast(true)
 
@@ -51,102 +58,50 @@ export function ProductCard({ product, onAdd, dimmed = false }: ProductCardProps
 
   return (
     <>
-      <article className={`product-card product-card-premium ${isSoldOut ? 'product-card-soldout' : ''} ${dimmed ? 'product-card-dimmed' : ''}`}>
-        <div className="product-image-wrap">
-          <img src={product.image} alt={product.name} className="product-image" />
-          <span className="badge">{product.grade}</span>
+      <article className={`minimal-product-card ${isSoldOut ? 'soldout' : ''} ${dimmed ? 'dimmed' : ''}`}>
+        <div className="minimal-image-container">
+          <img src={product.image} alt={product.name} className="minimal-image" />
           
-          {/* TAG BEST SELLER ĐẲNG CẤP THƯƠNG MẠI ĐIỆN TỬ (CHỈ HIỂN THỊ TRÊN SẢN PHẨM ĐẦU TIÊN) */}
-          {isBestSeller && !dimmed && (
-            <div 
-              className="product-floating-chip" 
-              style={{ 
-                background: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)', 
-                color: '#ffffff',
-                fontWeight: 'bold',
-                boxShadow: '0 4px 12px rgba(255, 77, 79, 0.35)',
-                border: 'none',
-                padding: '5px 10px',
-                borderRadius: '6px',
-                letterSpacing: '0.5px'
-              }}
-            >
-              <Flame size={13} fill="#fff" />
-              Best Seller
-            </div>
+          {!dimmed && !isSoldOut && customBadgeText && (
+            <span className={`minimal-badge ${badgeColorClass}`}>
+              {customBadgeText}
+            </span>
           )}
+          {isSoldOut && <span className="minimal-badge badge-soldout">HẾT HÀNG</span>}
 
-          {hasDiscount && !dimmed && (
-            <div className="product-sale-off-badge">
-              -{discountPercent}% OFF
-            </div>
+          {!isDisabled && (
+            <button className="minimal-hover-add-btn" onClick={handleAddToCart}>
+              <Boxes size={14} />
+              Thêm vào giỏ hàng
+            </button>
           )}
         </div>
 
-        <div className="product-content product-content-refined">
-          {dimmed ? (
-            <div className="product-dimmed-badge">
-              <strong>Sắp mở bán</strong>
-            </div>
-          ) : null}
-          <div className={`product-detail-stack ${dimmed ? 'dimmed' : ''}`}>
-            <div className="product-topline">
-              <p className="product-period">{product.period}</p>
-            </div>
-            <div className="product-meta-row">
-              <span className="product-meta-pill">{product.type}</span>
-              <span className="product-meta-pill">{product.characterIds.length > 1 ? 'Combo' : 'Thẻ lẻ'}</span>
-            </div>
-            <h3>{product.name}</h3>
-            <p>{product.subtitle}</p>
+        <div className="minimal-info-container">
+          <div className="minimal-meta-row">
+            <span>{product.grade}</span>
+            {isCombo && (
+              <>
+                <span className="dot-separator">•</span>
+                <span>Combo</span>
+              </>
+            )}
+          </div>
 
-            {/* KHỐI PHÂN TÍCH GIÁ */}
-            <div className="product-price-analysis-container">
-              <div className="product-price-main-block">
-                <span className="product-sale-price-label">Giá ưu đãi</span>
-                <strong className="product-sale-price">{formatCurrency(product.price)}</strong>
-              </div>
-              
-              {hasDiscount && !dimmed && finalOriginalPrice ? (
-                <div className="product-price-old-block">
-                  <span className="product-old-price-strike">
-                    {formatCurrency(finalOriginalPrice)}
-                  </span>
-                  <span className="product-saved-amount-badge">
-                    Tiết kiệm {formatCurrency(finalOriginalPrice - product.price)}
-                  </span>
-                </div>
-              ) : (
-                /* Giữ khoảng trống tịnh tiến vô hình */
-                <div className="product-price-old-block empty-placeholder" style={{ opacity: 0 }}>
-                  <span className="product-old-price-strike">0đ</span>
-                  <span className="product-saved-amount-badge">0đ</span>
-                </div>
-              )}
-            </div>
+          <h3 className="minimal-title" title={product.name}>{product.name}</h3>
 
-            <ul className="feature-list product-feature-list">
-              {product.features.slice(0, 3).map((feature) => (
-                <li key={feature}>{feature}</li>
-              ))}
-            </ul>
-
-            {/* Khối này sẽ tự động neo chặt xuống chân của card */}
-            <div className="product-card-actions product-card-actions-stacked">
-              <button className="primary-btn full" onClick={handleAddToCart} disabled={isDisabled}>
-                <Boxes size={16} />
-                {isSoldOut ? 'Tạm hết hàng' : dimmed ? 'Chưa mở bán' : 'Thêm vào giỏ hàng'}
-              </button>
-              <span className={`product-note ${isLowStock ? 'warning' : ''}`}>
-                {isLowStock ? <AlertTriangle size={14} /> : <Sparkles size={14} />}
-                {dimmed ? 'Sản phẩm đang được khóa hiển thị' : isLowStock ? 'Ưu tiên chốt đơn sớm để giữ combo' : 'Gợi ý học kèm quiz'}
-              </span>
-            </div>
+          <div className="minimal-price-row">
+            <span className="minimal-current-price">{formatCurrency(product.price)}</span>
+            {hasDiscount && !dimmed && finalOriginalPrice && (
+              <>
+                <span className="minimal-inline-discount-tag">-{discountPercent}%</span>
+                <span className="minimal-old-price">{formatCurrency(finalOriginalPrice)}</span>
+              </>
+            )}
           </div>
         </div>
       </article>
 
-      {/* TOAST SHOPEE POPUP */}
       {showSuccessToast && (
         <div className="shopee-toast-overlay">
           <div className="shopee-toast-box">

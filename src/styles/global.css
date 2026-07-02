@@ -4689,3 +4689,216 @@ footer ul {
   50% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 0.8; }
 }
+
+/* ==========================================================================
+   GIAO DIỆN SẢN PHẨM HIỆN ĐẠI - HOÀN THIỆN TOÀN DIỆN (GIÁ ĐỎ & TAG ĐỘNG)
+   ========================================================================== */
+
+.minimal-product-card {
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.minimal-product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+.minimal-image-container {
+  position: relative;
+  width: 100%;
+  padding-top: 105%;
+  background: #fdfcf9;
+  overflow: hidden;
+}
+
+.minimal-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.minimal-product-card:hover .minimal-image {
+  transform: scale(1.03);
+}
+
+/* Định dạng nhãn dán góc trên hình dạng viên thuốc dẹt ngang */
+.minimal-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+/* PHÂN LOẠI MÀU CHO TAG ĐỘNG THEO LỰA CHỌN CỦA BẠN */
+/* 1. Phiên bản màu Đỏ: Dùng cho BÁN CHẠY, HOT, XU HƯỚNG... (Chuẩn sàn Shopee/Lazada) */
+.badge-red {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff1a1a 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 26, 26, 0.35);
+}
+
+/* 2. Phiên bản màu Xanh Dương: Dùng cho chữ MỚI hoặc NEW */
+.badge-blue {
+  background: linear-gradient(135deg, #2f80ed 0%, #1f60bd 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(47, 128, 237, 0.35);
+}
+
+/* 3. Phiên bản màu Cam: Dùng cho SALE / GIẢM GIÁ */
+.badge-orange {
+  background: linear-gradient(135deg, #ff9c6e 0%, #ff7875 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(255, 120, 117, 0.35);
+}
+
+.badge-soldout {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Thanh nút thêm vào giỏ hàng trượt mượt mà lên trên */
+.minimal-hover-add-btn {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  z-index: 3;
+}
+
+.minimal-product-card:hover .minimal-hover-add-btn {
+  transform: translateY(0);
+}
+
+.minimal-hover-add-btn:hover {
+  background: #222222;
+}
+
+/* Khối thông tin chữ phía dưới */
+.minimal-info-container {
+  padding: 14px 10px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.minimal-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.dot-separator {
+  font-size: 8px;
+  color: #bfbfbf;
+}
+
+.minimal-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f1f1f;
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Khu vực hiển thị giá tiền nằm ngang */
+.minimal-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* GIÁ CHÍNH THỨC: Đỏ rực rỡ nổi bật và chuyên nghiệp */
+.minimal-current-price {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ff4d4f;
+}
+
+/* Viên thuốc chứa % giảm giá màu xanh dương phong cách Coolmate */
+.minimal-inline-discount-tag {
+  background: #2f80ed;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.minimal-old-price {
+  font-size: 12px;
+  color: #bfbfbf;
+  text-decoration: line-through;
+  font-weight: 400;
+}
+
+.minimal-product-card.dimmed {
+  opacity: 0.5;
+}
+
+/* Trong global.css */
+.badge-custom {
+  position: absolute;
+  top: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  text-transform: uppercase;
+  color: white;
+}
+
+/* Các phân loại màu */
+.badge-black {
+  background: black;
+}
+.badge-blue {
+  background: blue;
+}
+.badge-red {
+  background: red;
+}

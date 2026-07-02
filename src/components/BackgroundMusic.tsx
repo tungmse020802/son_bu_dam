@@ -13,17 +13,41 @@ export function BackgroundMusic() {
     audio.volume = 0.35
     audioRef.current = audio
 
+    // LẤY LẠI THỜI GIAN ĐÃ PHÁT TRƯỚC ĐÓ (NẾU CÓ)
+    const savedTime = localStorage.getItem('music_current_time')
+    if (savedTime) {
+      audio.currentTime = parseFloat(savedTime)
+    }
+
     audio.addEventListener('error', () => {
       if (audioRef.current) {
         audioRef.current.src = '/nhac-nen.mp3'
+        // Áp dụng lại thời gian nếu đổi nguồn file do lỗi đường dẫn
+        if (savedTime) audioRef.current.currentTime = parseFloat(savedTime)
       }
     })
 
+    // THEO DÕI VÀ LƯU LIÊN TỤC THỜI GIAN ĐANG CHẠY CỦA NHẠC
+    const handleTimeUpdate = () => {
+      if (audioRef.current) {
+        localStorage.setItem('music_current_time', audioRef.current.currentTime.toString())
+      }
+    }
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+
     const handleFirstInteraction = () => {
+      // Nếu trước đó user chủ động tắt nhạc, không tự động phát ở trang mới
+      const savedPlayingState = localStorage.getItem('music_is_playing')
+      if (savedPlayingState === 'false') {
+        removeListeners()
+        return
+      }
+
       if (audioRef.current && audioRef.current.paused) {
         audioRef.current.play()
           .then(() => {
             setIsPlaying(true)
+            localStorage.setItem('music_is_playing', 'true')
             removeListeners()
           })
           .catch((err) => console.log("Chờ người dùng click để kích hoạt nhạc...", err))
@@ -39,6 +63,7 @@ export function BackgroundMusic() {
     return () => {
       removeListeners()
       if (audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', handleTimeUpdate)
         audioRef.current.pause()
       }
     }
@@ -53,9 +78,13 @@ export function BackgroundMusic() {
     if (isPlaying) {
       audioRef.current.pause()
       setIsPlaying(false)
+      localStorage.setItem('music_is_playing', 'false') // Lưu lại trạng thái user tắt nhạc
     } else {
       audioRef.current.play()
-        .then(() => setIsPlaying(true))
+        .then(() => {
+          setIsPlaying(true)
+          localStorage.setItem('music_is_playing', 'true') // Lưu lại trạng thái user bật nhạc
+        })
         .catch((err) => {
           console.error(err)
           alert("Không thể phát nhạc! Bạn hãy kiểm tra file nhac-nen.mp3 đã nằm trong thư mục public/assets chưa nhé.")
@@ -70,7 +99,7 @@ export function BackgroundMusic() {
         bottom: '25px', 
         left: '25px', 
         zIndex: 999999,
-        padding: '10px' // Tạo vùng đệm để di chuột vào dễ hơn
+        padding: '10px' 
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -92,17 +121,14 @@ export function BackgroundMusic() {
           fontWeight: 600,
           letterSpacing: '0.5px',
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)',
-          
-          /* Hiệu ứng ẩn/hiện mượt mà */
           transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-          opacity: isHovered ? 1 : 0.2, // Bình thường mờ 80%, di chuột vào hiện 100%
-          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)', // Thu nhỏ lùi nhẹ về góc khi ẩn
+          opacity: isHovered ? 1 : 0.2, 
+          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)', 
         }}
         title={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
       >
         {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
         
-        {/* Chữ chỉ hiện ra đầy đủ khi di chuột vào, giúp nút cực kỳ gọn */}
         <span style={{
           maxWidth: isHovered ? '150px' : '0px',
           overflow: 'hidden',

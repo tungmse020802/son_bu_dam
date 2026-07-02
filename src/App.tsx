@@ -2,6 +2,7 @@
 
 
 // Thêm dòng import component cuộn trang này vào dưới nhóm import
+import { BackgroundMusic } from './components/BackgroundMusic'
 import ScrollToTop from './components/ScrollToTop'
 import { ArrowRight, Award, CheckCircle2, Sparkles, UsersRound } from 'lucide-react'
 import type { FormEvent } from 'react'
@@ -1319,12 +1320,15 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      {/* CHÈN ĐÚNG 1 DÒNG NÀY VÀO ĐẦY ĐỂ TỰ ĐỘNG CUỘN LÊN ĐẦU TRANG */}
       <ScrollToTop />
+
+      {/* 2. CHÈN BỘ PHÁT NHẠC NẰM ĐỘC LẬP TẠI ĐÂY */}
+      <BackgroundMusic />
 
       {!isAdminRoute ? (
         <Header cartCount={cartCount} learnerName={currentUser?.fullName} isAdmin={currentUser?.role === 'admin'} onLogout={handleLogout} />
       ) : null}
+      
       <Routes>
         <Route path="/" element={<HomePage featuredProduct={featuredProduct} />} />
         <Route path="/products" element={<ProductsPage products={catalog} loading={catalogLoading} onAdd={handleAdd} />} />
@@ -1338,6 +1342,7 @@ export default function App() {
         <Route path="/account" element={<AccountPage currentUser={currentUser} authLoading={authLoading} onAuthSuccess={handleAuthSuccess} onLogout={handleLogout} />} />
         <Route path="/dashboard/*" element={<AdminDashboard currentUser={currentUser} authLoading={authLoading} onLogout={handleLogout} />} />
       </Routes>
+      
       {!isAdminRoute && !isAccountRoute ? <Footer /> : null}
     </div>
   )

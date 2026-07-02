@@ -1,10 +1,8 @@
-import { BackgroundMusic } from './BackgroundMusic'
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate, NavLink, Link } from 'react-router-dom'
 import { 
   Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, 
-  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin, Compass, ShieldCheck,
-  Volume2, VolumeX 
+  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin 
 } from 'lucide-react'
 
 interface HeaderProps {
@@ -252,9 +250,6 @@ export function Footer() {
           </div>
         </div>
       </div>
-
-      {/* Gọi trực tiếp bộ phát nhạc nội bộ */}
-      <BackgroundMusic />
     </footer>
   )
 }
