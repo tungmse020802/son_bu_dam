@@ -1,53 +1,44 @@
 import { useEffect, useRef, useState } from 'react'
 import { Volume2, VolumeX } from 'lucide-react'
 
+// Tạo Audio DUY NHẤT ở phạm vi module (ngoài React lifecycle).
+// Dù component BackgroundMusic bị mount/unmount nhiều lần khi chuyển trang
+// (Footer chỉ hiển thị ở một số route), vẫn chỉ có 1 track được phát,
+// không bao giờ tạo ra 2 bản audio chạy song song và lệch nhịp.
+let sharedAudio: HTMLAudioElement | null = null
+
+function getSharedAudio() {
+  if (!sharedAudio) {
+    sharedAudio = new Audio('/assets/nhac-nen.mp3')
+    sharedAudio.loop = true
+    sharedAudio.volume = 0.35
+    sharedAudio.addEventListener('error', () => {
+      if (sharedAudio) {
+        sharedAudio.src = '/nhac-nen.mp3'
+      }
+    })
+  }
+  return sharedAudio
+}
+
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    // Thử đường dẫn trong assets, nếu lỗi tự động tìm ở thư mục gốc public
-    const audio = new Audio('/assets/nhac-nen.mp3')
-    audio.loop = true
-    audio.volume = 0.35
+    const audio = getSharedAudio()
     audioRef.current = audio
 
-    // LẤY LẠI THỜI GIAN ĐÃ PHÁT TRƯỚC ĐÓ (NẾU CÓ)
-    const savedTime = localStorage.getItem('music_current_time')
-    if (savedTime) {
-      audio.currentTime = parseFloat(savedTime)
-    }
-
-    audio.addEventListener('error', () => {
-      if (audioRef.current) {
-        audioRef.current.src = '/nhac-nen.mp3'
-        // Áp dụng lại thời gian nếu đổi nguồn file do lỗi đường dẫn
-        if (savedTime) audioRef.current.currentTime = parseFloat(savedTime)
-      }
-    })
-
-    // THEO DÕI VÀ LƯU LIÊN TỤC THỜI GIAN ĐANG CHẠY CỦA NHẠC
-    const handleTimeUpdate = () => {
-      if (audioRef.current) {
-        localStorage.setItem('music_current_time', audioRef.current.currentTime.toString())
-      }
-    }
-    audio.addEventListener('timeupdate', handleTimeUpdate)
+    // Đồng bộ lại trạng thái nút bấm với trạng thái thật của audio
+    // (vd: vừa chuyển trang xong nhưng nhạc vẫn đang phát từ trước).
+    setIsPlaying(!audio.paused)
 
     const handleFirstInteraction = () => {
-      // Nếu trước đó user chủ động tắt nhạc, không tự động phát ở trang mới
-      const savedPlayingState = localStorage.getItem('music_is_playing')
-      if (savedPlayingState === 'false') {
-        removeListeners()
-        return
-      }
-
       if (audioRef.current && audioRef.current.paused) {
         audioRef.current.play()
           .then(() => {
             setIsPlaying(true)
-            localStorage.setItem('music_is_playing', 'true')
             removeListeners()
           })
           .catch((err) => console.log("Chờ người dùng click để kích hoạt nhạc...", err))
@@ -60,12 +51,11 @@ export function BackgroundMusic() {
 
     document.addEventListener('click', handleFirstInteraction)
 
+    // KHÔNG pause audio khi unmount — vì đây là instance dùng chung,
+    // Footer unmount (ví dụ khi vào trang /account) không có nghĩa là
+    // người dùng muốn tắt nhạc. Chỉ gỡ event listener của lần mount này.
     return () => {
       removeListeners()
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('timeupdate', handleTimeUpdate)
-        audioRef.current.pause()
-      }
     }
   }, [])
 
@@ -78,13 +68,9 @@ export function BackgroundMusic() {
     if (isPlaying) {
       audioRef.current.pause()
       setIsPlaying(false)
-      localStorage.setItem('music_is_playing', 'false') // Lưu lại trạng thái user tắt nhạc
     } else {
       audioRef.current.play()
-        .then(() => {
-          setIsPlaying(true)
-          localStorage.setItem('music_is_playing', 'true') // Lưu lại trạng thái user bật nhạc
-        })
+        .then(() => setIsPlaying(true))
         .catch((err) => {
           console.error(err)
           alert("Không thể phát nhạc! Bạn hãy kiểm tra file nhac-nen.mp3 đã nằm trong thư mục public/assets chưa nhé.")
@@ -99,7 +85,7 @@ export function BackgroundMusic() {
         bottom: '25px', 
         left: '25px', 
         zIndex: 999999,
-        padding: '10px' 
+        padding: '10px'
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -122,13 +108,12 @@ export function BackgroundMusic() {
           letterSpacing: '0.5px',
           boxShadow: '0 4px 15px rgba(0, 0, 0, 0.4)',
           transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
-          opacity: isHovered ? 1 : 0.2, 
-          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)', 
+          opacity: isHovered ? 1 : 0.2,
+          transform: isHovered ? 'translateX(0) scale(1)' : 'translateX(-15px) scale(0.95)',
         }}
         title={isPlaying ? "Tắt nhạc nền" : "Bật nhạc nền"}
       >
         {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
-        
         <span style={{
           maxWidth: isHovered ? '150px' : '0px',
           overflow: 'hidden',

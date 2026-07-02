@@ -417,45 +417,22 @@ export const LessonQuizDemo: Record<string, Array<{
       prompt: 'Hai Bà Trưng đã phất cờ khởi nghĩa vào năm nào?',
       options: ['Năm 40', 'Năm 42', 'Năm 43', 'Năm 542'],
       correctIndex: 0,
-      explanation: 'Mùa xuân năm 40, Hai Bà Trưng phất cờ khởi nghĩa tại Hát Môn và nhanh chóng giành độc lập.'
+      explanation: 'Mùa xuân năm 40, Hai Bà Trưng phất cờ khởi nghĩa tại Hát Môn và nhanh chóng giành độc lập.',
     },
     {
       id: 'demo-hbt-2',
       prompt: 'Thái thú tàn bạo nào của nhà Đông Hán đã thúc đẩy cuộc khởi nghĩa bùng nổ?',
       options: ['Tô Định', 'Mã Viện', 'Sĩ Nhiếp', 'Cao Biền'],
       correctIndex: 0,
-      explanation: 'Thái thú Tô Định nổi tiếng tàn bạo, tham lam đã đẩy nhân dân vào cảnh khốn cùng và sát hại Thi Sách (chồng Trưng Trắc).'
+      explanation: 'Thái thú Tô Định nổi tiếng tàn bạo, tham lam đã đẩy nhân dân vào cảnh khốn cùng và sát hại Thi Sách (chồng Trưng Trắc).',
     },
     {
       id: 'demo-hbt-3',
       prompt: 'Cuộc khởi nghĩa Hai Bà Trưng được phát động đầu tiên tại địa danh nào?',
       options: ['Mê Linh', 'Hát Môn', 'Cổ Loa', 'Phú Điền'],
       correctIndex: 1,
-      explanation: 'Cuộc khởi nghĩa chính thức được phất cờ tại cửa sông Hát (Hát Môn, Hà Nội ngày nay).'
-    }
-  ],
-  'quang-trung-nguyen-hue': [
-    {
-      id: 'demo-qt-1',
-      prompt: 'Nguyễn Huệ đại phá quân Thanh vào dịp tết năm nào?',
-      options: ['Tết Kỷ Dậu 1789', 'Tết Mậu Thân 1788', 'Tết Canh Tý 1790', 'Tết Quý Sửu 1793'],
-      correctIndex: 0,
-      explanation: 'Vào dịp Tết Kỷ Dậu (1789), vua Quang Trung - Nguyễn Huệ chỉ huy quân sĩ thần tốc tiến ra Bắc đại phá 29 vạn quân Thanh.'
+      explanation: 'Cuộc khởi nghĩa chính thức được phất cờ tại cửa sông Hát (Hát Môn, Hà Nội ngày nay).',
     },
-    {
-      id: 'demo-qt-2',
-      prompt: 'Trận đánh quyết định nào lật đổ hoàn toàn quân Thanh ở kinh thành?',
-      options: ['Trận Rạch Gầm - Xoài Mút', 'Trận Ngọc Hồi - Đống Đa', 'Trận Chi Lăng', 'Trận Bạch Đằng'],
-      correctIndex: 1,
-      explanation: 'Trận Ngọc Hồi - Đống Đa là chiến công vang dội nhất quét sạch quân Thanh khỏi bờ cõi.'
-    },
-    {
-      id: 'demo-qt-3',
-      prompt: 'Trước khi tiến quân ra Bắc, Nguyễn Huệ lên ngôi hoàng đế lấy niên hiệu là gì?',
-      options: ['Thái Đức', 'Quang Trung', 'Gia Long', 'Cảnh Thịnh'],
-      correctIndex: 1,
-      explanation: 'Tháng 12 năm 1788, Nguyễn Huệ tế cáo trời đất lên ngôi hoàng đế, lấy niên hiệu là Quang Trung.'
-    }
   ],
   'trieu-thi-trinh-khat-vong-tu-do': [
     {
@@ -463,22 +440,266 @@ export const LessonQuizDemo: Record<string, Array<{
       prompt: 'Bà Triệu lãnh đạo cuộc khởi nghĩa chống lại ách đô hộ của triều đại nào?',
       options: ['Nhà Đông Hán', 'Nhà Ngô', 'Nhà Đường', 'Nhà Lương'],
       correctIndex: 1,
-      explanation: 'Năm 248, Bà Triệu (Triệu Thị Trinh) khởi nghĩa chống lại ách đô hộ tàn bạo của nhà Đông Ngô.'
+      explanation: 'Năm 248, Bà Triệu (Triệu Thị Trinh) khởi nghĩa chống lại ách đô hộ tàn bạo của nhà Đông Ngô.',
     },
     {
       id: 'demo-ttt-2',
       prompt: 'Căn cứ chính của cuộc khởi nghĩa Bà Triệu nằm ở vùng nào?',
       options: ['Hát Môn', 'Mê Linh', 'Phú Điền', 'Dạ Trạch'],
       correctIndex: 2,
-      explanation: 'Bà khởi nghĩa tại vùng núi Phú Điền, huyện Yên Định, tỉnh Thanh Hóa ngày nay.'
+      explanation: 'Bà khởi nghĩa tại vùng núi Phú Điền, huyện Yên Định, tỉnh Thanh Hóa ngày nay.',
     },
     {
       id: 'demo-ttt-3',
       prompt: 'Câu nói nổi tiếng: "Tôi muốn cưỡi cơn gió mạnh, đạp luồng sóng dữ..." là của ai?',
       options: ['Trưng Trắc', 'Bùi Thị Xuân', 'Triệu Thị Trinh', 'Nguyễn Thị Minh Khai'],
       correctIndex: 2,
-      explanation: 'Đây là câu tuyên ngôn bất hủ thể hiện chí khí lẫm liệt, khát vọng tự do dân tộc của Bà Triệu.'
-    }
-  ]
-  // Bạn có thể viết tiếp các key tương ứng với 9 slug nhân vật còn lại theo cấu trúc này...
-};
+      explanation: 'Đây là câu tuyên ngôn bất hủ thể hiện chí khí lẫm liệt, khát vọng tự do dân tộc của Bà Triệu.',
+    },
+  ],
+  'an-duong-vuong-xay-dung-au-lac': [
+    {
+      id: 'demo-adv-1',
+      prompt: 'An Dương Vương tên thật là gì?',
+      options: ['Thục Phán', 'Cao Lỗ', 'Triệu Đà', 'Lý Bí'],
+      correctIndex: 0,
+      explanation: 'An Dương Vương tên thật là Thục Phán, người thống nhất Âu Việt và Lạc Việt lập nên nước Âu Lạc.',
+    },
+    {
+      id: 'demo-adv-2',
+      prompt: 'Kinh đô của nước Âu Lạc được đặt tại đâu?',
+      options: ['Mê Linh', 'Cổ Loa', 'Hoa Lư', 'Phong Châu'],
+      correctIndex: 1,
+      explanation: 'An Dương Vương cho dời đô về đồng bằng và xây thành Cổ Loa kiên cố.',
+    },
+    {
+      id: 'demo-adv-3',
+      prompt: 'Vũ khí nào giúp Âu Lạc nhiều lần đánh bại quân Triệu Đà?',
+      options: ['Nỏ Liên Châu', 'Gươm thần', 'Voi chiến', 'Thành đồng'],
+      correctIndex: 0,
+      explanation: 'Nỏ Liên Châu (nỏ thần) do Cao Lỗ chế tạo là vũ khí lợi hại của quân đội Âu Lạc.',
+    },
+  ],
+  'cao-lo-giu-bi-mat-quoc-gia': [
+    {
+      id: 'demo-cl-1',
+      prompt: 'Cao Lỗ nổi tiếng với việc chế tạo loại vũ khí nào?',
+      options: ['Nỏ Liên Châu', 'Cung tên thường', 'Giáo dài', 'Khiên đồng'],
+      correctIndex: 0,
+      explanation: 'Cao Lỗ là nhà sáng chế quân sự kiệt xuất, người chế tạo ra nỏ Liên Châu nổi tiếng.',
+    },
+    {
+      id: 'demo-cl-2',
+      prompt: 'Cao Lỗ nhiều lần khuyên An Dương Vương điều gì?',
+      options: [
+        'Mở rộng buôn bán với Triệu Đà',
+        'Đề cao cảnh giác trước âm mưu của Triệu Đà',
+        'Dời đô đi nơi khác',
+        'Giảm quân đội để tiết kiệm',
+      ],
+      correctIndex: 1,
+      explanation: 'Khi Triệu Đà cho Trọng Thủy sang làm rể dò xét bí mật quân sự, Cao Lỗ đã nhiều lần khuyên vua đề phòng.',
+    },
+    {
+      id: 'demo-cl-3',
+      prompt: 'Câu nói nổi tiếng của Cao Lỗ trước khi rời triều đình là gì?',
+      options: [
+        '"Giữ được nỏ thần thì giữ được nước"',
+        '"Còn nước còn tát"',
+        '"Quyết tử cho Tổ quốc quyết sinh"',
+        '"Nước mất thì nhà tan"',
+      ],
+      correctIndex: 0,
+      explanation: 'Lời cảnh báo này thể hiện tầm nhìn xa của Cao Lỗ về tầm quan trọng của việc giữ bí mật quân sự.',
+    },
+  ],
+  'my-chau-bai-hoc-canh-giac': [
+    {
+      id: 'demo-mc-1',
+      prompt: 'Mỵ Châu là con gái của vị vua nào?',
+      options: ['Hùng Vương', 'An Dương Vương', 'Triệu Đà', 'Lý Nam Đế'],
+      correctIndex: 1,
+      explanation: 'Mỵ Châu là công chúa duy nhất của vua An Dương Vương thời Âu Lạc.',
+    },
+    {
+      id: 'demo-mc-2',
+      prompt: 'Mỵ Châu kết hôn với ai trong âm mưu xâm lược của Triệu Đà?',
+      options: ['Trọng Thủy', 'Cao Lỗ', 'Thi Sách', 'Dương Đình Nghệ'],
+      correctIndex: 0,
+      explanation: 'Mỵ Châu kết hôn với Trọng Thủy, con trai Triệu Đà, trong một âm mưu chính trị.',
+    },
+    {
+      id: 'demo-mc-3',
+      prompt: 'Bí mật quân sự nào đã vô tình bị lộ, dẫn đến việc Âu Lạc mất nước?',
+      options: ['Bí mật về thành Cổ Loa', 'Bí mật về nỏ thần', 'Bí mật về lương thực', 'Bí mật về đường hành quân'],
+      correctIndex: 1,
+      explanation: 'Vì quá tin tưởng chồng, Mỵ Châu vô tình để lộ bí mật về nỏ thần cho Trọng Thủy.',
+    },
+  ],
+  'ly-bi-van-xuan': [
+    {
+      id: 'demo-lb-1',
+      prompt: 'Lý Bí phát động cuộc khởi nghĩa chống nhà Lương vào năm nào?',
+      options: ['Năm 542', 'Năm 544', 'Năm 550', 'Năm 605'],
+      correctIndex: 0,
+      explanation: 'Lý Bí tập hợp lực lượng và phát động khởi nghĩa vào năm 542.',
+    },
+    {
+      id: 'demo-lb-2',
+      prompt: 'Sau khi giành thắng lợi, Lý Bí lên ngôi hoàng đế lấy hiệu là gì?',
+      options: ['Lý Nam Đế', 'Lý Thái Tổ', 'Lý Anh Tông', 'Lý Cao Tông'],
+      correctIndex: 0,
+      explanation: 'Năm 544, Lý Bí lên ngôi hoàng đế, lấy hiệu là Lý Nam Đế.',
+    },
+    {
+      id: 'demo-lb-3',
+      prompt: 'Quốc hiệu do Lý Bí đặt cho đất nước là gì?',
+      options: ['Đại Việt', 'Vạn Xuân', 'Đại Cồ Việt', 'Âu Lạc'],
+      correctIndex: 1,
+      explanation: 'Quốc hiệu Vạn Xuân thể hiện mong muốn đất nước trường tồn mãi mãi.',
+    },
+  ],
+  'trieu-quang-phuc-da-trach': [
+    {
+      id: 'demo-tqp-1',
+      prompt: 'Sau khi lên ngôi vua, Triệu Quang Phục lấy hiệu là gì?',
+      options: ['Triệu Việt Vương', 'Triệu Vũ Đế', 'Triệu Ai Vương', 'Triệu Văn Vương'],
+      correctIndex: 0,
+      explanation: 'Triệu Quang Phục lên ngôi vua, lấy hiệu là Triệu Việt Vương.',
+    },
+    {
+      id: 'demo-tqp-2',
+      prompt: 'Ông chọn vùng nào làm căn cứ kháng chiến chống quân Lương?',
+      options: ['Đầm Dạ Trạch', 'Núi Ba Vì', 'Cửa sông Bạch Đằng', 'Thành Cổ Loa'],
+      correctIndex: 0,
+      explanation: 'Triệu Quang Phục chọn vùng đầm lầy Dạ Trạch hiểm trở làm căn cứ chiến đấu lâu dài.',
+    },
+    {
+      id: 'demo-tqp-3',
+      prompt: 'Chiến thuật đặc trưng giúp ông chống lại quân Lương mạnh hơn là gì?',
+      options: [
+        'Đánh trực diện dàn trận lớn',
+        'Ngày ẩn nấp, đêm bất ngờ tập kích',
+        'Dùng thuyền chiến vượt biển',
+        'Cầu viện nước ngoài',
+      ],
+      correctIndex: 1,
+      explanation: 'Nhờ tận dụng địa hình đầm lầy, nghĩa quân ẩn náu ban ngày và tập kích bất ngờ vào ban đêm.',
+    },
+  ],
+  'mai-thuc-loan-ngon-lua-dau-tranh': [
+    {
+      id: 'demo-mtl-1',
+      prompt: 'Mai Thúc Loan được nhân dân tôn xưng là gì?',
+      options: ['Mai Hắc Đế', 'Bố Cái Đại Vương', 'Triệu Việt Vương', 'Mai Nam Đế'],
+      correctIndex: 0,
+      explanation: 'Ông có nước da ngăm đen và xưng đế nên được nhân dân gọi là Mai Hắc Đế.',
+    },
+    {
+      id: 'demo-mtl-2',
+      prompt: 'Mai Thúc Loan phát động cuộc khởi nghĩa lớn vào năm nào?',
+      options: ['Năm 722', 'Năm 905', 'Năm 931', 'Năm 40'],
+      correctIndex: 0,
+      explanation: 'Năm 722, ông phát động cuộc khởi nghĩa thu hút hàng vạn người tham gia.',
+    },
+    {
+      id: 'demo-mtl-3',
+      prompt: 'Sau khi xưng đế, Mai Thúc Loan xây dựng căn cứ tại đâu?',
+      options: ['Thành Vạn An', 'Thành Đại La', 'Thành Cổ Loa', 'Thành Tống Bình'],
+      correctIndex: 0,
+      explanation: 'Ông xây dựng căn cứ tại thành Vạn An, vùng Hoan Châu (Nghệ An ngày nay).',
+    },
+  ],
+  'phung-hung-bo-cai-dai-vuong': [
+    {
+      id: 'demo-ph-1',
+      prompt: 'Sau khi qua đời, nhân dân tôn xưng Phùng Hưng là gì?',
+      options: ['Bố Cái Đại Vương', 'Mai Hắc Đế', 'Triệu Việt Vương', 'Ngô Vương'],
+      correctIndex: 0,
+      explanation: 'Nhân dân tôn ông là "Bố Cái Đại Vương", nghĩa là vị vua được kính trọng như cha mẹ.',
+    },
+    {
+      id: 'demo-ph-2',
+      prompt: 'Nghĩa quân của Phùng Hưng đã chiếm được thành trung tâm nào của chính quyền đô hộ?',
+      options: ['Tống Bình', 'Đại La', 'Cổ Loa', 'Vạn An'],
+      correctIndex: 0,
+      explanation: 'Nghĩa quân tiến công và chiếm được thành Tống Bình, trung tâm cai trị lúc bấy giờ.',
+    },
+    {
+      id: 'demo-ph-3',
+      prompt: 'Ai là người cùng Phùng Hưng đứng lên khởi nghĩa?',
+      options: ['Phùng Hải (em trai)', 'Phùng Hạo', 'Khúc Hạo', 'Dương Tam Kha'],
+      correctIndex: 0,
+      explanation: 'Phùng Hưng cùng em trai là Phùng Hải tập hợp nghĩa sĩ chống lại ách đô hộ nhà Đường.',
+    },
+  ],
+  'khuc-thua-du-tu-chu': [
+    {
+      id: 'demo-ktd-1',
+      prompt: 'Năm 905, Khúc Thừa Dụ tự xưng chức danh gì?',
+      options: ['Tiết độ sứ', 'Hoàng đế', 'Vương', 'Thái thú'],
+      correctIndex: 0,
+      explanation: 'Ông tự xưng Tiết độ sứ, khôn khéo giành quyền tự chủ mà không gây chiến tranh ngay.',
+    },
+    {
+      id: 'demo-ktd-2',
+      prompt: 'Khúc Thừa Dụ đã chiếm được thành nào để giành quyền tự chủ?',
+      options: ['Đại La', 'Cổ Loa', 'Tống Bình cũ', 'Hoa Lư'],
+      correctIndex: 0,
+      explanation: 'Ông chiếm được thành Đại La, nắm quyền kiểm soát vùng Tĩnh Hải quân.',
+    },
+    {
+      id: 'demo-ktd-3',
+      prompt: 'Ai là người tiếp nối sự nghiệp của Khúc Thừa Dụ sau khi ông qua đời?',
+      options: ['Khúc Hạo (con trai)', 'Dương Đình Nghệ', 'Ngô Quyền', 'Kiều Công Tiễn'],
+      correctIndex: 0,
+      explanation: 'Con trai ông là Khúc Hạo tiếp tục sự nghiệp và thực hiện nhiều cải cách quan trọng.',
+    },
+  ],
+  'duong-dinh-nghe-giu-vung-tu-chu': [
+    {
+      id: 'demo-ddn-1',
+      prompt: 'Dương Đình Nghệ đánh bại quân Nam Hán, giành lại quyền kiểm soát vào năm nào?',
+      options: ['Năm 931', 'Năm 905', 'Năm 938', 'Năm 968'],
+      correctIndex: 0,
+      explanation: 'Năm 931, ông đem quân đánh bại quân Nam Hán đang chiếm thành Đại La.',
+    },
+    {
+      id: 'demo-ddn-2',
+      prompt: 'Ai đã sát hại Dương Đình Nghệ vào năm 937?',
+      options: ['Kiều Công Tiễn', 'Lưu Hoằng Tháo', 'Tô Định', 'Trọng Thủy'],
+      correctIndex: 0,
+      explanation: 'Kiều Công Tiễn phản bội, sát hại Dương Đình Nghệ để đoạt quyền.',
+    },
+    {
+      id: 'demo-ddn-3',
+      prompt: 'Dương Đình Nghệ có ảnh hưởng lớn tới vị tướng nào sau này làm nên chiến thắng Bạch Đằng?',
+      options: ['Ngô Quyền', 'Lý Bí', 'Triệu Quang Phục', 'Phùng Hưng'],
+      correctIndex: 0,
+      explanation: 'Ông bồi dưỡng tài năng cho Ngô Quyền, người sau này lãnh đạo chiến thắng Bạch Đằng năm 938.',
+    },
+  ],
+  'ngo-quyen-thoi-dai-doc-lap': [
+    {
+      id: 'demo-nq-1',
+      prompt: 'Ngô Quyền đánh bại quân Nam Hán trên dòng sông nào?',
+      options: ['Sông Bạch Đằng', 'Sông Hồng', 'Sông Mã', 'Sông Cầu'],
+      correctIndex: 0,
+      explanation: 'Ngô Quyền cho đóng cọc gỗ trên sông Bạch Đằng, lợi dụng thủy triều để đánh bại quân địch.',
+    },
+    {
+      id: 'demo-nq-2',
+      prompt: 'Chiến thắng Bạch Đằng lịch sử diễn ra vào năm nào?',
+      options: ['Năm 938', 'Năm 931', 'Năm 905', 'Năm 968'],
+      correctIndex: 0,
+      explanation: 'Năm 938, quân Nam Hán bị tiêu diệt hoàn toàn trong trận Bạch Đằng.',
+    },
+    {
+      id: 'demo-nq-3',
+      prompt: 'Sau chiến thắng, Ngô Quyền lên ngôi vua và đóng đô ở đâu?',
+      options: ['Cổ Loa', 'Đại La', 'Hoa Lư', 'Phong Châu'],
+      correctIndex: 0,
+      explanation: 'Năm 939, Ngô Quyền lên ngôi vua, đóng đô ở Cổ Loa để nối tiếp truyền thống cha ông.',
+    },
+  ],
+}
