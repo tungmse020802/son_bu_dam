@@ -12,6 +12,7 @@ export type StoredUser = {
   email: string
   passwordHash: string
   role: UserRole
+  googleId?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -45,6 +46,15 @@ export type StoredOrderItem = OrderItem & {
   orderId: string
 }
 
+type StoredPasswordReset = {
+  id: string
+  userId: string
+  tokenHash: string
+  expiresAt: string
+  usedAt: string | null
+  createdAt: string
+}
+
 type StoredWebhookEvent = {
   id: string
   orderCode: number
@@ -58,6 +68,7 @@ type JsonStore = {
   orders: StoredOrder[]
   orderItems: StoredOrderItem[]
   webhookEvents: StoredWebhookEvent[]
+  passwordResets: StoredPasswordReset[]
 }
 
 const emptyStore: JsonStore = {
@@ -65,8 +76,8 @@ const emptyStore: JsonStore = {
   orders: [],
   orderItems: [],
   webhookEvents: [],
+  passwordResets: [],
 }
-
 const DEFAULT_ADMIN_FULL_NAME = 'Admin'
 const DEFAULT_ADMIN_PASSWORD_HASH = '$2b$10$eqfnMuotx0jHzExNTsziLOySghQlLtriG818Ehy.Jvaf238WQH0M6'
 
@@ -87,11 +98,12 @@ async function readStore(): Promise<JsonStore> {
     const raw = await fs.readFile(databaseFile, 'utf8')
     const parsed = JSON.parse(raw) as Partial<JsonStore>
     return {
-      users: parsed.users ?? [],
-      orders: parsed.orders ?? [],
-      orderItems: parsed.orderItems ?? [],
-      webhookEvents: parsed.webhookEvents ?? [],
-    }
+  users: parsed.users ?? [],
+  orders: parsed.orders ?? [],
+  orderItems: parsed.orderItems ?? [],
+  webhookEvents: parsed.webhookEvents ?? [],
+  passwordResets: parsed.passwordResets ?? [],
+}
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       return cloneStore(emptyStore)
@@ -127,6 +139,8 @@ export async function initializeDatabase() {
     store.orders ??= []
     store.orderItems ??= []
     store.webhookEvents ??= []
+    store.passwordResets ??= []
+    // ... phần còn lại giữ nguyên
 
     if (store.users.some((user) => user.role === 'admin')) {
       return
@@ -294,5 +308,129 @@ export async function updateStoredOrderStatus(
       .sort((left, right) => left.productName.localeCompare(right.productName))
 
     return { order, items }
+  })
+}
+
+
+export async function findUserByGoogleId(googleId: string) {
+  const store = await readStore()
+  return store.users.find((user) => user.googleId === googleId) ?? null
+}
+
+export async function linkGoogleId(userId: string, googleId: string) {
+  return updateStore((store) => {
+    const user = store.users.find((entry) => entry.id === userId)
+    if (!user) {
+      throw new Error('Không tìm thấy tài khoản.')
+    }
+    user.googleId = googleId
+    user.updatedAt = new Date().toISOString()
+    return user
+  })
+}
+
+export async function insertGoogleUser(input: {
+  id: string
+  fullName: string
+  email: string
+  googleId: string
+  passwordHash: string
+  role: UserRole
+}) {
+  return updateStore((store) => {
+    if (store.users.some((user) => user.email === input.email)) {
+      throw new Error('Email này đã được sử dụng.')
+    }
+    const now = new Date().toISOString()
+    const user: StoredUser = { ...input, createdAt: now, updatedAt: now }
+    store.users.push(user)
+    return user
+  })
+}
+
+export async function updateUserPassword(userId: string, passwordHash: string) {
+  return updateStore((store) => {
+    const user = store.users.find((entry) => entry.id === userId)
+    if (!user) {
+      throw new Error('Không tìm thấy tài khoản.')
+    }
+    user.passwordHash = passwordHash
+    user.updatedAt = new Date().toISOString()
+    return user
+  })
+}
+
+export async function insertPasswordResetToken(input: {
+  id: string
+  userId: string
+  tokenHash: string
+  expiresAt: string
+}) {
+  return updateStore((store) => {
+    store.passwordResets ??= []
+    const record: StoredPasswordReset = { ...input, usedAt: null, createdAt: new Date().toISOString() }
+    store.passwordResets.push(record)
+    return record
+  })
+}
+
+export async function findValidPasswordReset(tokenHash: string) {
+  const store = await readStore()
+  return (
+    store.passwordResets?.find(
+      (entry) => entry.tokenHash === tokenHash && !entry.usedAt && new Date(entry.expiresAt).getTime() > Date.now(),
+    ) ?? null
+  )
+}
+
+export async function markPasswordResetUsed(id: string) {
+  return updateStore((store) => {
+    const record = store.passwordResets?.find((entry) => entry.id === id)
+    if (record) {
+      record.usedAt = new Date().toISOString()
+    }
+  })
+}
+
+export async function deleteStoredUser(userId: string, cascadeOrders: boolean) {
+  return updateStore((store) => {
+    const userIndex = store.users.findIndex((entry) => entry.id === userId)
+    if (userIndex === -1) {
+      throw new Error('Không tìm thấy tài khoản.')
+    }
+
+    const [removedUser] = store.users.splice(userIndex, 1)
+
+    if (cascadeOrders) {
+      // Xóa luôn toàn bộ đơn hàng của tài khoản này -> doanh thu tự động giảm
+      // vì getDashboardData() tính lại từ store.orders mỗi lần gọi.
+      const orderIdsToRemove = store.orders.filter((order) => order.userId === userId).map((order) => order.id)
+      store.orders = store.orders.filter((order) => order.userId !== userId)
+      store.orderItems = store.orderItems.filter((item) => !orderIdsToRemove.includes(item.orderId))
+    } else {
+      // Giữ lại đơn hàng (vẫn tính vào doanh thu), chỉ gỡ liên kết với tài khoản đã xóa.
+      store.orders.forEach((order) => {
+        if (order.userId === userId) {
+          order.userId = null
+        }
+      })
+    }
+
+    return removedUser
+  })
+}
+
+export async function deleteStoredOrder(orderCode: number) {
+  return updateStore((store) => {
+    const order = store.orders.find((entry) => entry.orderCode === orderCode)
+    if (!order) {
+      throw new Error('Không tìm thấy đơn hàng.')
+    }
+
+    store.orders = store.orders.filter((entry) => entry.orderCode !== orderCode)
+    store.orderItems = store.orderItems.filter((item) => item.orderId !== order.id)
+    store.webhookEvents = store.webhookEvents.filter((event) => event.orderCode !== orderCode)
+
+    return order
   })
 }

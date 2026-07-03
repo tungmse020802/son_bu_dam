@@ -69,7 +69,9 @@ export function LessonTrialQuiz({ lessonSlug }: LessonTrialQuizProps) {
       </div>
 
       {finished ? (
-        <div className="lesson-trial-quiz-result">
+        // Dùng đúng cấu trúc/class của quiz đã mở khóa (quiz-result-panel, result-ring)
+        // để giao diện đồng bộ tuyệt đối, không cần inline style.
+        <div className="quiz-result-panel quiz-result-panel-clean">
           <div className="result-ring result-ring-clean">
             <strong>{score}/{questions.length}</strong>
             <span>Điểm trải nghiệm</span>

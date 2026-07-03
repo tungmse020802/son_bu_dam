@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react'
-import { useNavigate, NavLink, Link } from 'react-router-dom'
+import { useNavigate, NavLink, Link, useLocation } from 'react-router-dom'
 import { 
   Award, BookOpen, Boxes, LogIn, LogOut, ShoppingCart, Sparkles, 
-  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin 
+  UserCircle2, Search, User, ChevronDown, Phone, Mail, MapPin, Compass, ShieldCheck,
+  Volume2, VolumeX, Menu, X
 } from 'lucide-react'
 import { BackgroundMusic } from './BackgroundMusic'
 
@@ -39,8 +40,10 @@ const HERO_LESSONS_MAP = [
 export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -51,6 +54,11 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // Tự đóng menu mobile mỗi khi người dùng chuyển sang trang khác
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [location.pathname])
 
   const handleSearchSubmit = () => {
     if (!searchQuery.trim()) return
@@ -66,6 +74,7 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
       navigate(`/lessons?search=${encodeURIComponent(searchQuery)}`)
     }
     setSearchQuery('')
+    setIsMobileMenuOpen(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -84,100 +93,128 @@ export function Header({ cartCount, learnerName, isAdmin, onLogout }: HeaderProp
           </Link>
         </div>
 
-        <nav className="main-nav main-nav-refined">
-          {navItems.map((item) => {
-            const Icon = item.icon
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-              >
-                <Icon size={16} />
-                {item.label}
-              </NavLink>
-            )
-          })}
-        </nav>
+        <button
+          type="button"
+          className="mobile-menu-toggle"
+          aria-label={isMobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+          aria-expanded={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+        >
+          {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
 
-        <div className="header-actions">
-          <div className="search-box">
-            <button type="button" onClick={handleSearchSubmit} aria-label="Tìm kiếm">
-              <Search size={15} />
-            </button>
-            <input 
-              type="text" 
-              placeholder="Tìm tên anh hùng..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-
-          {learnerName ? (
-            <>
-              <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper">
-                <ShoppingCart size={22} strokeWidth={2} />
-                {cartCount > 0 && (
-                  <span className="shopee-cart-badge">{cartCount}</span>
-                )}
-              </NavLink>
-
-              <div className="profile-dropdown-container" ref={dropdownRef}>
-                <button 
-                  type="button" 
-                  className={`account-pill dropdown-trigger ${isDropdownOpen ? 'open' : ''}`}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        <div className={`header-collapsible ${isMobileMenuOpen ? 'open' : ''}`}>
+          <nav className="main-nav main-nav-refined">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  <UserCircle2 size={16} />
-                  <span>{learnerName}</span>
-                  <ChevronDown size={14} className={`arrow-icon ${isDropdownOpen ? 'rotate' : ''}`} />
-                </button>
+                  <Icon size={16} />
+                  {item.label}
+                </NavLink>
+              )
+            })}
+          </nav>
 
-                {isDropdownOpen && (
-                  <div className="profile-dropdown-menu">
-                    <Link to="/account" className="dropdown-item" onClick={() => setIsDropdownOpen(false)}>
-                      <User size={15} />
-                      <span>Thông tin tài khoản</span>
-                    </Link>
-
-                    {isAdmin && (
-                      <Link to="/dashboard" className="dropdown-item admin-item" onClick={() => setIsDropdownOpen(false)}>
-                        <Sparkles size={15} />
-                        <span>Trang Admin</span>
-                      </Link>
-                    )}
-
-                    <button 
-                      type="button" 
-                      className="dropdown-item logout-item" 
-                      onClick={() => {
-                        setIsDropdownOpen(false)
-                        onLogout()
-                      }}
-                    >
-                      <LogOut size={15} />
-                      <span>Đăng xuất</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="account-action-group">
-              <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper" style={{ marginRight: '4px' }}>
-                <ShoppingCart size={22} strokeWidth={2} />
-                {cartCount > 0 && (
-                  <span className="shopee-cart-badge">{cartCount}</span>
-                )}
-              </NavLink>
-              
-              <NavLink to="/account" className="ghost-btn login-cta">
-                <LogIn size={16} />
-                Đăng nhập
-              </NavLink>
+          <div className="header-actions">
+            <div className="search-box">
+              <button type="button" onClick={handleSearchSubmit} aria-label="Tìm kiếm">
+                <Search size={15} />
+              </button>
+              <input 
+                type="text" 
+                placeholder="Tìm tên anh hùng..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
             </div>
-          )}
+
+            {learnerName ? (
+              <>
+                <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper" onClick={() => setIsMobileMenuOpen(false)}>
+                  <ShoppingCart size={22} strokeWidth={2} />
+                  {cartCount > 0 && (
+                    <span className="shopee-cart-badge">{cartCount}</span>
+                  )}
+                </NavLink>
+
+                <div className="profile-dropdown-container" ref={dropdownRef}>
+                  <button 
+                    type="button" 
+                    className={`account-pill dropdown-trigger ${isDropdownOpen ? 'open' : ''}`}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  >
+                    <UserCircle2 size={16} />
+                    <span>{learnerName}</span>
+                    <ChevronDown size={14} className={`arrow-icon ${isDropdownOpen ? 'rotate' : ''}`} />
+                  </button>
+
+                  {isDropdownOpen && (
+                    <div className="profile-dropdown-menu">
+                      <Link
+                        to="/account"
+                        className="dropdown-item"
+                        onClick={() => {
+                          setIsDropdownOpen(false)
+                          setIsMobileMenuOpen(false)
+                        }}
+                      >
+                        <User size={15} />
+                        <span>Thông tin tài khoản</span>
+                      </Link>
+
+                      {isAdmin && (
+                        <Link
+                          to="/dashboard"
+                          className="dropdown-item admin-item"
+                          onClick={() => {
+                            setIsDropdownOpen(false)
+                            setIsMobileMenuOpen(false)
+                          }}
+                        >
+                          <Sparkles size={15} />
+                          <span>Trang Admin</span>
+                        </Link>
+                      )}
+
+                      <button 
+                        type="button" 
+                        className="dropdown-item logout-item" 
+                        onClick={() => {
+                          setIsDropdownOpen(false)
+                          setIsMobileMenuOpen(false)
+                          onLogout()
+                        }}
+                      >
+                        <LogOut size={15} />
+                        <span>Đăng xuất</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="account-action-group">
+                <NavLink id="cart-icon" to="/checkout" className="shopee-cart-wrapper" style={{ marginRight: '4px' }} onClick={() => setIsMobileMenuOpen(false)}>
+                  <ShoppingCart size={22} strokeWidth={2} />
+                  {cartCount > 0 && (
+                    <span className="shopee-cart-badge">{cartCount}</span>
+                  )}
+                </NavLink>
+                
+                <NavLink to="/account" className="ghost-btn login-cta" onClick={() => setIsMobileMenuOpen(false)}>
+                  <LogIn size={16} />
+                  Đăng nhập
+                </NavLink>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

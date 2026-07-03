@@ -5211,3 +5211,276 @@ footer ul {
     gap: 6px;
   }
 }
+
+/* ==========================================================================
+   MOBILE MENU (HAMBURGER) + SỬA TRIỆT ĐỂ VỠ GIAO DIỆN TRÊN ĐIỆN THOẠI
+   Đặt cuối file để ghi đè đúng các rule responsive cũ đang xung đột nhau.
+   ========================================================================== */
+
+html, body {
+  overflow-x: hidden;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.header-collapsible {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+@media (max-width: 1024px) {
+  /* Vô hiệu hóa hẳn cách "xuống dòng" cũ, chuyển sang menu hamburger */
+  .nav-shell {
+    flex-wrap: nowrap;
+    align-items: center;
+    position: relative;
+  }
+
+  .main-nav {
+    flex-wrap: nowrap;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .header-collapsible {
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 16px 20px 24px;
+    background: linear-gradient(180deg, rgba(43, 23, 28, 0.99), rgba(18, 9, 12, 0.99));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 24px 44px rgba(0, 0, 0, 0.4);
+    z-index: 40;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+  }
+
+  .header-collapsible.open {
+    display: flex;
+  }
+
+  .main-nav-refined {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    overflow-x: visible;
+    padding: 0;
+  }
+
+  .main-nav-refined .nav-link {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.7rem 0.85rem;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .header-actions > a,
+  .account-action-group,
+  .account-pill {
+    flex: 0 0 auto;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .search-box:focus-within {
+    width: 100%;
+  }
+
+  .account-action-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .profile-dropdown-container {
+    width: 100%;
+  }
+
+  .account-pill.dropdown-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .profile-dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    box-shadow: none;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Fix nút bị đè lên chữ ở quiz-access-panel (bước chưa mở khóa/đăng nhập) */
+@media (max-width: 1024px) {
+  .quiz-access-panel {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .quiz-access-panel .hero-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .quiz-access-panel .hero-actions > a,
+  .quiz-access-panel .hero-actions > button,
+  .quiz-access-panel > a.primary-btn,
+  .quiz-access-panel > a.secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Fix tiêu đề trang chủ bị cắt/che khuất bên trái trên mobile */
+@media (max-width: 1024px) {
+  .home-hero-shell {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-hero-title span:first-child,
+  .home-hero-title span:last-child {
+    white-space: normal;
+  }
+
+  .home-hero h2 {
+    max-width: 100%;
+  }
+}
+
+.auth-google-slot {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 18px;
+}
+
+.google-login-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.auth-divider {
+  position: relative;
+  text-align: center;
+  margin: 4px 0 20px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 38%;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+
+.auth-divider span {
+  position: relative;
+  padding: 0 10px;
+}
+
+.auth-forgot-link {
+  display: inline-block;
+  margin: -8px 0 16px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--maroon);
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.auth-back-link {
+  display: inline-block;
+  margin-bottom: 14px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--maroon);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-helper-text {
+  margin: 0 0 18px;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+
+.admin-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  background: rgba(220, 38, 38, 0.06);
+  color: #b91c1c;
+  transition: 0.2s ease;
+}
+
+.admin-delete-btn:hover {
+  background: rgba(220, 38, 38, 0.14);
+  border-color: rgba(220, 38, 38, 0.4);
+  transform: translateY(-1px);
+}
+
+.admin-delete-btn-labeled {
+  width: auto;
+  padding: 0 16px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.admin-users-table .admin-table-row {
+  grid-template-columns: minmax(260px, 1.5fr) 140px 120px 90px 140px 60px;
+}
+
+.admin-orders-table .admin-table-row {
+  grid-template-columns: 150px minmax(230px, 1.4fr) 120px 150px 120px 112px 60px;
+}

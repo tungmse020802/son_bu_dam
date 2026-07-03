@@ -100,3 +100,55 @@ export async function logoutUser() {
     clearLocalUser()
   }
 }
+
+
+export async function loginWithGoogle(credential: string) {
+  const response = await fetch(`${API_BASE_URL}/api/auth-google`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  })
+
+  const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
+  if (!response.ok) {
+    throw new Error(getApiMessage(data) ?? 'Đăng nhập Google thất bại.')
+  }
+  if (!data?.user) {
+    throw new Error('Phản hồi từ máy chủ không hợp lệ.')
+  }
+
+  const user = { ...data.user, role: data.user.role ?? 'customer' }
+  saveLocalUser(user)
+  return user
+}
+
+export async function requestPasswordReset(email: string) {
+  const response = await fetch(`${API_BASE_URL}/api/auth-forgot-password`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+
+  const data = await readApiJson<{ message?: string }>(response)
+  if (!response.ok) {
+    throw new Error(getApiMessage(data) ?? 'Không thể gửi email đặt lại mật khẩu.')
+  }
+  return getApiMessage(data) ?? 'Nếu email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu đã được gửi tới hộp thư của bạn.'
+}
+
+export async function resetPassword(token: string, password: string) {
+  const response = await fetch(`${API_BASE_URL}/api/auth-reset-password`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  })
+
+  const data = await readApiJson<{ message?: string }>(response)
+  if (!response.ok) {
+    throw new Error(getApiMessage(data) ?? 'Không thể đặt lại mật khẩu.')
+  }
+  return getApiMessage(data) ?? 'Đặt lại mật khẩu thành công.'
+}
