@@ -1,13 +1,28 @@
 import crypto from 'node:crypto'
 import bcrypt from 'bcryptjs'
+import { OAuth2Client } from 'google-auth-library'
 import type { Request, Response } from 'express'
 import type { UserRole } from '../src/types/app.js'
 import { resolveUserRole } from './admin.js'
-import { findUserByEmail, findUserById, insertUser, type StoredUser } from './db.js'
+import {
+  findUserByEmail,
+  findUserByGoogleId,
+  findUserById,
+  findValidPasswordReset,
+  insertGoogleUser,
+  insertPasswordResetToken,
+  insertUser,
+  linkGoogleId,
+  markPasswordResetUsed,
+  updateUserPassword,
+  type StoredUser,
+} from './db.js'
+import { sendPasswordResetEmail } from './email.js'
 
 const SESSION_COOKIE_NAME = 'svam_session'
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7
 const SESSION_SECRET = process.env.SESSION_SECRET ?? 'svam-dev-session-secret'
+const PASSWORD_RESET_TTL_MS = 1000 * 60 * 30
 
 export type AuthUser = {
   id: string
@@ -199,4 +214,101 @@ export async function getAuthUserFromRequest(req: Request) {
 
   const user = await getUserById(parsed.userId)
   return user ?? parsed.user ?? null
+}
+
+// --- GOOGLE AUTHENTICATION & PASSWORD RESET MANAGEMENT ---
+
+const googleClientId = process.env.GOOGLE_CLIENT_ID
+const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null
+
+export async function loginWithGoogle(idToken: string) {
+  if (!googleClient || !googleClientId) {
+    throw new Error('Đăng nhập Google chưa được cấu hình trên máy chủ.')
+  }
+  if (!idToken) {
+    throw new Error('Thiếu mã xác thực Google Credential.')
+  }
+
+  const ticket = await googleClient.verifyIdToken({ idToken, audience: googleClientId })
+  const payload = ticket.getPayload()
+
+  if (!payload?.email) {
+    throw new Error('Không lấy được thông tin email từ Google.')
+  }
+
+  const email = payload.email.trim().toLowerCase()
+  const fullName = payload.name?.trim() || email.split('@')[0]
+  const googleId = payload.sub
+
+  const existingByGoogle = await findUserByGoogleId(googleId)
+  if (existingByGoogle) {
+    return mapUser(existingByGoogle)
+  }
+
+  const existingByEmail = await findUserByEmail(email)
+  if (existingByEmail) {
+    const linked = await linkGoogleId(existingByEmail.id, googleId)
+    const updatedUser = await findUserById(existingByEmail.id)
+    if (!updatedUser) throw new Error('Không thể liên kết tài khoản Google.')
+    return mapUser(updatedUser)
+  }
+
+  const randomPassword = crypto.randomBytes(24).toString('hex')
+  const passwordHash = await bcrypt.hash(randomPassword, 10)
+  const created = await insertGoogleUser({
+    id: createId(),
+    fullName,
+    email,
+    googleId,
+    passwordHash,
+    role: resolveUserRole(email),
+  })
+
+  return mapUser(created)
+}
+
+function hashResetToken(token: string) {
+  return crypto.createHash('sha256').update(token).digest('hex')
+}
+
+export async function requestPasswordReset(email: string) {
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!normalizedEmail) {
+    throw new Error('Vui lòng nhập email.')
+  }
+
+  const user = await findUserByEmail(normalizedEmail)
+  if (!user) {
+    return
+  }
+
+  const rawToken = crypto.randomBytes(32).toString('hex')
+  const tokenHash = hashResetToken(rawToken)
+  const expiresAt = new Date(Date.now() + PASSWORD_RESET_TTL_MS).toISOString()
+
+  await insertPasswordResetToken({ id: createId(), userId: user.id, tokenHash, expiresAt })
+
+  const appBaseUrl = process.env.APP_BASE_URL ?? 'http://localhost:5173'
+  const resetUrl = `${appBaseUrl}/reset-password?token=${rawToken}`
+
+  await sendPasswordResetEmail(user.email, resetUrl)
+}
+
+export async function resetPassword(token: string, newPassword: string) {
+  if (!token) {
+    throw new Error('Liên kết đặt lại mật khẩu không hợp lệ.')
+  }
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error('Mật khẩu mới cần ít nhất 8 ký tự.')
+  }
+
+  const tokenHash = hashResetToken(token)
+  const record = await findValidPasswordReset(tokenHash)
+  if (!record) {
+    throw new Error('Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.')
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10)
+  await updateUserPassword(record.userId, passwordHash)
+  await markPasswordResetUsed(record.id)
 }

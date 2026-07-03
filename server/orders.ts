@@ -15,6 +15,7 @@ import {
   insertOrder,
   listStoredOrders,
   listStoredOrdersByUser,
+  deleteStoredOrder,
   updateStoredOrderStatus,
   type StoredOrder,
   type StoredOrderItem,
@@ -202,6 +203,10 @@ export async function listOrdersByUser(userId: string) {
 export async function updateOrderStatus(orderCode: number, status: OrderStatus, eventType: string, payload: unknown) {
   const record = await updateStoredOrderStatus(orderCode, status, eventType, payload, createId())
   return mapStoredOrderDetail(record)
+}
+
+export async function deleteOrder(orderCode: number) {
+  await deleteStoredOrder(orderCode)
 }
 
 export async function getDashboardData(): Promise<DashboardData> {

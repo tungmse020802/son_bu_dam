@@ -5,9 +5,18 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { lessons } from '../src/data/mockData.js'
 import type { CheckoutRequest } from '../src/types/app.js'
-import { clearAuthSession, createUser, getAuthUserFromRequest, loginUser, setUserAuthSession } from './auth.js'
-import { initializeDatabase, listStoredUsers } from './db.js'
-import { createOrder, getCatalogProducts, getDashboardData, getOrderByCode, listAllOrders, listOrdersByUser, updateOrderStatus } from './orders.js'
+import { deleteStoredUser, findUserById, initializeDatabase, listStoredUsers } from './db.js'
+import { createOrder, deleteOrder, getCatalogProducts, getDashboardData, getOrderByCode, listAllOrders, listOrdersByUser, updateOrderStatus } from './orders.js'
+import {
+  clearAuthSession,
+  createUser,
+  getAuthUserFromRequest,
+  loginUser,
+  loginWithGoogle,
+  requestPasswordReset,
+  resetPassword,
+  setUserAuthSession,
+} from './auth.js'
 
 const app = express()
 const port = Number(process.env.PORT ?? 8787)
@@ -83,6 +92,49 @@ async function handleLogin(req: express.Request, res: express.Response) {
   }
 }
 
+async function handleGoogleLogin(req: express.Request, res: express.Response) {
+  try {
+    const { credential } = req.body as { credential?: string }
+    if (!credential) {
+      res.status(400).json({ message: 'Thiếu thông tin đăng nhập Google.' })
+      return
+    }
+    const user = await loginWithGoogle(credential)
+    setUserAuthSession(res, user)
+    res.json({ user, message: 'Đăng nhập Google thành công.' })
+  } catch (error) {
+    res.status(401).json({ message: error instanceof Error ? error.message : 'Đăng nhập Google thất bại.' })
+  }
+}
+
+async function handleForgotPassword(req: express.Request, res: express.Response) {
+  try {
+    const { email } = req.body as { email?: string }
+    if (!email) {
+      res.status(400).json({ message: 'Vui lòng nhập email.' })
+      return
+    }
+    await requestPasswordReset(email)
+    res.json({ message: 'Nếu email tồn tại trong hệ thống, hướng dẫn đặt lại mật khẩu đã được gửi tới hộp thư của bạn.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể gửi email đặt lại mật khẩu.' })
+  }
+}
+
+async function handleResetPassword(req: express.Request, res: express.Response) {
+  try {
+    const { token, password } = req.body as { token?: string; password?: string }
+    if (!token || !password) {
+      res.status(400).json({ message: 'Thiếu thông tin đặt lại mật khẩu.' })
+      return
+    }
+    await resetPassword(token, password)
+    res.json({ message: 'Đặt lại mật khẩu thành công. Bạn có thể đăng nhập bằng mật khẩu mới.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể đặt lại mật khẩu.' })
+  }
+}
+
 async function handleMe(req: express.Request, res: express.Response) {
   try {
     const user = await getAuthUserFromRequest(req)
@@ -119,6 +171,9 @@ app.post('/api/auth/register', handleRegister)
 app.post('/api/auth-register', handleRegister)
 app.post('/api/auth/login', handleLogin)
 app.post('/api/auth-login', handleLogin)
+app.post('/api/auth-google', handleGoogleLogin)
+app.post('/api/auth-forgot-password', handleForgotPassword)
+app.post('/api/auth-reset-password', handleResetPassword)
 app.get('/api/auth/me', handleMe)
 app.get('/api/auth-me', handleMe)
 app.post('/api/auth/logout', handleLogout)
@@ -221,6 +276,57 @@ app.get('/api/admin/orders/:orderCode', async (req, res) => {
     res.json(await getOrderByCode(getOrderCodeFromRequest(req)))
   } catch (error) {
     res.status(404).json({ message: error instanceof Error ? error.message : 'Không tìm thấy đơn hàng.' })
+  }
+})
+
+app.delete('/api/admin/users/:userId', async (req, res) => {
+  try {
+    const admin = await requireAdmin(req, res)
+    if (!admin) return
+
+    const { userId } = req.params
+
+    if (userId === admin.id) {
+      res.status(400).json({ message: 'Bạn không thể tự xoá tài khoản đang đăng nhập.' })
+      return
+    }
+
+    const targetUser = await findUserById(userId)
+    if (!targetUser) {
+      res.status(404).json({ message: 'Không tìm thấy tài khoản.' })
+      return
+    }
+
+    if (targetUser.role === 'admin') {
+      const allUsers = await listStoredUsers()
+      const adminCount = allUsers.filter((user) => user.role === 'admin').length
+      if (adminCount <= 1) {
+        res.status(400).json({ message: 'Không thể xoá quản trị viên cuối cùng của hệ thống.' })
+        return
+      }
+    }
+
+    const cascadeOrders = req.query.cascade === 'true'
+    await deleteStoredUser(userId, cascadeOrders)
+
+    res.json({
+      message: cascadeOrders
+        ? 'Đã xoá tài khoản và toàn bộ đơn hàng liên quan. Doanh thu đã được cập nhật.'
+        : 'Đã xoá tài khoản. Các đơn hàng liên quan được giữ lại (không còn gắn với tài khoản).',
+    })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể xoá tài khoản.' })
+  }
+})
+
+app.delete('/api/admin/orders/:orderCode', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    const orderCode = getOrderCodeFromRequest(req)
+    await deleteOrder(orderCode)
+    res.json({ message: 'Đã xoá đơn hàng. Doanh thu và thống kê được cập nhật tự động.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể xoá đơn hàng.' })
   }
 })
 

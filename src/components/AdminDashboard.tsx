@@ -7,6 +7,7 @@ import {
   Search,
   ShieldCheck,
   ShoppingBag,
+  Trash2,
   Users,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -83,7 +84,13 @@ function AdminOverviewPage({ data }: { data: AdminOverviewData | null }) {
   )
 }
 
-function AdminAccountsPage({ users }: { users: AdminUserSummary[] }) {
+function AdminAccountsPage({
+  users,
+  onDeleteUser,
+}: {
+  users: AdminUserSummary[]
+  onDeleteUser: (userId: string, orderCount: number) => Promise<void>
+}) {
   const [query, setQuery] = useState('')
   const normalizedQuery = query.trim().toLowerCase()
   const filteredUsers = useMemo(
@@ -125,6 +132,7 @@ function AdminAccountsPage({ users }: { users: AdminUserSummary[] }) {
             <span>Ngày tạo</span>
             <span>Đơn hàng</span>
             <span>Đã thanh toán</span>
+            <span>Thao tác</span>
           </div>
           {filteredUsers.map((user) => (
             <div key={user.id} className="admin-table-row">
@@ -139,6 +147,14 @@ function AdminAccountsPage({ users }: { users: AdminUserSummary[] }) {
               <span>{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
               <strong>{user.orderCount}</strong>
               <strong>{formatCurrency(user.totalSpent)}</strong>
+              <button
+                type="button"
+                className="admin-delete-btn"
+                onClick={() => onDeleteUser(user.id, user.orderCount)}
+                aria-label={`Xoá tài khoản ${user.fullName}`}
+              >
+                <Trash2 size={15} />
+              </button>
             </div>
           ))}
           {!filteredUsers.length ? <p className="admin-empty">Không tìm thấy tài khoản phù hợp.</p> : null}
@@ -148,7 +164,13 @@ function AdminAccountsPage({ users }: { users: AdminUserSummary[] }) {
   )
 }
 
-function AdminOrdersPage({ orders }: { orders: Order[] }) {
+function AdminOrdersPage({
+  orders,
+  onDeleteOrder,
+}: {
+  orders: Order[]
+  onDeleteOrder: (orderCode: number) => Promise<void>
+}) {
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
   const normalizedQuery = query.trim().toLowerCase()
@@ -206,6 +228,7 @@ function AdminOrdersPage({ orders }: { orders: Order[] }) {
             <span>Trạng thái</span>
             <span>Tổng tiền</span>
             <span />
+            <span>Xoá</span>
           </div>
           {filteredOrders.map((order) => (
             <div key={order.id} className="admin-table-row">
@@ -223,6 +246,14 @@ function AdminOrdersPage({ orders }: { orders: Order[] }) {
               <Link className="admin-row-link" to={`/dashboard/orders/${order.orderCode}`}>
                 Chi tiết <ChevronRight size={15} />
               </Link>
+              <button
+                type="button"
+                className="admin-delete-btn"
+                onClick={() => onDeleteOrder(order.orderCode)}
+                aria-label={`Xoá đơn hàng DH-${order.orderCode}`}
+              >
+                <Trash2 size={15} />
+              </button>
             </div>
           ))}
           {!filteredOrders.length ? <p className="admin-empty">Không có đơn hàng phù hợp.</p> : null}
@@ -232,7 +263,13 @@ function AdminOrdersPage({ orders }: { orders: Order[] }) {
   )
 }
 
-function AdminOrderDetailPage({ onOrderUpdated }: { onOrderUpdated: () => Promise<void> }) {
+function AdminOrderDetailPage({
+  onOrderUpdated,
+  onDeleteOrder,
+}: {
+  onOrderUpdated: () => Promise<void>
+  onDeleteOrder: (orderCode: number) => Promise<void>
+}) {
   const { orderCode } = useParams()
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [message, setMessage] = useState('')
@@ -287,6 +324,14 @@ function AdminOrderDetailPage({ onOrderUpdated }: { onOrderUpdated: () => Promis
               {confirming ? 'Đang xác nhận...' : 'Xác nhận đã nhận tiền'}
             </button>
           ) : null}
+          <button
+            type="button"
+            className="admin-delete-btn admin-delete-btn-labeled"
+            onClick={() => onDeleteOrder(order.orderCode)}
+          >
+            <Trash2 size={15} />
+            Xoá đơn hàng
+          </button>
         </div>
       </div>
 
@@ -374,6 +419,40 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
     }
   }, [authLoading, currentUser, refreshToken])
 
+  async function handleDeleteUser(userId: string, orderCount: number) {
+    const confirmed = window.confirm('Bạn có chắc muốn xoá tài khoản này? Hành động này không thể hoàn tác.')
+    if (!confirmed) return
+
+    let cascade = false
+    if (orderCount > 0) {
+      cascade = window.confirm(
+        `Tài khoản này có ${orderCount} đơn hàng.\n\nBấm OK để XOÁ LUÔN các đơn hàng đó (doanh thu sẽ giảm tương ứng).\nBấm Cancel để GIỮ LẠI đơn hàng (chỉ gỡ liên kết tài khoản, doanh thu không đổi).`,
+      )
+    }
+
+    setMessage('')
+    try {
+      await fetchAdmin(`/api/admin/users/${userId}?cascade=${cascade}`, { method: 'DELETE' })
+      await refreshAdminData()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể xoá tài khoản.')
+    }
+  }
+
+  async function handleDeleteOrder(orderCode: number) {
+    const confirmed = window.confirm(`Bạn có chắc muốn xoá đơn hàng DH-${orderCode}? Doanh thu sẽ được cập nhật lại tự động.`)
+    if (!confirmed) return
+
+    setMessage('')
+    try {
+      await fetchAdmin(`/api/admin/orders/${orderCode}`, { method: 'DELETE' })
+      await refreshAdminData()
+      navigate('/dashboard/orders')
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể xoá đơn hàng.')
+    }
+  }
+
   async function handleLogout() {
     await onLogout()
     navigate('/account', { replace: true })
@@ -423,9 +502,17 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
           {message ? <p className="status-message error">{message}</p> : null}
           <Routes>
             <Route index element={<AdminOverviewPage data={overview} />} />
-            <Route path="accounts" element={<AdminAccountsPage users={users} />} />
-            <Route path="orders" element={<AdminOrdersPage orders={orders} />} />
-            <Route path="orders/:orderCode" element={<AdminOrderDetailPage onOrderUpdated={async () => setRefreshToken((value) => value + 1)} />} />
+            <Route path="accounts" element={<AdminAccountsPage users={users} onDeleteUser={handleDeleteUser} />} />
+            <Route path="orders" element={<AdminOrdersPage orders={orders} onDeleteOrder={handleDeleteOrder} />} />
+            <Route
+              path="orders/:orderCode"
+              element={
+                <AdminOrderDetailPage
+                  onOrderUpdated={async () => setRefreshToken((value) => value + 1)}
+                  onDeleteOrder={handleDeleteOrder}
+                />
+              }
+            />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>

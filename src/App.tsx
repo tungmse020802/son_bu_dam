@@ -2,6 +2,7 @@
 
 
 // Thêm dòng import component cuộn trang này vào dưới nhóm import
+import { GoogleLoginButton } from './components/GoogleLoginButton'
 import { LessonTrialQuiz } from './components/LessonTrialQuiz'
 import { BackgroundMusic } from './components/BackgroundMusic'
 import ScrollToTop from './components/ScrollToTop'
@@ -18,7 +19,7 @@ import { getShowcaseProducts, lessons, products as fallbackProducts } from './da
 import { historyQuiz, historyQuizSets } from './data/quizData'
 import type { AuthUser, CartItem, CheckoutResponse, DashboardData, OrderDetail, PaymentMethod } from './types/app'
 import { API_BASE_URL, getApiMessage, readApiJson } from './utils/api'
-import { getCurrentUser, loginUser, logoutUser, registerUser } from './utils/auth'
+import { getCurrentUser, loginUser, loginWithGoogle, logoutUser, registerUser, requestPasswordReset, resetPassword } from './utils/auth'
 import {
   addToCart,
   calculateSubtotal,
@@ -363,6 +364,8 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
       score: isCorrect ? prev.score + 1 : prev.score,
     }))
   }
+
+  
 
   function handleNext() {
     if (currentIndex === selectedQuiz.questions.length - 1) {
@@ -906,6 +909,11 @@ function AccountPage({
   const [submitting, setSubmitting] = useState(false)
   const [orders, setOrders] = useState<OrderDetail[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotMessage, setForgotMessage] = useState('')
+  const [forgotSubmitting, setForgotSubmitting] = useState(false)
+  const [googleSubmitting, setGoogleSubmitting] = useState(false)
 
   useEffect(() => {
     if (!currentUser) return
@@ -949,6 +957,7 @@ function AccountPage({
     }
   }, [currentUser])
 
+  // --- HÀM SUBMIT FORM ĐĂNG NHẬP / ĐĂNG KÝ GỐC ---
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setMessage('')
@@ -980,6 +989,41 @@ function AccountPage({
     }
   }
 
+  // --- HÀM XỬ LÝ GOOGLE CREDENTIAL ---
+  async function handleGoogleCredential(credential: string) {
+    setGoogleSubmitting(true)
+    setMessage('')
+    try {
+      const user = await loginWithGoogle(credential)
+      onAuthSuccess(user)
+      if (user.role === 'admin') {
+        navigate('/dashboard', { replace: true })
+      } else if (redirectState?.from) {
+        navigate(redirectState.from, { replace: true })
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Đăng nhập Google thất bại.')
+    } finally {
+      setGoogleSubmitting(false)
+    }
+  }
+
+  // --- HÀM SUBMIT QUÊN MẬT KHẨU ---
+  async function handleForgotPasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setForgotSubmitting(true)
+    setForgotMessage('')
+    try {
+      const resultMessage = await requestPasswordReset(forgotEmail)
+      setForgotMessage(resultMessage)
+    } catch (error) {
+      setForgotMessage(error instanceof Error ? error.message : 'Không thể gửi email đặt lại mật khẩu.')
+    } finally {
+      setForgotSubmitting(false)
+    }
+  }
+
+  // --- CÁC ĐIỀU KIỆN RETURN GIAO DIỆN (RENDER LOGIC) ---
   if (authLoading) {
     return (
       <section className="container section-block auth-shell">
@@ -991,6 +1035,43 @@ function AccountPage({
   }
 
   if (!currentUser) {
+    if (showForgotPassword) {
+      return (
+        <section className="container section-block auth-shell auth-shell-refined auth-shell-centered-bg">
+          <form className="auth-card auth-card-refined auth-card-centered-screen auth-card-floating" onSubmit={handleForgotPasswordSubmit}>
+            <button
+              type="button"
+              className="auth-back-link"
+              onClick={() => {
+                setShowForgotPassword(false)
+                setForgotMessage('')
+              }}
+            >
+              ← Quay lại đăng nhập
+            </button>
+            <p className="eyebrow dark">Quên mật khẩu</p>
+            <h3>Đặt lại mật khẩu qua email</h3>
+            <p className="auth-helper-text">
+              Nhập email đã đăng ký, hệ thống sẽ gửi liên kết đặt lại mật khẩu tới hộp thư của bạn.
+            </p>
+            <label>
+              Email
+              <input
+                type="email"
+                value={forgotEmail}
+                onChange={(event) => setForgotEmail(event.target.value)}
+                placeholder="email@example.com"
+              />
+            </label>
+            <button className="primary-btn full" type="submit" disabled={forgotSubmitting || !forgotEmail.trim()}>
+              {forgotSubmitting ? 'Đang gửi...' : 'Gửi liên kết đặt lại mật khẩu'}
+            </button>
+            {forgotMessage ? <p className="status-message info">{forgotMessage}</p> : null}
+          </form>
+        </section>
+      )
+    }
+
     return (
       <section className="container section-block auth-shell auth-shell-refined auth-shell-centered-bg">
         <form className="auth-card auth-card-refined auth-card-centered-screen auth-card-floating" onSubmit={handleSubmit}>
@@ -1001,6 +1082,13 @@ function AccountPage({
           <p className="eyebrow dark">{mode === 'login' ? 'Đăng nhập học viên' : 'Tạo tài khoản mới'}</p>
           <h3>{mode === 'login' ? 'Vào tài khoản' : 'Bắt đầu với tài khoản thật'}</h3>
           {redirectMessage ? <p className="status-message info">{redirectMessage}</p> : null}
+
+          <div className="auth-google-slot">
+            <GoogleLoginButton onCredential={handleGoogleCredential} disabled={googleSubmitting} />
+            {googleSubmitting ? <p className="status-message info compact">Đang xử lý đăng nhập Google...</p> : null}
+          </div>
+          <div className="auth-divider"><span>hoặc dùng email</span></div>
+
           {mode === 'register' ? (
             <label>
               Họ tên
@@ -1015,6 +1103,19 @@ function AccountPage({
             Mật khẩu
             <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Tối thiểu 8 ký tự" />
           </label>
+          {mode === 'login' ? (
+            <button
+              type="button"
+              className="auth-forgot-link"
+              onClick={() => {
+                setShowForgotPassword(true)
+                setForgotEmail(email)
+                setMessage('')
+              }}
+            >
+              Quên mật khẩu?
+            </button>
+          ) : null}
           {mode === 'register' ? (
             <label>
               Xác nhận mật khẩu
@@ -1031,6 +1132,7 @@ function AccountPage({
     )
   }
 
+  // --- GIAO DIỆN KHI ĐÃ ĐĂNG NHẬP THÀNH CÔNG ---
   return (
     <section className="container section-block learner-account-shell">
       <div className="learner-hero-panel">
@@ -1244,6 +1346,78 @@ function DashboardPage({
   )
 }
 
+
+function ResetPasswordPage() {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const token = searchParams.get('token') ?? ''
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [success, setSuccess] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setMessage('')
+
+    if (!token) {
+      setMessage('Liên kết đặt lại mật khẩu không hợp lệ.')
+      return
+    }
+    if (password !== confirmPassword) {
+      setMessage('Mật khẩu xác nhận chưa khớp.')
+      return
+    }
+
+    setSubmitting(true)
+    try {
+      const resultMessage = await resetPassword(token, password)
+      setSuccess(true)
+      setMessage(resultMessage)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể đặt lại mật khẩu.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="container section-block auth-shell auth-shell-refined auth-shell-centered-bg">
+      <form className="auth-card auth-card-refined auth-card-centered-screen auth-card-floating" onSubmit={handleSubmit}>
+        <p className="eyebrow dark">Đặt lại mật khẩu</p>
+        <h3>Tạo mật khẩu mới</h3>
+        {!token ? (
+          <p className="status-message error">Liên kết không hợp lệ hoặc thiếu mã xác nhận.</p>
+        ) : success ? (
+          <>
+            <p className="status-message info">{message}</p>
+            <button type="button" className="primary-btn full" onClick={() => navigate('/account', { replace: true })}>
+              Về trang đăng nhập
+            </button>
+          </>
+        ) : (
+          <>
+            <label>
+              Mật khẩu mới
+              <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Tối thiểu 8 ký tự" />
+            </label>
+            <label>
+              Xác nhận mật khẩu mới
+              <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Nhập lại mật khẩu mới" />
+            </label>
+            <button className="primary-btn full" type="submit" disabled={submitting}>
+              {submitting ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+            </button>
+            {message ? <p className="status-message error">{message}</p> : null}
+          </>
+        )}
+      </form>
+    </section>
+  )
+}
+
+
 export default function App() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -1397,6 +1571,7 @@ export default function App() {
         <Route path="/checkout/success" element={<CheckoutResultPage onPaid={handleOrderPaid} />} />
         <Route path="/checkout/cancel" element={<CheckoutResultPage onPaid={handleOrderPaid} />} />
         <Route path="/account" element={<AccountPage currentUser={currentUser} authLoading={authLoading} onAuthSuccess={handleAuthSuccess} onLogout={handleLogout} />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/dashboard/*" element={<AdminDashboard currentUser={currentUser} authLoading={authLoading} onLogout={handleLogout} />} />
       </Routes>
       
