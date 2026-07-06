@@ -16,6 +16,8 @@ import type { AdminOverviewData, AdminUserSummary, AuthUser, Order, OrderDetail 
 import { API_BASE_URL, getApiMessage, readApiJson } from '../utils/api'
 import { formatCurrency, orderStatusLabel, paymentLabel } from '../utils/store'
 import { DashboardOverview } from './DashboardOverview'
+import { FilePlus } from 'lucide-react' // thêm vào danh sách import lucide-react hiện có
+import { AdminContentManager } from './AdminContentManager'
 
 interface AdminDashboardProps {
   currentUser: AuthUser | null
@@ -478,6 +480,7 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
           <NavLink to="/dashboard" end><LayoutDashboard size={18} />Tổng quan</NavLink>
           <NavLink to="/dashboard/accounts"><Users size={18} />Tài khoản</NavLink>
           <NavLink to="/dashboard/orders"><ClipboardList size={18} />Đơn hàng</NavLink>
+          <NavLink to="/dashboard/content"><FilePlus size={18} />Nội dung</NavLink>
           <Link to="/products"><Boxes size={18} />Xem cửa hàng</Link>
         </nav>
         <div className="admin-sidebar-user">
@@ -501,20 +504,24 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
         <div className="admin-content">
           {message ? <p className="status-message error">{message}</p> : null}
           <Routes>
-            <Route index element={<AdminOverviewPage data={overview} />} />
-            <Route path="accounts" element={<AdminAccountsPage users={users} onDeleteUser={handleDeleteUser} />} />
-            <Route path="orders" element={<AdminOrdersPage orders={orders} onDeleteOrder={handleDeleteOrder} />} />
-            <Route
-              path="orders/:orderCode"
-              element={
-                <AdminOrderDetailPage
-                  onOrderUpdated={async () => setRefreshToken((value) => value + 1)}
-                  onDeleteOrder={handleDeleteOrder}
-                />
-              }
-            />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+  <Route index element={<AdminOverviewPage data={overview} />} />
+  <Route path="accounts" element={<AdminAccountsPage users={users} onDeleteUser={handleDeleteUser} />} />
+  <Route path="orders" element={<AdminOrdersPage orders={orders} onDeleteOrder={handleDeleteOrder} />} />
+  <Route
+    path="orders/:orderCode"
+    element={
+      <AdminOrderDetailPage
+        onOrderUpdated={async () => setRefreshToken((value) => value + 1)}
+        onDeleteOrder={handleDeleteOrder}
+      />
+    }
+  />
+  
+  {/* Chèn dòng mới vào đây */}
+  <Route path="content" element={<AdminContentManager />} />
+
+  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+</Routes>
         </div>
       </main>
     </div>

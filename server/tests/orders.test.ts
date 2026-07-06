@@ -15,6 +15,8 @@ vi.mock('../db', () => ({
   listStoredOrders: vi.fn(async () => []),
   listStoredOrdersByUser: vi.fn(async () => []),
   updateStoredOrderStatus: vi.fn(),
+  listAdminProducts: vi.fn(async () => []),
+  listProductOverrides: vi.fn(async () => []),
 }))
 
 vi.mock('../payos', () => ({

@@ -5484,3 +5484,545 @@ html, body {
 .admin-orders-table .admin-table-row {
   grid-template-columns: 150px minmax(230px, 1.4fr) 120px 150px 120px 112px 60px;
 }
+
+
+.product-card-coming-soon {
+  opacity: 0.94;
+}
+
+.product-coming-soon-chip {
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%) !important;
+  color: #ffffff !important;
+}
+
+.product-meta-pill-soon {
+  background: rgba(100, 116, 139, 0.12) !important;
+  color: #475569 !important;
+}
+
+.product-coming-soon-price {
+  color: #475569 !important;
+  font-size: 1.15rem !important;
+}
+
+
+/* ==========================================================================
+   PRODUCT CARD TỐI GIẢN — nút thêm giỏ hàng là overlay hiện khi hover
+   ========================================================================== */
+
+.product-image-wrap-simple {
+  position: relative;
+  overflow: hidden;
+}
+
+.product-simple-ribbon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.3rem 0.62rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+.product-simple-ribbon-bestseller {
+  background: #e02020;
+}
+
+.product-simple-ribbon-soon {
+  background: #2f6fed;
+  text-transform: none;
+}
+
+/* Nút thêm giỏ hàng: nằm đè lên đáy ảnh, ẩn xuống dưới, trượt lên khi hover */
+.product-simple-hover-cta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 0;
+  border: 0;
+  background: rgba(20, 12, 12, 0.82);
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.product-card-simple:hover .product-simple-hover-cta {
+  transform: translateY(0);
+}
+
+.product-simple-hover-cta:disabled {
+  cursor: not-allowed;
+  background: rgba(90, 90, 90, 0.82);
+}
+
+.product-content-simple {
+  padding: 16px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-simple-grade {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-soft);
+}
+
+.product-simple-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.32;
+  color: var(--ink);
+  min-height: 2.6em;
+}
+
+.product-simple-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.product-simple-price {
+  color: #e0342a;
+  font-size: 1.12rem;
+  font-weight: 800;
+}
+
+.product-simple-price-soon {
+  color: var(--text-soft);
+  font-size: 1rem;
+}
+
+.product-simple-discount-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.14rem 0.42rem;
+  border-radius: 5px;
+  background: #2f6fed;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.product-simple-old-price {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  text-decoration: line-through;
+}
+
+.product-card-coming-soon {
+  opacity: 0.94;
+}
+
+.product-simple-ribbon-new {
+  background: #2f6fed;
+}
+
+/* ==========================================================================
+   FIX TỶ LỆ ẢNH SẢN PHẨM CARD TỐI GIẢN — ảnh vuông (1:1) đúng như ảnh mẫu,
+   không còn khoảng trắng thừa phía dưới, kèm hiệu ứng zoom nhẹ khi hover.
+   ========================================================================== */
+
+/* Ngăn Grid ép các card trong cùng 1 hàng cao bằng nhau -> mỗi card
+   tự co theo đúng nội dung của nó, không còn khoảng trắng thừa. */
+.product-grid-showcase {
+  align-items: start;
+}
+
+.product-card-simple {
+  height: auto;
+}
+
+/* Ảnh vuông 1:1 đúng tỉ lệ ảnh mẫu, không còn bị bẹt/thấp như trước. */
+.product-card-simple .product-image {
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+/* Hiệu ứng zoom nhẹ khi rê chuột vào card: ảnh phóng to bên trong khung
+   (khung đã có overflow: hidden ở .product-image-wrap-simple nên không tràn ra ngoài). */
+.product-card-simple:hover .product-image {
+  transform: scale(1.06);
+}
+
+.product-content-simple {
+  padding: 14px 18px 18px;
+}
+
+
+
+/* ==========================================================================
+   FORM ADMIN THÊM BÀI HỌC / SẢN PHẨM — THIẾT KẾ CHUYÊN NGHIỆP
+   ========================================================================== */
+
+.admin-content-tabs {
+  margin-bottom: 4px;
+}
+
+.admin-content-tabs .auth-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-content-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-form-section {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.admin-form-section-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-form-section-icon {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(138, 31, 45, 0.08);
+  color: var(--maroon);
+}
+
+.admin-form-section-heading h4 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.admin-form-section-heading p {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.admin-form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-form-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-form-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.admin-form-field-full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-field input,
+.admin-form-field select,
+.admin-form-field textarea {
+  font-weight: 400;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fbfaf6;
+  padding: 0.72rem 0.85rem;
+  font-size: 0.88rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.admin-form-field input:focus,
+.admin-form-field select:focus,
+.admin-form-field textarea:focus {
+  outline: none;
+  border-color: rgba(138, 31, 45, 0.45);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(138, 31, 45, 0.08);
+}
+
+.admin-form-field input:disabled,
+.admin-form-field select:disabled,
+.admin-form-field textarea:disabled {
+  background: #f0efe9;
+  color: var(--text-soft);
+  cursor: not-allowed;
+}
+
+.admin-form-field textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.admin-form-hint {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.admin-form-hint-block {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(201, 133, 43, 0.1);
+  color: #9a5a11;
+}
+
+.admin-character-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.admin-character-picker-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fbfaf6;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-character-picker-item input {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--maroon);
+}
+
+.admin-character-picker-item:hover {
+  border-color: rgba(138, 31, 45, 0.3);
+}
+
+.admin-character-picker-item.checked {
+  border-color: var(--maroon);
+  background: var(--gold-soft);
+}
+
+.admin-character-picker-name {
+  font-weight: 700;
+  font-size: 0.86rem;
+  padding-right: 22px;
+  color: var(--ink);
+}
+
+.admin-character-picker-item small {
+  color: var(--text-soft);
+  font-size: 0.72rem;
+}
+
+.admin-toggle-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-toggle-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fbfaf6;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-toggle-card:has(input:checked) {
+  border-color: var(--maroon);
+  background: var(--gold-soft);
+}
+
+.admin-toggle-card input {
+  margin-top: 3px;
+  width: 17px;
+  height: 17px;
+  accent-color: var(--maroon);
+  flex: 0 0 auto;
+}
+
+.admin-toggle-card strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.admin-toggle-card span {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.admin-content-form-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 4px 4px 0;
+}
+
+@media (max-width: 900px) {
+  .admin-form-grid-2,
+  .admin-form-grid-3,
+  .admin-toggle-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form-field-full {
+    grid-column: auto;
+  }
+}
+
+.admin-content-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-content-list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.admin-content-list-toolbar .admin-search {
+  flex: 1 1 auto;
+}
+
+.admin-content-list-toolbar .primary-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.admin-lessons-table .admin-table-row {
+  grid-template-columns: minmax(220px, 1.6fr) 100px 140px 90px;
+}
+
+.admin-products-table .admin-table-row {
+  grid-template-columns: minmax(220px, 1.6fr) 100px 140px 100px 90px;
+}
+
+.admin-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 118, 110, 0.3);
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--jade);
+  font-size: 0.78rem;
+  font-weight: 700;
+  transition: 0.2s ease;
+}
+
+.admin-edit-btn:hover {
+  background: rgba(15, 118, 110, 0.16);
+  transform: translateY(-1px);
+}
+
+.admin-back-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.quiz-best-time-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-best-time-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fbfaf6;
+}
+
+.quiz-best-time-item strong {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+.quiz-best-time-item span {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.76rem;
+  color: var(--text-soft);
+}
+
+.quiz-best-time-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--jade);
+  font-weight: 800;
+  font-size: 0.86rem;
+  white-space: nowrap;
+}

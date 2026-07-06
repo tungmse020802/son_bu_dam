@@ -29,6 +29,8 @@ export interface Product {
   features: string[]
   characterIds: string[]
   arEnabled: boolean
+  comboTag?: boolean      // true = luôn hiện "Combo", false = luôn hiện "Thẻ lẻ", để trống = tự suy ra như cũ
+  comingSoon?: boolean    // true = ẩn giá, thay bằng "Sắp ra mắt", khoá nút mua
 }
 
 export interface Lesson {
@@ -162,4 +164,13 @@ export interface AuthResponse {
 
 export interface AuthErrorResponse {
   message: string
+}
+
+export interface QuizBestTime {
+  quizSlug: string
+  quizTitle: string
+  bestSeconds: number
+  score: number
+  questionCount: number
+  updatedAt: string
 }

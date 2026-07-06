@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
-import type { OrderItem, OrderStatus, PaymentMethod, UserRole } from '../src/types/app.js'
+import type { Lesson, OrderItem, OrderStatus, PaymentMethod, Product, QuizBestTime, UserRole } from '../src/types/app.js'
 import { getAdminEmails } from './admin.js'
 
 export type StoredUser = {
@@ -55,6 +55,17 @@ type StoredPasswordReset = {
   createdAt: string
 }
 
+type StoredQuizBestTime = {
+  id: string
+  userId: string
+  quizSlug: string
+  quizTitle: string
+  bestSeconds: number
+  score: number
+  questionCount: number
+  updatedAt: string
+}
+
 type StoredWebhookEvent = {
   id: string
   orderCode: number
@@ -69,6 +80,11 @@ type JsonStore = {
   orderItems: StoredOrderItem[]
   webhookEvents: StoredWebhookEvent[]
   passwordResets: StoredPasswordReset[]
+  adminLessons: Lesson[]
+  adminProducts: Product[]
+  lessonOverrides: Lesson[]
+  productOverrides: Product[]
+  quizBestTimes: StoredQuizBestTime[]
 }
 
 const emptyStore: JsonStore = {
@@ -77,6 +93,11 @@ const emptyStore: JsonStore = {
   orderItems: [],
   webhookEvents: [],
   passwordResets: [],
+  adminLessons: [],
+  adminProducts: [],
+  lessonOverrides: [],
+  productOverrides: [],
+  quizBestTimes: [],
 }
 const DEFAULT_ADMIN_FULL_NAME = 'Admin'
 const DEFAULT_ADMIN_PASSWORD_HASH = '$2b$10$eqfnMuotx0jHzExNTsziLOySghQlLtriG818Ehy.Jvaf238WQH0M6'
@@ -103,6 +124,11 @@ async function readStore(): Promise<JsonStore> {
   orderItems: parsed.orderItems ?? [],
   webhookEvents: parsed.webhookEvents ?? [],
   passwordResets: parsed.passwordResets ?? [],
+  adminLessons: parsed.adminLessons ?? [],
+  adminProducts: parsed.adminProducts ?? [],
+  lessonOverrides: parsed.lessonOverrides ?? [],
+  productOverrides: parsed.productOverrides ?? [],
+  quizBestTimes: parsed.quizBestTimes ?? [],
 }
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -140,6 +166,12 @@ export async function initializeDatabase() {
     store.orderItems ??= []
     store.webhookEvents ??= []
     store.passwordResets ??= []
+    store.adminLessons ??= []
+    store.adminProducts ??= []
+    store.lessonOverrides ??= []
+    store.productOverrides ??= []
+    store.quizBestTimes ??= []
+    // ... phần còn lại giữ nguyên
     // ... phần còn lại giữ nguyên
 
     if (store.users.some((user) => user.role === 'admin')) {
@@ -433,4 +465,128 @@ export async function deleteStoredOrder(orderCode: number) {
 
     return order
   })
+}
+
+export async function insertAdminLesson(lesson: Lesson) {
+  return updateStore((store) => {
+    store.adminLessons ??= []
+    store.adminLessons.push(lesson)
+    return lesson
+  })
+}
+
+export async function listAdminLessons() {
+  const store = await readStore()
+  return store.adminLessons ?? []
+}
+
+export async function insertAdminProduct(product: Product) {
+  return updateStore((store) => {
+    store.adminProducts ??= []
+    store.adminProducts.push(product)
+    return product
+  })
+}
+
+export async function listAdminProducts() {
+  const store = await readStore()
+  return store.adminProducts ?? []
+}
+
+
+export async function upsertLessonOverride(lesson: Lesson) {
+  return updateStore((store) => {
+    store.lessonOverrides ??= []
+    const idx = store.lessonOverrides.findIndex((entry) => entry.id === lesson.id)
+    if (idx >= 0) store.lessonOverrides[idx] = lesson
+    else store.lessonOverrides.push(lesson)
+    return lesson
+  })
+}
+
+export async function listLessonOverrides() {
+  const store = await readStore()
+  return store.lessonOverrides ?? []
+}
+
+export async function updateAdminLesson(id: string, lesson: Lesson) {
+  return updateStore((store) => {
+    store.adminLessons ??= []
+    const idx = store.adminLessons.findIndex((entry) => entry.id === id)
+    if (idx === -1) throw new Error('Không tìm thấy bài học trong danh sách bài học do admin thêm.')
+    store.adminLessons[idx] = lesson
+    return lesson
+  })
+}
+
+export async function upsertProductOverride(product: Product) {
+  return updateStore((store) => {
+    store.productOverrides ??= []
+    const idx = store.productOverrides.findIndex((entry) => entry.id === product.id)
+    if (idx >= 0) store.productOverrides[idx] = product
+    else store.productOverrides.push(product)
+    return product
+  })
+}
+
+export async function listProductOverrides() {
+  const store = await readStore()
+  return store.productOverrides ?? []
+}
+
+export async function updateAdminProduct(id: string, product: Product) {
+  return updateStore((store) => {
+    store.adminProducts ??= []
+    const idx = store.adminProducts.findIndex((entry) => entry.id === id)
+    if (idx === -1) throw new Error('Không tìm thấy sản phẩm trong danh sách sản phẩm do admin thêm.')
+    store.adminProducts[idx] = product
+    return product
+  })
+}
+
+export async function upsertQuizBestTime(input: {
+  userId: string
+  quizSlug: string
+  quizTitle: string
+  seconds: number
+  score: number
+  questionCount: number
+}) {
+  return updateStore((store) => {
+    store.quizBestTimes ??= []
+    const existing = store.quizBestTimes.find(
+      (entry) => entry.userId === input.userId && entry.quizSlug === input.quizSlug,
+    )
+
+    // Chỉ cập nhật khi CHƯA có kỷ lục, hoặc lần này NHANH HƠN kỷ lục cũ.
+    if (!existing) {
+      const record: StoredQuizBestTime = {
+        id: randomUUID(),
+        userId: input.userId,
+        quizSlug: input.quizSlug,
+        quizTitle: input.quizTitle,
+        bestSeconds: input.seconds,
+        score: input.score,
+        questionCount: input.questionCount,
+        updatedAt: new Date().toISOString(),
+      }
+      store.quizBestTimes.push(record)
+      return record
+    }
+
+    if (input.seconds < existing.bestSeconds) {
+      existing.bestSeconds = input.seconds
+      existing.score = input.score
+      existing.questionCount = input.questionCount
+      existing.quizTitle = input.quizTitle
+      existing.updatedAt = new Date().toISOString()
+    }
+
+    return existing
+  })
+}
+
+export async function listQuizBestTimesByUser(userId: string) {
+  const store = await readStore()
+  return (store.quizBestTimes ?? []).filter((entry) => entry.userId === userId)
 }

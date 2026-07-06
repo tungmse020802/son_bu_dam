@@ -3,9 +3,9 @@ import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { lessons } from '../src/data/mockData.js'
+import { createLesson, createProduct, getAllLessons, getFullProductCatalog, updateLesson, updateProduct } from './content.js'
 import type { CheckoutRequest } from '../src/types/app.js'
-import { deleteStoredUser, findUserById, initializeDatabase, listStoredUsers } from './db.js'
+import { deleteStoredUser, findUserById, initializeDatabase, listQuizBestTimesByUser, listStoredUsers, upsertQuizBestTime } from './db.js'
 import { createOrder, deleteOrder, getCatalogProducts, getDashboardData, getOrderByCode, listAllOrders, listOrdersByUser, updateOrderStatus } from './orders.js'
 import {
   clearAuthSession,
@@ -181,12 +181,20 @@ app.post('/api/auth-logout', handleLogout)
 app.get('/api/account/orders', handleAccountOrders)
 app.get('/api/account-orders', handleAccountOrders)
 
-app.get('/api/products', (_req, res) => {
-  res.json(getCatalogProducts())
+app.get('/api/products', async (_req, res) => {
+  try {
+    res.json(await getCatalogProducts())
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được sản phẩm.' })
+  }
 })
 
-app.get('/api/lessons', (_req, res) => {
-  res.json(lessons)
+app.get('/api/lessons', async (_req, res) => {
+  try {
+    res.json(await getAllLessons())
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được bài học.' })
+  }
 })
 
 app.get('/api/dashboard', async (req, res) => {
@@ -206,6 +214,59 @@ app.get('/api/dashboard', async (req, res) => {
     res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được dashboard.' })
   }
 })
+
+async function handleSaveQuizBestTime(req: express.Request, res: express.Response) {
+  try {
+    const user = await getAuthUserFromRequest(req)
+    if (!user) {
+      res.status(401).json({ message: 'Chưa đăng nhập.' })
+      return
+    }
+
+    const { quizSlug, quizTitle, seconds, score, questionCount } = req.body as {
+      quizSlug?: string
+      quizTitle?: string
+      seconds?: number
+      score?: number
+      questionCount?: number
+    }
+
+    if (!quizSlug || typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds < 0) {
+      res.status(400).json({ message: 'Dữ liệu thời gian làm bài không hợp lệ.' })
+      return
+    }
+
+    const record = await upsertQuizBestTime({
+      userId: user.id,
+      quizSlug,
+      quizTitle: quizTitle ?? quizSlug,
+      seconds: Math.round(seconds),
+      score: Number.isFinite(score) ? Number(score) : 0,
+      questionCount: Number.isFinite(questionCount) ? Number(questionCount) : 0,
+    })
+
+    res.json({ record, message: 'Đã lưu kỷ lục thời gian làm bài.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể lưu thời gian làm bài.' })
+  }
+}
+
+async function handleListQuizBestTimes(req: express.Request, res: express.Response) {
+  try {
+    const user = await getAuthUserFromRequest(req)
+    if (!user) {
+      res.status(401).json({ message: 'Chưa đăng nhập.' })
+      return
+    }
+    const records = await listQuizBestTimesByUser(user.id)
+    res.json({ records })
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được kỷ lục thời gian làm bài.' })
+  }
+}
+
+app.post('/api/quiz/best-time', handleSaveQuizBestTime)
+app.get('/api/quiz/best-times', handleListQuizBestTimes)
 
 async function requireAdmin(req: express.Request, res: express.Response) {
   const user = await getAuthUserFromRequest(req)
@@ -276,6 +337,44 @@ app.get('/api/admin/orders/:orderCode', async (req, res) => {
     res.json(await getOrderByCode(getOrderCodeFromRequest(req)))
   } catch (error) {
     res.status(404).json({ message: error instanceof Error ? error.message : 'Không tìm thấy đơn hàng.' })
+  }
+})
+
+app.get('/api/admin/content/lessons', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    res.json({ lessons: await getAllLessons() })
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được danh sách bài học.' })
+  }
+})
+
+app.get('/api/admin/content/products', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    res.json({ products: await getFullProductCatalog() })
+  } catch (error) {
+    res.status(500).json({ message: error instanceof Error ? error.message : 'Không tải được danh sách sản phẩm.' })
+  }
+})
+
+app.put('/api/admin/lessons/:lessonId', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    const lesson = await updateLesson(req.params.lessonId, req.body)
+    res.json({ lesson, message: 'Đã cập nhật bài học.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể cập nhật bài học.' })
+  }
+})
+
+app.put('/api/admin/products/:productId', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    const product = await updateProduct(req.params.productId, req.body)
+    res.json({ product, message: 'Đã cập nhật sản phẩm.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể cập nhật sản phẩm.' })
   }
 })
 
@@ -373,6 +472,27 @@ app.post('/api/checkout', async (req, res) => {
     })
   } catch (error) {
     res.status(400).json({ message: error instanceof Error ? error.message : 'Checkout thất bại.' })
+  }
+})
+
+
+app.post('/api/admin/lessons', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    const lesson = await createLesson(req.body)
+    res.status(201).json({ lesson, message: 'Đã thêm bài học mới.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể thêm bài học.' })
+  }
+})
+
+app.post('/api/admin/products', async (req, res) => {
+  try {
+    if (!(await requireAdmin(req, res))) return
+    const product = await createProduct(req.body)
+    res.status(201).json({ product, message: 'Đã thêm sản phẩm mới.' })
+  } catch (error) {
+    res.status(400).json({ message: error instanceof Error ? error.message : 'Không thể thêm sản phẩm.' })
   }
 })
 

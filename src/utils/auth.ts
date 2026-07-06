@@ -21,26 +21,35 @@ function clearLocalUser() {
 }
 
 export async function getCurrentUser() {
-  const response = await fetch(`${API_BASE_URL}/api/auth-me`, {
-    credentials: 'include',
-  })
+  const controller = new AbortController()
+  // Nếu server không phản hồi trong 8 giây, tự động huỷ request thay vì treo vô hạn.
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-  if (response.status === 401) {
-    return loadLocalUser()
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth-me`, {
+      credentials: 'include',
+      signal: controller.signal,
+    })
+
+    if (response.status === 401) {
+      return loadLocalUser()
+    }
+
+    const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
+    if (!response.ok) {
+      throw new Error(getApiMessage(data) ?? 'Không tải được phiên đăng nhập.')
+    }
+
+    if (!data?.user) {
+      return loadLocalUser()
+    }
+
+    const user = { ...data.user, role: data.user.role ?? 'customer' }
+    saveLocalUser(user)
+    return user
+  } finally {
+    clearTimeout(timeoutId)
   }
-
-  const data = await readApiJson<{ user?: AuthUser; message?: string }>(response)
-  if (!response.ok) {
-    throw new Error(getApiMessage(data) ?? 'Không tải được phiên đăng nhập.')
-  }
-
-  if (!data?.user) {
-    return loadLocalUser()
-  }
-
-  const user = { ...data.user, role: data.user.role ?? 'customer' }
-  saveLocalUser(user)
-  return user
 }
 
 export async function registerUser(input: { fullName: string; email: string; password: string }) {
