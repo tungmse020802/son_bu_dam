@@ -1,4 +1,6 @@
 import express from 'express'
+import crypto from 'node:crypto'
+import multer from 'multer'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import { existsSync } from 'node:fs'
@@ -22,6 +24,29 @@ const app = express()
 const port = Number(process.env.PORT ?? 8787)
 const frontendDistDir = path.resolve(process.cwd(), 'dist')
 const frontendIndexPath = path.join(frontendDistDir, 'index.html')
+
+const uploadsDir = path.resolve(process.cwd(), 'data', 'uploads')
+if (!existsSync(uploadsDir)) {
+  await import('node:fs/promises').then((fs) => fs.mkdir(uploadsDir, { recursive: true }))
+}
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || '.jpg'
+      cb(null, `${crypto.randomUUID()}${ext}`)
+    },
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 }, // giới hạn 5MB mỗi ảnh
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      cb(new Error('Chỉ chấp nhận file ảnh (jpg, png, webp, gif...).'))
+      return
+    }
+    cb(null, true)
+  },
+})
 
 const allowedOrigins = [
   process.env.APP_BASE_URL,
@@ -281,6 +306,19 @@ async function requireAdmin(req: express.Request, res: express.Response) {
   return user
 }
 
+async function requireAdminMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const user = await getAuthUserFromRequest(req)
+  if (!user) {
+    res.status(401).json({ message: 'Vui lòng đăng nhập tài khoản admin.' })
+    return
+  }
+  if (user.role !== 'admin') {
+    res.status(403).json({ message: 'Bạn không có quyền thực hiện thao tác này.' })
+    return
+  }
+  next()
+}
+
 app.get('/api/admin/overview', async (req, res) => {
   try {
     if (!(await requireAdmin(req, res))) return
@@ -496,6 +534,20 @@ app.post('/api/admin/products', async (req, res) => {
   }
 })
 
+app.post('/api/admin/upload', requireAdminMiddleware, (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      res.status(400).json({ message: err instanceof Error ? err.message : 'Không thể tải ảnh lên.' })
+      return
+    }
+    if (!req.file) {
+      res.status(400).json({ message: 'Vui lòng chọn một file ảnh.' })
+      return
+    }
+    res.json({ url: `/uploads/${req.file.filename}`, message: 'Tải ảnh lên thành công.' })
+  })
+})
+
 function getOrderCodeFromRequest(req: express.Request) {
   const value = req.params.orderCode ?? req.query.orderCode
   const raw = Array.isArray(value) ? value[0] : value
@@ -549,7 +601,7 @@ function sendFrontendIndex(res: express.Response) {
     )
 }
 
-app.use(express.static(frontendDistDir))
+app.use('/uploads', express.static(uploadsDir))
 
 app.get('/', (_req, res) => {
   sendFrontendIndex(res)
