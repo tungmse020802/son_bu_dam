@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ImageUploadField } from './ImageUploadField'
 import type { FormEvent } from 'react'
 import { BookPlus, ChevronLeft, Image as ImageIcon, PackagePlus, Pencil, Search, Tags, Users } from 'lucide-react'
 import { characters } from '../data/mockData'
@@ -161,11 +162,11 @@ function LessonForm({ initial, onSaved, onCancel }: { initial?: Lesson; onSaved:
 
       <FormSection icon={<ImageIcon size={18} />} title="Hình ảnh minh hoạ">
         <div className="admin-form-grid admin-form-grid-2">
-          <label className="admin-form-field admin-form-field-full">
-            Đường dẫn ảnh
-            <input value={image} onChange={(e) => setImage(e.target.value)} placeholder="/assets/ten-anh.jpg" />
-            <small className="admin-form-hint">Để trống nếu chưa có ảnh, hệ thống sẽ dùng ảnh mặc định.</small>
-          </label>
+          <div className="admin-form-field admin-form-field-full">
+  <span>Ảnh minh hoạ</span>
+  <ImageUploadField value={image} onChange={setImage} />
+  <small className="admin-form-hint">Để trống nếu chưa có ảnh, hệ thống sẽ dùng ảnh mặc định.</small>
+</div>
         </div>
       </FormSection>
 
@@ -326,10 +327,10 @@ function ProductForm({ initial, onSaved, onCancel }: { initial?: Product; onSave
 
       <FormSection icon={<ImageIcon size={18} />} title="Hình ảnh & mô tả chi tiết">
         <div className="admin-form-grid admin-form-grid-2">
-          <label className="admin-form-field admin-form-field-full">
-            Đường dẫn ảnh sản phẩm
-            <input value={image} onChange={(e) => setImage(e.target.value)} placeholder="/assets/ten-anh.png" />
-          </label>
+          <div className="admin-form-field admin-form-field-full">
+  <span>Ảnh sản phẩm</span>
+  <ImageUploadField value={image} onChange={setImage} />
+</div>
           <label className="admin-form-field admin-form-field-full">
             Mô tả chi tiết
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required />
