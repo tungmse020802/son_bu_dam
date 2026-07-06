@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { getShowcaseProducts, products } from '../src/data/mockData.js'
+import { getFullProductCatalog, getStorefrontCatalog } from './content.js'
 import type {
   CartItem,
   CheckoutRequest,
@@ -90,8 +90,8 @@ function mapStoredOrderDetail(record: { order: StoredOrder; items: StoredOrderIt
   }
 }
 
-export function getCatalogProducts() {
-  return getShowcaseProducts(products)
+export async function getCatalogProducts() {
+  return getStorefrontCatalog()
 }
 
 export function resolveCartItems(cart: CartItem[], catalog: Product[]) {
@@ -139,7 +139,8 @@ export async function createOrder(input: CheckoutRequest, userId?: string | null
     throw new Error('Shop hiện chỉ hỗ trợ chuyển khoản VietQR TPBank.')
   }
 
-  const { items, subtotal, shipping, total } = resolveCartItems(input.cart, products)
+const catalog = await getFullProductCatalog()
+const { items, subtotal, shipping, total } = resolveCartItems(input.cart, catalog)
   if (!items.length) {
     throw new Error('Không tìm thấy sản phẩm hợp lệ trong giỏ hàng.')
   }

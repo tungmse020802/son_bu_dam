@@ -8,6 +8,7 @@
     "dev:client": "vite --host --port 80",
     "dev:server": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
+    "start": "tsx server/index.ts",
     "preview": "vite preview",
     "test": "npm run test:server && npm run test:client",
     "test:server": "vitest run server/tests",
@@ -27,7 +28,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.1",
-    "swiper": "^12.2.0"
+    "swiper": "^12.2.0",
+    "tsx": "^4.20.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
@@ -45,7 +47,6 @@
     "concurrently": "^9.2.0",
     "jsdom": "^29.1.1",
     "supertest": "^7.2.2",
-    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^5.4.19",
     "vitest": "^4.1.8"

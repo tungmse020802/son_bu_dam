@@ -210,10 +210,94 @@ function buildCatalogProduct(entry: (typeof gradeCatalog)[number]): any {
   }
 }
 
+
+// TODO: thay 2 dòng ảnh dưới đây bằng ảnh thật của bộ Chibi khi có,
+// ví dụ '/assets/combo-chibi-lop-6.png' và '/assets/combo-thuong-chibi-lop-6.png'
+const chibiComboImage = productImage
+const comboThuongChibiImage = productImage
+
+const gradeSixChibiProduct: Product = {
+  id: 'combo-lop-6-chibi',
+  slug: 'bo-the-bai-chibi-lop-6',
+  name: 'Bộ thẻ bài Chibi các nhân vật lịch sử lớp 6',
+  subtitle: 'Trọn bộ 12 thẻ nhân vật lịch sử lớp 6 phong cách Chibi đáng yêu.',
+  price: 120000,
+  grade: 'Lớp 6',
+  period: 'Âu Lạc - Tự Chủ',
+  type: 'Anh hùng',
+  stock: 30,
+  image: chibiComboImage,
+  description:
+    'Bộ thẻ bài phong cách Chibi dễ thương, tái hiện 12 nhân vật lịch sử lớp 6 với tạo hình ngộ nghĩnh, gần gũi hơn với học sinh nhỏ tuổi, đi kèm bài học và quiz tương tác giống bộ thẻ thường.',
+  features: [
+    'Phong cách Chibi đáng yêu, dễ tiếp cận với học sinh nhỏ tuổi.',
+    'Quét QR — Chơi Quiz: Ôn tập kiến thức qua trò chơi trắc nghiệm.',
+    'Đầy đủ 12 nhân vật lịch sử lớp 6 như bộ thẻ thường.',
+  ],
+  characterIds: characters.filter((character) => character.grade === 'Lớp 6').map((character) => character.id),
+  arEnabled: true,
+  comboTag: false,
+}
+
+const gradeSixComboThuongChibiProduct: Product = {
+  id: 'combo-lop-6-thuong-chibi',
+  slug: 'combo-2-bo-the-thuong-va-chibi-lop-6',
+  name: 'Combo 2 bộ thẻ bài Thường và Chibi lớp 6',
+  subtitle: 'Sở hữu cả 2 phong cách: bộ thẻ thường và bộ thẻ Chibi lớp 6 trong 1 combo tiết kiệm.',
+  price: 220000,
+  originalPrice: 270000,
+  grade: 'Lớp 6',
+  period: 'Âu Lạc - Tự Chủ',
+  type: 'Anh hùng',
+  stock: 24,
+  image: comboThuongChibiImage,
+  description:
+    'Combo kết hợp cả bộ thẻ bài lịch sử lớp 6 phong cách thường và phong cách Chibi, giúp học sinh có thêm lựa chọn sưu tầm đa dạng mà vẫn tiết kiệm hơn so với mua lẻ từng bộ.',
+  features: [
+    'Bao gồm cả bộ thẻ thường và bộ thẻ Chibi lớp 6.',
+    'Tiết kiệm hơn so với mua riêng lẻ từng phong cách.',
+    'Quét QR — Chơi Quiz: Dùng chung hệ thống quiz cho cả 2 bộ thẻ.',
+  ],
+  characterIds: characters.filter((character) => character.grade === 'Lớp 6').map((character) => character.id),
+  arEnabled: true,
+  comboTag: true,
+}
+
+const gradeSevenComingSoonProduct: Product = {
+  id: 'tron-bo-lop-7-comingsoon',
+  slug: 'tron-bo-the-bai-lop-7-sap-ra-mat',
+  name: 'Trọn bộ thẻ bài lịch sử Lớp 7',
+  subtitle: 'Bộ thẻ bài lịch sử lớp 7 đang được hoàn thiện, sắp ra mắt trong thời gian tới.',
+  price: 0,
+  grade: 'Lớp 7',
+  period: 'Vạn Xuân - Tự Chủ',
+  type: 'Anh hùng',
+  stock: 0,
+  image: productImage,
+  description:
+    'Trọn bộ thẻ bài lịch sử lớp 7 đang trong quá trình hoàn thiện nội dung và minh hoạ. Hãy theo dõi để cập nhật thông tin mở bán sớm nhất.',
+  features: [
+    'Bộ thẻ nhân vật lịch sử lớp 7 đang được hoàn thiện.',
+    'Sẽ sớm có bài học và quiz tương tác đi kèm.',
+    'Theo dõi để không bỏ lỡ ngày mở bán.',
+  ],
+  characterIds: characters.filter((character) => character.grade === 'Lớp 7').map((character) => character.id),
+  arEnabled: true,
+  comboTag: false,
+  comingSoon: true,
+}
+
+
+
+
+
 // Thực hiện ép kiểu ở lớp mảng ngoài cùng để phân phối dữ liệu đi các component mượt mà không lỗi
 export const products: Product[] = [
   buildCatalogProduct(gradeCatalog[0]),
-  
+  gradeSixChibiProduct,
+  gradeSixComboThuongChibiProduct,
+
+  // Duyệt qua danh sách combo lớp 6 để ép đường dẫn ảnh mới cho Combo 3 và Combo 5
   ...gradeSixComboProducts.map((product) => {
     if (product.id === 'combo-lop-6-3-bo') {
       return { ...product, image: '/assets/Gemini_Generated_Image_8q81sm8q81sm8q81.png' };
@@ -223,6 +307,8 @@ export const products: Product[] = [
     }
     return product;
   }),
+
+  gradeSevenComingSoonProduct,
 
   ...gradeCatalog.slice(1).map(buildCatalogProduct),
   ...characters.map((character, index) => ({
@@ -244,13 +330,20 @@ export const products: Product[] = [
 ] as Product[]
 
 export function getShowcaseProducts(catalog: Product[]) {
-  const gradeSixProductIds = ['combo-lop-6', 'combo-lop-6-3-bo', 'combo-lop-6-5-bo']
-  const gradeSixShowcase = gradeSixProductIds
+  const showcaseProductIds = [
+    'combo-lop-6',
+    'combo-lop-6-chibi',
+    'combo-lop-6-thuong-chibi',
+    'combo-lop-6-3-bo',
+    'combo-lop-6-5-bo',
+    'tron-bo-lop-7-comingsoon',
+  ]
+  const showcase = showcaseProductIds
     .map((productId) => catalog.find((product) => product.id === productId))
     .filter((product): product is Product => Boolean(product))
 
-  if (gradeSixShowcase.length > 0) {
-    return gradeSixShowcase
+  if (showcase.length > 0) {
+    return showcase
   }
 
   return catalog.filter((product) => product.characterIds.length > 1).slice(0, 3)

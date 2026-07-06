@@ -2,6 +2,7 @@
 
 
 // Thêm dòng import component cuộn trang này vào dưới nhóm import
+import { saveQuizBestTime, fetchQuizBestTimes } from './utils/quiz'
 import { GoogleLoginButton } from './components/GoogleLoginButton'
 import { LessonTrialQuiz } from './components/LessonTrialQuiz'
 import { BackgroundMusic } from './components/BackgroundMusic'
@@ -15,9 +16,9 @@ import { DashboardOverview } from './components/DashboardOverview'
 import { Footer, Header } from './components/Layout'
 import { LessonCard } from './components/LessonCard'
 import { ProductCard } from './components/ProductCard'
-import { getShowcaseProducts, lessons, products as fallbackProducts } from './data/mockData'
+import { getShowcaseProducts, lessons as fallbackLessons, products as fallbackProducts } from './data/mockData'
 import { historyQuiz, historyQuizSets } from './data/quizData'
-import type { AuthUser, CartItem, CheckoutResponse, DashboardData, OrderDetail, PaymentMethod } from './types/app'
+import type { AuthUser, CartItem, CheckoutResponse, DashboardData, Lesson, OrderDetail, PaymentMethod, QuizBestTime } from './types/app'
 import { API_BASE_URL, getApiMessage, readApiJson } from './utils/api'
 import { getCurrentUser, loginUser, loginWithGoogle, logoutUser, registerUser, requestPasswordReset, resetPassword } from './utils/auth'
 import {
@@ -119,14 +120,12 @@ function ProductsPage({
   loading: boolean
   onAdd: (productId: string) => void
 }) {
-  const showcaseProducts = getShowcaseProducts(products)
-
   return (
     <section className="container section-block catalog-layout catalog-layout-stacked">
       {loading ? <div className="catalog-state-card">Đang tải catalog từ backend...</div> : null}
-      {!loading && showcaseProducts.length === 0 ? <div className="catalog-state-card">Hiện chưa có sản phẩm để hiển thị.</div> : null}
+      {!loading && products.length === 0 ? <div className="catalog-state-card">Hiện chưa có sản phẩm để hiển thị.</div> : null}
       <div className="product-grid product-grid-refined product-grid-showcase">
-        {showcaseProducts.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} onAdd={onAdd} />
         ))}
       </div>
@@ -134,7 +133,7 @@ function ProductsPage({
   )
 }
 
-function LessonsPage() {
+function LessonsPage({ lessons, loading }: { lessons: Lesson[]; loading: boolean }) {
   return (
     <section className="container section-block lessons-page">
       <div className="section-heading section-heading-balanced">
@@ -144,6 +143,7 @@ function LessonsPage() {
         </div>
         <Link to="/quiz" className="secondary-btn">Mở đấu trường quiz</Link>
       </div>
+      {loading ? <div className="catalog-state-card">Đang tải bài học từ backend...</div> : null}
       <div className="lesson-grid lesson-grid-refined">
         {lessons.map((lesson) => (
           <LessonCard key={lesson.id} lesson={lesson} />
@@ -153,7 +153,7 @@ function LessonsPage() {
   )
 }
 
-function LessonDetailPage() {
+function LessonDetailPage({ lessons }: { lessons: Lesson[] }) {
   const { slug } = useParams()
   const lesson = lessons.find((entry) => entry.slug === slug)
 
@@ -368,12 +368,26 @@ function QuizPage({ currentUser }: { currentUser: AuthUser | null }) {
   
 
   function handleNext() {
-    if (currentIndex === selectedQuiz.questions.length - 1) {
-      updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, showResult: true }))
-      return
+  if (currentIndex === selectedQuiz.questions.length - 1) {
+    updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, showResult: true }))
+
+    // Lưu kỷ lục thời gian làm bài — backend tự quyết định chỉ giữ lại
+    // nếu lần này nhanh hơn kỷ lục cũ, nên gọi thoải mái mỗi lần hoàn thành.
+    if (currentUser) {
+      saveQuizBestTime({
+        quizSlug: selectedQuiz.slug,
+        quizTitle: selectedQuiz.title,
+        seconds: elapsedSeconds,
+        score,
+        questionCount: selectedQuiz.questionCount,
+      }).catch(() => {
+        // Bỏ qua lỗi lưu kỷ lục để không ảnh hưởng trải nghiệm xem kết quả quiz.
+      })
     }
-    updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }))
+    return
   }
+  updateQuizState(selectedQuizSlug, (prev) => ({ ...prev, currentIndex: prev.currentIndex + 1 }))
+}
 
   function handlePrevious() {
     if (currentIndex === 0) return
@@ -914,6 +928,8 @@ function AccountPage({
   const [forgotMessage, setForgotMessage] = useState('')
   const [forgotSubmitting, setForgotSubmitting] = useState(false)
   const [googleSubmitting, setGoogleSubmitting] = useState(false)
+  const [quizBestTimes, setQuizBestTimes] = useState<QuizBestTime[]>([])
+  const [quizBestTimesLoading, setQuizBestTimesLoading] = useState(false)
 
   useEffect(() => {
     if (!currentUser) return
@@ -956,6 +972,39 @@ function AccountPage({
       cancelled = true
     }
   }, [currentUser])
+
+
+  useEffect(() => {
+  if (!currentUser) {
+    setQuizBestTimes([])
+    return
+  }
+
+  let cancelled = false
+
+  async function loadBestTimes() {
+    setQuizBestTimesLoading(true)
+    try {
+      const records = await fetchQuizBestTimes()
+      if (!cancelled) {
+        setQuizBestTimes(records)
+      }
+    } catch {
+      if (!cancelled) {
+        setQuizBestTimes([])
+      }
+    } finally {
+      if (!cancelled) {
+        setQuizBestTimesLoading(false)
+      }
+    }
+  }
+
+  loadBestTimes()
+  return () => {
+    cancelled = true
+  }
+}, [currentUser])
 
   // --- HÀM SUBMIT FORM ĐĂNG NHẬP / ĐĂNG KÝ GỐC ---
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -1220,18 +1269,35 @@ function AccountPage({
         </div>
 
         <aside className="admin-panel learner-activity-panel empty-state-panel">
-          <div className="account-section-heading compact">
-            <div>
-              <p className="eyebrow dark">Hoạt động gần đây</p>
-              <h3>{orders.length ? 'Đang dùng dữ liệu thật' : 'Chưa có hoạt động nào'}</h3>
-            </div>
+  <div className="account-section-heading compact">
+    <div>
+      <p className="eyebrow dark">Kỷ lục thời gian</p>
+      <h3>{quizBestTimes.length ? 'Thời gian làm bài nhanh nhất' : 'Chưa có kỷ lục nào'}</h3>
+    </div>
+  </div>
+  {quizBestTimesLoading ? (
+    <p className="status-message info compact">Đang tải kỷ lục thời gian làm bài...</p>
+  ) : quizBestTimes.length ? (
+    <div className="quiz-best-time-list">
+      {quizBestTimes.map((record) => (
+        <div key={record.quizSlug} className="quiz-best-time-item">
+          <div>
+            <strong>{record.quizTitle}</strong>
+            <span>{record.score}/{record.questionCount} câu đúng</span>
           </div>
-          <p className="empty-state-copy">
-            {orders.length
-              ? 'Trang tài khoản không còn dựng sẵn timeline hay reward giả; dữ liệu chỉ xuất hiện khi tài khoản có hoạt động thật.'
-              : 'Khi bạn hoàn thành quiz hoặc tạo đơn hàng thật, lịch sử hoạt động sẽ xuất hiện tại đây thay vì dữ liệu demo.'}
-          </p>
-        </aside>
+          <div className="quiz-best-time-value">
+            <Clock size={15} />
+            {formatDuration(record.bestSeconds)}
+          </div>
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="empty-state-copy">
+      Hoàn thành một bộ quiz để ghi nhận kỷ lục thời gian làm bài nhanh nhất của bạn tại đây.
+    </p>
+  )}
+</aside>
       </div>
     </section>
   )
@@ -1426,7 +1492,12 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [catalog, setCatalog] = useState(() => getShowcaseProducts(fallbackProducts))
   const [catalogLoading, setCatalogLoading] = useState(true)
+  const [lessons, setLessons] = useState<Lesson[]>(fallbackLessons)
+  const [lessonsLoading, setLessonsLoading] = useState(true)
 
+  // Kiểm tra phiên đăng nhập hiện tại khi ứng dụng khởi động.
+  // Đây là đoạn bắt buộc phải có, nếu thiếu thì authLoading sẽ mãi mãi là true
+  // và các trang như /account, /dashboard sẽ kẹt ở "Đang kiểm tra phiên đăng nhập...".
   useEffect(() => {
     let cancelled = false
 
@@ -1456,6 +1527,40 @@ export default function App() {
   useEffect(() => {
     let cancelled = false
 
+    async function loadLessons() {
+      try {
+        setLessonsLoading(true)
+        const response = await fetch(`${API_BASE_URL}/api/lessons`)
+        const data = await readApiJson<Lesson[] | { message?: string }>(response)
+        if (!response.ok) {
+          throw new Error(getApiMessage(data) ?? 'Không tải được bài học.')
+        }
+        if (!Array.isArray(data)) {
+          throw new Error('Phản hồi từ máy chủ không hợp lệ.')
+        }
+        if (!cancelled) {
+          setLessons(data)
+        }
+      } catch {
+        if (!cancelled) {
+          setLessons(fallbackLessons)
+        }
+      } finally {
+        if (!cancelled) {
+          setLessonsLoading(false)
+        }
+      }
+    }
+
+    loadLessons()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+
     async function loadCatalog() {
       try {
         setCatalogLoading(true)
@@ -1469,7 +1574,7 @@ export default function App() {
         }
 
         if (!cancelled) {
-          setCatalog(getShowcaseProducts(data))
+          setCatalog(data) // server đã trả đúng danh sách cuối cùng, không lọc lại nữa
         }
       } catch (error) {
         if (!cancelled) {
@@ -1553,18 +1658,18 @@ export default function App() {
     <div className="app-shell">
       <ScrollToTop />
 
-      {/* 2. CHÈN BỘ PHÁT NHẠC NẰM ĐỘC LẬP TẠI ĐÂY */}
+      {/* Bộ phát nhạc nằm độc lập, không phụ thuộc route */}
       <BackgroundMusic />
 
       {!isAdminRoute ? (
         <Header cartCount={cartCount} learnerName={currentUser?.fullName} isAdmin={currentUser?.role === 'admin'} onLogout={handleLogout} />
       ) : null}
-      
+
       <Routes>
         <Route path="/" element={<HomePage featuredProduct={featuredProduct} />} />
         <Route path="/products" element={<ProductsPage products={catalog} loading={catalogLoading} onAdd={handleAdd} />} />
-        <Route path="/lessons" element={<LessonsPage />} />
-        <Route path="/lessons/:slug" element={<LessonDetailPage />} />
+        <Route path="/lessons" element={<LessonsPage lessons={lessons} loading={lessonsLoading} />} />
+        <Route path="/lessons/:slug" element={<LessonDetailPage lessons={lessons} />} />
         <Route path="/quiz" element={<QuizPage currentUser={currentUser} />} />
         <Route path="/ar" element={<Navigate to="/quiz" replace />} />
         <Route path="/checkout" element={<CheckoutPage cart={cart} products={catalog} catalogLoading={catalogLoading} currentUser={currentUser} setCart={handleSetCart} />} />
@@ -1574,7 +1679,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/dashboard/*" element={<AdminDashboard currentUser={currentUser} authLoading={authLoading} onLogout={handleLogout} />} />
       </Routes>
-      
+
       {!isAdminRoute && !isAccountRoute ? <Footer /> : null}
     </div>
   )
