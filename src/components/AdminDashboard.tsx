@@ -4,14 +4,16 @@ import {
   ClipboardList,
   LayoutDashboard,
   LogOut,
+  Menu,
   Search,
   ShieldCheck,
   ShoppingBag,
   Trash2,
   Users,
+  X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Navigate, NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, NavLink, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { AdminOverviewData, AdminUserSummary, AuthUser, Order, OrderDetail } from '../types/app'
 import { API_BASE_URL, getApiMessage, readApiJson } from '../utils/api'
 import { formatCurrency, orderStatusLabel, paymentLabel } from '../utils/store'
@@ -391,6 +393,13 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
   const [orders, setOrders] = useState<Order[]>([])
   const [message, setMessage] = useState('')
   const [refreshToken, setRefreshToken] = useState(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const location = useLocation()
+
+  // Tự đóng sidebar mỗi khi chuyển trang trên mobile
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [location.pathname])
 
   async function refreshAdminData() {
     const [overviewData, usersData, ordersData] = await Promise.all([
@@ -456,6 +465,7 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
   }
 
   async function handleLogout() {
+    setIsSidebarOpen(false)
     await onLogout()
     navigate('/account', { replace: true })
   }
@@ -466,8 +476,22 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
   if (!currentUser) return <Navigate to="/account" replace />
   if (currentUser.role !== 'admin') return <Navigate to="/account" replace />
 
-  return (
-    <div className="admin-shell">
+return (
+    <div className={`admin-shell ${isSidebarOpen ? 'admin-shell-sidebar-open' : ''}`}>
+      <button
+        type="button"
+        className="admin-mobile-toggle"
+        onClick={() => setIsSidebarOpen((prev) => !prev)}
+        aria-label={isSidebarOpen ? 'Đóng menu quản trị' : 'Mở menu quản trị'}
+      >
+        {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        <span>Menu quản trị</span>
+      </button>
+
+      {isSidebarOpen ? (
+        <div className="admin-sidebar-backdrop" onClick={() => setIsSidebarOpen(false)} />
+      ) : null}
+
       <aside className="admin-sidebar">
         <Link to="/dashboard" className="admin-brand">
           <img src="/assets/logo.png" alt="Sử Việt Anh Minh" />
@@ -504,24 +528,21 @@ export function AdminDashboard({ currentUser, authLoading, onLogout }: AdminDash
         <div className="admin-content">
           {message ? <p className="status-message error">{message}</p> : null}
           <Routes>
-  <Route index element={<AdminOverviewPage data={overview} />} />
-  <Route path="accounts" element={<AdminAccountsPage users={users} onDeleteUser={handleDeleteUser} />} />
-  <Route path="orders" element={<AdminOrdersPage orders={orders} onDeleteOrder={handleDeleteOrder} />} />
-  <Route
-    path="orders/:orderCode"
-    element={
-      <AdminOrderDetailPage
-        onOrderUpdated={async () => setRefreshToken((value) => value + 1)}
-        onDeleteOrder={handleDeleteOrder}
-      />
-    }
-  />
-  
-  {/* Chèn dòng mới vào đây */}
-  <Route path="content" element={<AdminContentManager />} />
-
-  <Route path="*" element={<Navigate to="/dashboard" replace />} />
-</Routes>
+            <Route index element={<AdminOverviewPage data={overview} />} />
+            <Route path="accounts" element={<AdminAccountsPage users={users} onDeleteUser={handleDeleteUser} />} />
+            <Route path="orders" element={<AdminOrdersPage orders={orders} onDeleteOrder={handleDeleteOrder} />} />
+            <Route
+              path="orders/:orderCode"
+              element={
+                <AdminOrderDetailPage
+                  onOrderUpdated={async () => setRefreshToken((value) => value + 1)}
+                  onDeleteOrder={handleDeleteOrder}
+                />
+              }
+            />
+            <Route path="content" element={<AdminContentManager />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
         </div>
       </main>
     </div>
