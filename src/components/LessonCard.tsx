@@ -10,19 +10,8 @@ export function LessonCard({ lesson }: LessonCardProps) {
   return (
     <article className="lesson-card lesson-card-premium">
       <Link to={`/lessons/${lesson.slug}`} className="lesson-image-link" aria-label={`Mở bài học ${lesson.title}`}>
-  <img 
-    src={lesson.image} 
-    alt={lesson.title} 
-    loading="eager"
-    className="lesson-image" 
-    style={{ 
-      display: 'block',
-      width: '100%',
-      height: '240px', // Đặt bằng đúng chiều cao khung ảnh cũ trong CSS của bạn
-      objectFit: 'cover'
-    }} 
-  />
-</Link>
+        <img src={lesson.image} alt={lesson.title} className="lesson-image" />
+      </Link>
       <div className="lesson-body lesson-body-refined">
         <div className="lesson-meta">
           <span>{lesson.grade}</span>
