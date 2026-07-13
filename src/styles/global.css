@@ -6189,3 +6189,182 @@ html, body {
     border-radius: 18px;
   }
 }
+
+
+/* ==========================================================================
+   TỐI ƯU MOBILE CHO TRANG ĐĂNG NHẬP/ĐĂNG KÝ
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  /* Thu gọn header trên mobile để không chiếm quá nhiều khoảng trống dọc */
+  .nav-shell {
+    padding: 12px 0 10px;
+  }
+
+  .logo-container {
+    width: 44px;
+    height: 44px;
+  }
+
+  .mobile-menu-toggle {
+    width: 40px;
+    height: 40px;
+  }
+
+  /* Căn card đăng nhập lên gần đầu thay vì giữa màn hình,
+     loại bỏ khoảng trống nền tối thừa phía trên gây cảm giác "rỗng". */
+  .auth-shell-centered-bg {
+    align-items: flex-start;
+    padding: 20px 14px 32px;
+    min-height: auto;
+  }
+
+  .auth-card-floating {
+    width: 100%;
+    padding: 22px 18px;
+    border-radius: 18px;
+    margin-top: 12px;
+  }
+
+  .auth-card-refined,
+  .auth-card-centered {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .auth-switch-row {
+    width: 100%;
+  }
+
+  .auth-switch {
+    flex: 1;
+    text-align: center;
+  }
+
+  .auth-card h3 {
+    font-size: 1.4rem;
+  }
+
+  /* Tăng vùng chạm cho input & nút, đạt chuẩn accessibility mobile (>=48px) */
+  .auth-card label input,
+  .auth-card label textarea {
+    min-height: 48px;
+    font-size: 16px; /* tránh Safari/Chrome tự zoom khi focus input */
+  }
+
+  .auth-card .primary-btn.full {
+    min-height: 50px;
+    font-size: 0.95rem;
+  }
+
+  .auth-google-slot {
+    margin: 8px 0 14px;
+  }
+
+  .google-login-button > div {
+    width: 100% !important;
+  }
+
+  .auth-forgot-link {
+    display: block;
+    padding: 8px 0;
+    margin: -4px 0 14px;
+  }
+
+  .auth-back-link {
+    padding: 8px 0;
+    margin-bottom: 10px;
+  }
+}
+
+/* ==========================================================================
+   HOÀN THIỆN THÊM ADMIN MOBILE (bổ sung sau bản off-canvas sidebar)
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .admin-mobile-toggle {
+    justify-content: flex-start;
+    gap: 10px;
+    min-height: 52px;
+  }
+
+  .admin-sidebar {
+    padding: 20px 18px;
+  }
+
+  .admin-sidebar nav a {
+    min-height: 48px;
+    font-size: 0.92rem;
+  }
+
+  .admin-sidebar-user {
+    padding: 14px;
+  }
+
+  .admin-topbar {
+    top: 0;
+    z-index: 20;
+  }
+
+  .admin-topbar strong {
+    font-size: 0.95rem;
+  }
+
+  .admin-live-indicator {
+    font-size: 0.74rem;
+    padding: 0.45rem 0.65rem;
+    white-space: nowrap;
+  }
+
+  .admin-search {
+    min-height: 48px;
+  }
+
+  .admin-search input {
+    font-size: 16px;
+  }
+
+  .admin-content-list-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .admin-content-list-toolbar .primary-btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+
+  .admin-edit-btn,
+  .admin-delete-btn {
+    min-height: 40px;
+  }
+
+  .admin-form-field input,
+  .admin-form-field select,
+  .admin-form-field textarea {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  .admin-form-field textarea {
+    min-height: 90px;
+  }
+
+  .admin-toggle-card {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-content {
+    padding: 14px;
+  }
+
+  .admin-form-section {
+    padding: 18px;
+  }
+
+  .admin-character-picker {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+}
